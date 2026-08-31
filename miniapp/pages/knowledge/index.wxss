@@ -22,16 +22,8 @@
 .article-summary { display: block; margin-top: 18rpx; color: #765f69; font-size: 24rpx; line-height: 1.7; word-break: break-word; }
 .article-content { margin-top: 20rpx; padding-top: 20rpx; border-top: 1rpx solid #f2dfe7; color: #5a4650; font-size: 25rpx; line-height: 1.8; word-break: break-word; }
 .reference-note { display: block; margin-top: 18rpx; color: #9d8490; font-size: 21rpx; line-height: 1.65; word-break: break-word; }
-.ai-card { margin-top: 32rpx; padding: 28rpx; border: 1rpx solid #f2dfe7; border-radius: 30rpx; background: #fff; box-shadow: 0 9rpx 28rpx rgba(119,64,86,.06); }
-.ai-heading { display: flex; align-items: center; gap: 18rpx; }
-.ai-heading > view:last-child { min-width: 0; }
-.ai-badge { display: flex; flex: none; align-items: center; justify-content: center; width: 64rpx; height: 64rpx; border-radius: 21rpx; color: #fff; background: linear-gradient(135deg,#ff6f91,#ff9db4); font-size: 23rpx; font-weight: 700; line-height: 1; }
-.ai-title { display: block; font-size: 30rpx; font-weight: 700; line-height: 1.45; }
-.ai-note { display: block; margin-top: 4rpx; font-size: 22rpx; line-height: 1.55; word-break: break-word; }
-.question-input { width: 100%; height: 128rpx; min-height: 128rpx; max-height: 128rpx; margin-top: 16rpx; padding: 18rpx 22rpx; overflow-y: auto; border: 1rpx solid #f2dfe7; border-radius: 22rpx; background: #fff9fb; font-size: 26rpx; line-height: 1.6; word-break: break-word; }
-.offline-line { display: flex; align-items: center; min-height: 88rpx; margin-top: 8rpx; padding: 14rpx 0; color: #d94f75; font-size: 23rpx; line-height: 1.5; }
-.ask-error { margin-top: 16rpx; padding: 18rpx; border-radius: 16rpx; color: #98404c; background: #ffe5eb; font-size: 23rpx; line-height: 1.65; word-break: break-word; }
-.ask-button { margin-top: 16rpx; }
-.answer-box { margin-top: 24rpx; padding: 24rpx; border-radius: 22rpx; background: #fff0f5; }
-.answer-label { display: block; margin-bottom: 12rpx; color: #c34e70; font-size: 22rpx; font-weight: 700; line-height: 1.5; }
-.answer-text { display: block; color: #4f3943; font-size: 25rpx; line-height: 1.8; white-space: pre-wrap; word-break: break-word; }
+.local-info-card { display: flex; align-items: flex-start; gap: 18rpx; margin-top: 32rpx; padding: 28rpx; border: 1rpx solid #f2dfe7; border-radius: 30rpx; background: #fff0f5; }
+.local-info-icon { display: flex; flex: none; align-items: center; justify-content: center; width: 64rpx; min-height: 64rpx; border-radius: 21rpx; background: #fff; font-size: 32rpx; line-height: 1; }
+.local-info-copy { flex: 1; min-width: 0; }
+.local-info-title { display: block; font-size: 29rpx; font-weight: 700; line-height: 1.45; word-break: break-word; }
+.local-info-note { display: block; margin-top: 8rpx; font-size: 23rpx; line-height: 1.65; word-break: break-word; }

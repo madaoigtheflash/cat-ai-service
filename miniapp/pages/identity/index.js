@@ -15,7 +15,7 @@ function stateLabel(state) {
 
 function modeLabel(mode, simulation) {
   if (simulation) return '模拟验证结果'
-  if (mode === 'model_candidate' || mode === 'MODEL_ASSISTED') return '视觉模型候选'
+  if (mode === 'model_candidate' || mode === 'MODEL_ASSISTED') return '照片外观候选'
   if (mode === 'manual_only' || mode === 'MANUAL_ONLY') return '人工确认'
   return '候选辅助'
 }
@@ -129,7 +129,7 @@ Page({
     if (!candidate) return
     this.askDecision(
       `确认是「${candidate.displayName}」？`,
-      '请对照耳缘、脸部与身体花纹。模型排名不是身份证明，确认后仍可撤销。',
+      '请对照耳缘、脸部与身体花纹。候选顺序不是身份证明，确认后仍可撤销。',
       { type: 'same_cat', catId }
     )
   },
@@ -140,7 +140,7 @@ Page({
     if (!cat) return wx.showToast({ title: '小屋里还没有已同步猫咪', icon: 'none' })
     this.askDecision(
       `关联到「${cat.displayName}」？`,
-      '这是人工选择，不代表模型已经验证。请确认花纹和稳定身体特征一致。',
+      '这是人工选择，请确认花纹和稳定身体特征一致。',
       { type: 'same_cat', catId: cat.catId }
     )
   },

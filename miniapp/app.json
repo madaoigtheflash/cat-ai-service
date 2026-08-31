@@ -16,7 +16,7 @@
   "window": {
     "navigationBarBackgroundColor": "#FF6F91",
     "navigationBarTextStyle": "white",
-    "navigationBarTitleText": "Cat-AI 猫咪管家",
+    "navigationBarTitleText": "猫猫小屋",
     "backgroundColor": "#FFF7FA",
     "backgroundTextStyle": "dark"
   },
@@ -41,7 +41,7 @@
     "borderStyle": "white",
     "list": [
       { "pagePath": "pages/home/index", "text": "首页" },
-      { "pagePath": "pages/identify/index", "text": "识别" },
+      { "pagePath": "pages/identify/index", "text": "识猫" },
       { "pagePath": "pages/pets/index", "text": "档案" },
       { "pagePath": "pages/knowledge/index", "text": "知识" }
     ]

@@ -1,11 +1,10 @@
 <view class="page settings-page">
-  <view class="settings-intro"><view class="settings-icon">☁</view><view><text class="settings-title">微信云开发</text><text class="muted settings-subtitle">模型密钥仅保存在云函数环境变量，不写入小程序。</text></view></view>
+  <view class="settings-intro"><view class="settings-icon">☁</view><view><text class="settings-title">微信云开发</text><text class="muted settings-subtitle">云环境只处理你主动提交的照片和猫友小屋数据。</text></view></view>
 
   <view class="card settings-card">
     <text class="group-title">云端配置</text>
     <view class="about-row"><text>云环境 ID</text><text class="muted">{{cloudEnv}}</text></view>
-    <view class="about-row"><text>默认模型</text><text class="muted">{{model}}</text></view>
-    <view class="about-row"><text>密钥状态</text><text class="muted">{{keyConfigured ? '已配置' : '待检测'}}</text></view>
+    <view class="about-row"><text>照片识猫</text><text class="muted">{{photoStatus}}</text></view>
     <view class="about-row"><text>邀请制联机</text><text class="muted">{{onlineStatus}}</text></view>
     <view class="about-row"><text>同猫候选</text><text class="muted">{{identityStatus}}</text></view>
     <view class="settings-actions"><button class="primary-button settings-button" loading="{{testing}}" disabled="{{testing}}" bindtap="testConnection">测试云服务</button></view>
@@ -15,11 +14,11 @@
   <view class="card architecture-card">
     <text class="group-title">当前数据路径</text>
     <view class="path-row"><view class="path-icon local">本地</view><view><text class="path-title">猫咪档案与内置知识</text><text class="muted path-note">保存在当前设备的小程序存储中。</text></view></view>
-    <view class="path-row"><view class="path-icon cloud">云端</view><view><text class="path-title">图片识别与 AI 问答</text><text class="muted path-note">仅主动提交时经 CloudBase 云函数调用 MiniMax；识别临时图会在调用后删除。</text></view></view>
-    <view class="path-row"><view class="path-icon shared">共享</view><view><text class="path-title">邀请小屋与同猫候选</text><text class="muted path-note">只同步你主动选择的基础身份和目击；健康档案不会整包上传，模型也不会自动合并猫咪。</text></view></view>
+    <view class="path-row"><view class="path-icon cloud">云端</view><view><text class="path-title">照片特征观察</text><text class="muted path-note">仅在你主动选择照片并开始观察时处理；临时图片会在完成后删除。</text></view></view>
+    <view class="path-row"><view class="path-icon shared">共享</view><view><text class="path-title">邀请小屋与同猫候选</text><text class="muted path-note">只同步你主动选择的基础身份和目击；健康档案不会整包上传，系统也不会自动合并猫咪。</text></view></view>
   </view>
 
-  <view class="safe-tip">模型 Key、用户标识密钥和 Worker 签名密钥都只配置在云端。联机照片仅提交到邀请制小屋并先进入管理员审核；照片若含人脸、门牌或联系方式，请先不要上传。</view>
+  <view class="safe-tip">服务凭据和用户标识密钥只配置在云端。联机照片仅提交到邀请制小屋并先进入管理员审核；照片若含人脸、门牌或联系方式，请先不要上传。</view>
 
   <view class="card about-card">
     <view class="about-row"><text>小程序 AppID</text><text class="muted">wx1112379224ace9f9</text></view>

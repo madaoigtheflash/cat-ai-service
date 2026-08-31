@@ -24,14 +24,13 @@
       <view wx:if="{{expandedId === item.id}}" class="article-content"><text>{{item.content}}</text><text class="reference-note">健康相关内容仅供科普，不能替代兽医诊断。</text></view>
     </view>
   </view>
-  <view wx:if="{{!articles.length}}" class="empty-card"><text class="empty-icon">⌕</text><text class="empty-title">没有找到匹配资料</text><text class="muted">换一个关键词，或使用下方 AI 问答。</text></view>
+  <view wx:if="{{!articles.length}}" class="empty-card"><text class="empty-icon">⌕</text><text class="empty-title">没有找到匹配资料</text><text class="muted">换一个关键词，或切换资料分类。</text></view>
 
-  <view class="ai-card">
-    <view class="ai-heading"><view class="ai-badge">AI</view><view><text class="ai-title">问问喵博士</text><text class="muted ai-note">本地资料检索 + CloudBase 模型回答</text></view></view>
-    <textarea class="question-input" value="{{question}}" placeholder="例如：幼猫到家后应该先做什么？" maxlength="300" cursor-spacing="96" disable-default-padding show-confirm-bar="{{false}}" bindinput="onQuestionInput" />
-    <view wx:if="{{!configured}}" class="offline-line" bindtap="goSettings">云端助手未连接 · 前往设置</view>
-    <view wx:if="{{askError}}" class="ask-error">{{askError}}</view>
-    <button class="primary-button ask-button" loading="{{asking}}" disabled="{{asking}}" bindtap="askAI">{{asking ? '正在检索资料…' : '提交问题'}}</button>
-    <view wx:if="{{answer}}" class="answer-box"><text class="answer-label">AI 回答</text><text class="answer-text">{{answer}}</text><text class="reference-note">内容由 AI 生成，请结合资料来源和专业意见判断。</text></view>
+  <view class="local-info-card">
+    <view class="local-info-icon">📖</view>
+    <view class="local-info-copy">
+      <text class="local-info-title">仅检索小程序内置资料</text>
+      <text class="muted local-info-note">页面只做资料筛选。输入关键词后，会显示上方已经收录的养猫资料。</text>
+    </view>
   </view>
 </view>

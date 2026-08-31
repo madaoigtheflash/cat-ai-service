@@ -34,7 +34,7 @@ Page({
       return
     }
     if (!this.data.configured) {
-      this.setData({ error: '云端识别服务尚未就绪，请先到设置页检查 CloudBase 连接。' })
+      this.setData({ error: '照片观察服务尚未就绪，请先到设置页检查微信云开发连接。' })
       return
     }
     this.setData({ loading: true, error: '', result: null })
@@ -42,7 +42,7 @@ Page({
       const result = await api.identify(this.data.imagePath)
       this.setData({ result: api.normalizeIdentifyResult(result) })
     } catch (error) {
-      this.setData({ error: error.message || '识别失败，请稍后重试' })
+      this.setData({ error: error.message || '照片观察失败，请稍后重试' })
     } finally {
       this.setData({ loading: false })
     }
@@ -54,7 +54,7 @@ Page({
       result: {
         breed: '中华田园猫', confidence: 86, coat_color: '橘白', coat_pattern: '双色',
         estimated_age: '约 1–3 岁', gender: '未知', features: ['白色胸腹', '橘色虎斑', '短毛'],
-        description: '这是界面演示结果，不代表对当前照片进行了真实识别。', demo: true
+        description: '这是界面演示结果，不代表对当前照片进行了真实观察。', demo: true
       }
     })
   },

@@ -2,9 +2,9 @@
   <view class="identity-hero">
     <view class="identity-hero-icon">🐈‍⬛</view>
     <view class="identity-hero-copy">
-      <text class="identity-eyebrow">同猫识别 · 实验候选</text>
+      <text class="identity-eyebrow">同猫核对 · 外观候选</text>
       <text class="identity-title">一起核对是不是熟悉的它</text>
-      <text class="identity-subtitle">模型只负责缩小候选范围，最终由你根据花纹、耳缘和多次目击确认。</text>
+      <text class="identity-subtitle">候选列表只用于缩小核对范围，最终由你根据花纹、耳缘和多次目击确认。</text>
     </view>
   </view>
 
@@ -25,7 +25,7 @@
         <text class="mode-pill {{task.simulation ? 'simulation' : ''}}">{{task.modeLabel}}</text>
       </view>
       <text wx:if="{{task.notice}}" class="task-notice">{{task.notice}}</text>
-      <text wx:if="{{task.simulation}}" class="simulation-note">这是工程模拟结果，没有视觉识别意义，不能用于真实身份判断。</text>
+      <text wx:if="{{task.simulation}}" class="simulation-note">这是工程模拟结果，没有真实照片比对意义，不能用于身份判断。</text>
       <button wx:if="{{task.state === 'PROCESSING' || task.state === 'FAILED'}}" class="secondary-button refresh-button" bindtap="refreshTask">刷新候选</button>
       <button wx:if="{{task.state === 'UNDONE'}}" class="secondary-button refresh-button" bindtap="restartMatch">重新生成候选</button>
     </view>
@@ -59,7 +59,7 @@
       </view>
 
       <view class="section-heading">
-        <view><text class="section-title">人工确认</text><text class="section-note">模型没找对时，以你的观察为准</text></view>
+        <view><text class="section-title">人工确认</text><text class="section-note">候选不合适时，以你的观察为准</text></view>
       </view>
       <view class="card manual-card">
         <block wx:if="{{task.availableCats.length}}">

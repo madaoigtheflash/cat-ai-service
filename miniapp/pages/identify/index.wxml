@@ -16,8 +16,8 @@
   </view>
 
   <view wx:if="{{!configured}}" class="notice warning">
-    <text class="notice-title">需要先连接云端识别服务</text>
-    <text>模型密钥保存在 CloudBase 云函数环境变量中，不会写入小程序。</text>
+    <text class="notice-title">需要先连接微信云开发</text>
+    <text>照片仅在你主动点击开始后上传处理，临时图片会在完成后删除。</text>
     <text class="notice-link" bindtap="goSettings">前往设置 →</text>
   </view>
   <view wx:if="{{error}}" class="notice error"><text>{{error}}</text></view>
@@ -28,7 +28,7 @@
   <view wx:if="{{result}}" class="result-card">
     <view class="result-head">
       <view>
-        <text class="result-label">{{result.demo ? '界面演示' : '识别结果'}}</text>
+        <text class="result-label">{{result.demo ? '界面演示' : '照片观察结果'}}</text>
         <text class="result-breed">{{result.breed}}</text>
       </view>
       <view class="confidence"><text>{{result.confidence || '--'}}</text><text class="confidence-unit">%</text></view>
@@ -48,7 +48,7 @@
   </view>
 
   <view class="tips-card">
-    <text class="tips-title">提高识别质量</text>
+    <text class="tips-title">让照片更容易观察</text>
     <view class="tips-row"><text>①</text><text>避免逆光、滤镜与严重模糊</text></view>
     <view class="tips-row"><text>②</text><text>尽量拍到脸部、躯干和毛色花纹</text></view>
     <view class="tips-row"><text>③</text><text>品种结论仅供参考，不能替代血统证明</text></view>

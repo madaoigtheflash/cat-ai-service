@@ -1,5 +1,3 @@
-const knowledge = require('../data/knowledge')
-
 const CLOUD_ENV = 'cloud1-d6gpjpxunc74669d7'
 
 function cloudResult(response, fallback) {
@@ -121,22 +119,4 @@ function normalizeIdentifyResult(payload) {
   }
 }
 
-function searchKnowledge(query) {
-  const results = knowledge.search(query, '全部').slice(0, 5)
-  return Promise.resolve({ query, results, count: results.length })
-}
-
-function askKnowledge(query, breed) {
-  const sources = knowledge.search(`${breed || ''} ${query}`, '全部').slice(0, 5).map(item => ({
-    id: item.id,
-    title: item.title,
-    content: item.content
-  }))
-  return callCloud('askKnowledge', { query, breed: breed || '', sources })
-}
-
-function health() {
-  return callCloud('askKnowledge', { action: 'health' })
-}
-
-module.exports = { CLOUD_ENV, identify, normalizeIdentifyResult, searchKnowledge, askKnowledge, health }
+module.exports = { CLOUD_ENV, identify, normalizeIdentifyResult }

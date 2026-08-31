@@ -4,13 +4,12 @@ const CLOUD_ENV = 'cloud1-d6gpjpxunc74669d7'
 
 App({
   globalData: {
-    appName: 'Cat-AI 猫咪管家',
+    appName: '猫猫小屋',
     appId: 'wx1112379224ace9f9',
     cloudEnv: CLOUD_ENV,
     cloudReady: false,
     settings: {
-      apiBaseUrl: 'http://yacoyacoyaco.asuscomm.com:8503',
-      provider: 'minimax'
+      apiBaseUrl: 'http://yacoyacoyaco.asuscomm.com:8503'
     }
   },
 

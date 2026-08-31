@@ -19,7 +19,7 @@ const FEEDBACK_STAGE_COPY = {
   },
   INITIAL_REVIEW: {
     label: '已筛选',
-    next: '已完成产品反馈整理；若适合改进，将在本地进行 Codex 审计。',
+    next: '已完成产品反馈整理；若适合改进，将进入开发审阅。',
     tone: 'neutral'
   },
   LOCAL_REVIEW: {
@@ -160,7 +160,7 @@ Page({
       })
       this.setData({
         form: { title: '', content: '', steps: '' },
-        successMessage: '已收到。接下来会先进行产品反馈筛选，并在适合时进入本地 Codex 审计；不承诺处理时限。若内容涉及健康，仅作辅助参考，异常请咨询执业兽医。'
+        successMessage: '已收到。接下来会先进行产品反馈筛选，并在适合时进入开发审阅；不承诺处理时限。若内容涉及健康，仅作辅助参考，异常请咨询执业兽医。'
       })
       await this.loadCenter()
     } catch (error) {

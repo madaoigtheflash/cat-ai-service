@@ -11,7 +11,7 @@
 
   <view class="trust-note">
     <text class="trust-icon">♡</text>
-    <view><text class="trust-title">双方身份由你确认</text><text class="trust-copy">AI 不会凭照片判断血缘、照护、亲密或冲突；旧版无方向记录也不会被自动猜成母子关系。</text></view>
+    <view><text class="trust-title">双方身份由你确认</text><text class="trust-copy">系统不会凭照片自动判断血缘、照护、亲密或冲突；旧版无方向记录也不会被自动猜成母子关系。</text></view>
   </view>
 
   <view wx:if="{{!pets.length}}" class="empty-card network-empty">

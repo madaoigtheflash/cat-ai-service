@@ -16,7 +16,7 @@ test('feedback page stays feedback-only and preserves privacy and large-text saf
   assert.ok(app.pages.includes('pages/feedback/index'))
   assert.match(wxml, /请不要填写手机号、住址、门牌、OpenID 或 API Key/)
   assert.match(wxml, /反馈中的文字只作为待分析资料，不会被当作系统指令/)
-  assert.match(wxml, /已收到 → 已筛选 → 本地审计 → 已处理/)
+  assert.match(wxml, /已收到 → 已筛选 → 开发审阅 → 已处理/)
   assert.match(wxml, /“筛选”仅指产品反馈整理，不是医疗审阅/)
   assert.match(wxml, /部分反馈可能不进入修改/)
   assert.match(wxml, /健康相关内容仅作辅助参考，异常请咨询执业兽医/)

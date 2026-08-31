@@ -5,11 +5,10 @@ const identity = require('../../services/identity')
 Page({
   data: {
     cloudEnv: api.CLOUD_ENV,
-    model: 'MiniMax-M3',
     testing: false,
     testStatus: '',
     testMessage: '',
-    keyConfigured: false,
+    photoStatus: '主动使用时检测',
     onlineStatus: '待检测',
     identityStatus: '待检测'
   },
@@ -19,30 +18,26 @@ Page({
       testing: true,
       testStatus: '',
       testMessage: '',
-      keyConfigured: false,
       onlineStatus: '检测中',
       identityStatus: '检测中'
     })
     try {
-      const results = await Promise.allSettled([api.health(), online.health(), identity.health()])
-      const aiResult = results[0].status === 'fulfilled' ? results[0].value : null
-      const onlineResult = results[1].status === 'fulfilled' ? results[1].value : null
-      const identityResult = results[2].status === 'fulfilled' ? results[2].value : null
-      const configured = Boolean(aiResult && aiResult.modelConfigured)
+      const results = await Promise.allSettled([online.health(), identity.health()])
+      const onlineResult = results[0].status === 'fulfilled' ? results[0].value : null
+      const identityResult = results[1].status === 'fulfilled' ? results[1].value : null
       const onlineReady = Boolean(onlineResult && onlineResult.ownerSecretConfigured)
       const identityReady = Boolean(identityResult && identityResult.ownerSecretConfigured)
       const workerReady = Boolean(identityResult && (identityResult.workerConfigured || identityResult.mode === 'model_candidate'))
-      const allReady = configured && onlineReady && identityReady
+      const allReady = onlineReady && identityReady
       this.setData({
-        keyConfigured: configured,
-        onlineStatus: onlineReady ? '已连接' : onlineResult ? '缺少云端密钥' : '函数未部署',
+        onlineStatus: onlineReady ? '已连接' : onlineResult ? '缺少云端配置' : '函数未部署',
         identityStatus: identityReady
-          ? (workerReady ? '模型候选模式' : '人工确认模式')
-          : identityResult ? '缺少云端密钥' : '函数未部署',
+          ? (workerReady ? '候选整理可用' : '人工核对可用')
+          : identityResult ? '缺少云端配置' : '函数未部署',
         testStatus: allReady ? 'success' : 'partial',
         testMessage: allReady
-          ? `基础云服务已连接，模型 ${aiResult.model || this.data.model} 已配置；同猫功能当前为${workerReady ? '模型候选模式' : '人工确认模式'}。`
-          : '检测到未完成的云端配置。请按部署文档补齐函数、集合或云端密钥；本地档案不受影响。'
+          ? `邀请小屋与同猫核对服务已连接；同猫功能当前为${workerReady ? '候选整理模式' : '人工核对模式'}。照片识猫会在你主动选图后单独检测。`
+          : '检测到未完成的云端配置。请按部署文档补齐函数、集合或服务凭据；本地档案和内置知识不受影响。'
       })
     } catch (error) {
       this.setData({

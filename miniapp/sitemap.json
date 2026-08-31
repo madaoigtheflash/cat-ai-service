@@ -1,5 +1,5 @@
 {
-  "desc": "Cat-AI 页面索引规则",
+  "desc": "猫猫小屋页面索引规则",
   "rules": [
     {
       "action": "allow",

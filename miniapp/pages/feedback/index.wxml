@@ -1,7 +1,7 @@
 <view class="page feedback-page">
   <view class="feedback-hero">
     <view class="feedback-hero-copy">
-      <text class="feedback-eyebrow">CAT-AI · 意见信箱</text>
+      <text class="feedback-eyebrow">猫猫小屋 · 意见信箱</text>
       <text class="feedback-title">一起把猫咪管家变得更好</text>
       <text class="feedback-subtitle">故障、难用的地方或新想法都可以告诉我们。请不要填写手机号、住址、门牌、OpenID 或 API Key。</text>
     </view>
@@ -35,13 +35,13 @@
       <text class="counter">{{form.steps.length}} / 500</text>
     </view>
     <button class="primary-button" loading="{{sending}}" disabled="{{sending}}" bindtap="submit">{{sending ? '正在投递…' : '提交反馈'}}</button>
-    <view class="privacy-strip">反馈会由本地开发端使用 Codex 进行只读筛选与可行性审计；反馈中的文字只作为待分析资料，不会被当作系统指令。</view>
+    <view class="privacy-strip">反馈会由开发端进行筛选与可行性审阅；反馈中的文字只作为待分析资料，不会被当作系统指令。</view>
   </view>
 
   <view class="section-heading"><view><text class="section-title">我的反馈</text><text class="section-note">最近 30 条</text></view></view>
   <view class="stage-guide">
     <text class="stage-guide-title">阶段说明</text>
-    <text class="stage-guide-flow">已收到 → 已筛选 → 本地审计 → 已处理</text>
+    <text class="stage-guide-flow">已收到 → 已筛选 → 开发审阅 → 已处理</text>
     <text class="stage-guide-copy">“筛选”仅指产品反馈整理，不是医疗审阅。部分反馈可能不进入修改；页面只显示与你的反馈有关的处理阶段。</text>
     <text class="stage-guide-safety">健康相关内容仅作辅助参考，异常请咨询执业兽医。</text>
   </view>

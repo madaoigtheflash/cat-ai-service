@@ -4,8 +4,8 @@
   "cloudfunctionRoot": "cloudfunctions/",
   "libVersion": "3.17.1",
   "miniprogramRoot": "./",
-  "projectname": "Cat-AI 猫咪管家",
-  "description": "AI 猫咪品种辅助识别、知识查询与档案管理",
+  "projectname": "猫猫小屋",
+  "description": "猫咪照片特征观察、本地养猫资料、档案与猫友小屋",
   "setting": {
     "urlCheck": false,
     "es6": true,
@@ -36,6 +36,7 @@
   "simulatorPluginLibVersion": {},
   "packOptions": {
     "ignore": [
+      { "type": "folder", "value": "cloudfunctions" },
       { "type": "folder", "value": ".miniprogram-ci" },
       { "type": "folder", "value": "tests" },
       { "type": "file", "value": "README.md" }

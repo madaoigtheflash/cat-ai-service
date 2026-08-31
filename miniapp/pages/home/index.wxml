@@ -1,7 +1,7 @@
 <view class="page home-page">
   <view class="hero">
     <view class="hero-copy">
-      <text class="eyebrow">今日陪伴 · CAT AI</text>
+      <text class="eyebrow">今日陪伴 · 猫猫小屋</text>
       <text class="hero-title">{{greeting}}，一起更懂猫咪</text>
       <text class="hero-subtitle">拍张照片、记下成长，让每次互动都成为猫咪的小日记。</text>
       <button class="hero-button" bindtap="goIdentify">和猫咪互动</button>
@@ -15,8 +15,8 @@
   <view class="service-status {{configured ? 'status-ok' : 'status-warn'}}" bindtap="goSettings">
     <view class="status-dot"></view>
     <view class="status-copy">
-      <text>{{configured ? '云端猫咪助手在线' : '云端猫咪助手未就绪'}}</text>
-      <text class="muted">{{configured ? 'MiniMax-M3 · CloudBase 安全调用' : '点击检查云开发环境，本地档案仍可使用'}}</text>
+      <text>{{configured ? '微信云开发已连接' : '微信云开发未就绪'}}</text>
+      <text class="muted">{{configured ? '照片观察与邀请小屋按需使用云服务' : '点击检查云开发环境，本地档案仍可使用'}}</text>
     </view>
     <text class="chevron">›</text>
   </view>
@@ -45,7 +45,7 @@
   <view class="action-grid">
     <view class="action-card coral" bindtap="goIdentify"><text class="action-icon">📷</text><text class="action-title">认识猫咪</text><text class="action-desc">拍照发现品种与特征</text><text class="action-reward">＋新发现</text></view>
     <view class="action-card blush" bindtap="goPets"><text class="action-icon">♡</text><text class="action-title">成长手账</text><text class="action-desc">记录健康与日常变化</text><text class="action-reward">＋陪伴值</text></view>
-    <view class="action-card lilac" bindtap="goKnowledge"><text class="action-icon">✦</text><text class="action-title">喵喵课堂</text><text class="action-desc">本地资料与 AI 问答</text><text class="action-reward">＋养猫经验</text></view>
+    <view class="action-card lilac" bindtap="goKnowledge"><text class="action-icon">✦</text><text class="action-title">喵喵课堂</text><text class="action-desc">检索内置养猫资料</text><text class="action-reward">＋养猫经验</text></view>
     <view class="action-card cream" bindtap="goRelationships"><text class="action-icon">🐾</text><text class="action-title">猫际关系</text><text class="action-desc">看见猫咪之间的相处线索</text><text class="action-reward">＋关系卡</text></view>
   </view>
 
