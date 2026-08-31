@@ -1,0 +1,106 @@
+import java.nio.charset.StandardCharsets
+import java.util.Base64
+import java.util.regex.Pattern
+
+plugins {
+    id 'com.android.application'
+}
+
+def configFile = rootProject.file('../closeai.config.json')
+def configText = configFile.exists() ? configFile.getText('UTF-8') : ''
+
+def readProviderSetting = { String provider, String setting, String fallback ->
+    def blockPattern = Pattern.compile('(?s)"' + Pattern.quote(provider) + '"\\s*:\\s*\\{(.*?)\\n\\s*\\}')
+    def block = blockPattern.matcher(configText)
+    if (!block.find()) {
+        return fallback
+    }
+    def valuePattern = Pattern.compile('"' + Pattern.quote(setting) + '"\\s*:\\s*"([^"]*)"')
+    def value = valuePattern.matcher(block.group(1))
+    return value.find() ? value.group(1).trim() : fallback
+}
+
+def apiProvider = (project.findProperty('CAT_AI_PROVIDER') ?: System.getenv('CAT_AI_PROVIDER')
+        ?: 'minimax').toString().trim().toLowerCase(Locale.ROOT)
+def defaultBaseUrl = apiProvider == 'minimax' ? 'https://api.minimaxi.com/v1' : 'https://api.moonshot.cn/v1'
+def defaultModel = apiProvider == 'minimax' ? 'MiniMax-M3' : 'kimi-k2.6'
+
+// 优先使用 -PCAT_AI_API_KEY / 环境变量，便于换 Key；当前项目配置仅作为本机构建兜底。
+def apiKey = (project.findProperty('CAT_AI_API_KEY') ?: System.getenv('CAT_AI_API_KEY')
+        ?: readProviderSetting(apiProvider, 'api_key', '')).toString().replaceAll('\\s+', '')
+def apiBaseUrl = (project.findProperty('CAT_AI_BASE_URL') ?: System.getenv('CAT_AI_BASE_URL')
+        ?: readProviderSetting(apiProvider, 'base_url', defaultBaseUrl)).toString().replaceAll('/+$', '')
+def apiModel = (project.findProperty('CAT_AI_MODEL') ?: System.getenv('CAT_AI_MODEL')
+        ?: readProviderSetting(apiProvider, 'default_model', defaultModel)).toString().trim()
+
+if (!apiKey) {
+    throw new GradleException('未找到 API Key。请设置 CAT_AI_API_KEY 环境变量或 -PCAT_AI_API_KEY。')
+}
+
+// 避免在源码和 APK 字符串表中直接出现明文。此举只能提高提取门槛，不能让客户端密钥真正安全。
+def maskText = 'CatAI-Local-2026'
+def keyBytes = apiKey.getBytes(StandardCharsets.UTF_8)
+def maskBytes = maskText.getBytes(StandardCharsets.UTF_8)
+def obfuscated = new byte[keyBytes.length]
+for (int i = 0; i < keyBytes.length; i++) {
+    obfuscated[i] = (byte) (keyBytes[i] ^ maskBytes[i % maskBytes.length])
+}
+def keyBlob = Base64.encoder.encodeToString(obfuscated)
+
+def quoted = { String value -> '"' + value.replace('\\', '\\\\').replace('"', '\\"') + '"' }
+
+android {
+    namespace 'com.closeai.catai'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.closeai.catai'
+        minSdk 24
+        targetSdk 35
+        versionCode 4
+        versionName '1.1.0'
+
+        buildConfigField 'String', 'CAT_AI_PROVIDER', quoted(apiProvider)
+        buildConfigField 'String', 'CAT_AI_KEY_BLOB', quoted(keyBlob)
+        buildConfigField 'String', 'CAT_AI_KEY_MASK', quoted(maskText)
+        buildConfigField 'String', 'CAT_AI_BASE_URL', quoted(apiBaseUrl)
+        buildConfigField 'String', 'CAT_AI_MODEL', quoted(apiModel)
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    sourceSets {
+        main {
+            // 直接复用现有前端与猫咪知识库，Web 与 APK 始终保持同一份内容。
+            assets.srcDirs = [
+                    rootProject.file('../frontend'),
+                    rootProject.file('../猫咪知识库')
+            ]
+        }
+    }
+
+    buildTypes {
+        debug {
+            applicationIdSuffix '.debug'
+            versionNameSuffix '-debug'
+        }
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            // 生成可直接安装的内部发布包；正式上架时请替换为自己的长期签名。
+            signingConfig signingConfigs.debug
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation 'androidx.core:core:1.15.0'
+}

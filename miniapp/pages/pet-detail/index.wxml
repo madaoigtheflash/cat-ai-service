@@ -1,0 +1,32 @@
+<view wx:if="{{pet}}" class="detail-page">
+  <view class="detail-hero">
+    <image wx:if="{{pet.imagePath}}" class="detail-cover" src="{{pet.imagePath}}" mode="aspectFill" />
+    <view wx:else class="detail-cover detail-placeholder">🐱</view>
+    <view class="hero-overlay"></view>
+    <view class="detail-name"><text>{{pet.name}}</text><text class="detail-breed">{{pet.breed || '品种待补充'}} · {{pet.gender || '未知'}}</text></view>
+    <button class="edit-pill" bindtap="edit">编辑</button>
+  </view>
+
+  <view class="detail-content">
+    <view class="stats-grid">
+      <view class="stat"><text class="stat-value">{{pet.weight || '--'}}</text><text class="stat-label">体重 kg</text></view>
+      <view class="stat"><text class="stat-value small">{{pet.estimatedAge || '--'}}</text><text class="stat-label">年龄</text></view>
+      <view class="stat"><text class="stat-value small">{{pet.coatColor || '--'}}</text><text class="stat-label">毛色</text></view>
+    </view>
+
+    <view class="card status-card"><view><text class="card-label">当前状态</text><text class="status-value">{{pet.healthStatus || '尚未记录健康状态'}}</text></view><text class="heart">♡</text></view>
+    <button class="relationship-button" bindtap="openRelationships"><text>🐾</text><view><text class="relationship-title">查看猫际关系</text><text class="relationship-copy">记录它与其他猫咪的相处状态</text></view><text class="relationship-chevron">›</text></button>
+
+    <view class="record-heading"><view><text class="record-title">健康时间线</text><text class="muted record-note">体重、疫苗、驱虫与就医</text></view><button class="record-add" bindtap="addRecord">＋ 记录</button></view>
+    <view wx:if="{{records.length}}" class="timeline">
+      <view class="timeline-item" wx:for="{{records}}" wx:key="id">
+        <view class="timeline-dot"></view>
+        <view class="timeline-card"><view class="timeline-top"><text class="record-type">{{item.type === 'weights' ? '体重' : item.type === 'vaccines' ? '疫苗' : item.type === 'deworming' ? '驱虫' : '就医'}}</text><text class="muted">{{item.date}}</text></view><text class="record-content">{{item.content}}</text></view>
+      </view>
+    </view>
+    <view wx:else class="empty-record"><text>还没有健康记录</text><text class="muted">从一次体重测量开始吧</text></view>
+
+    <view wx:if="{{pet.notes}}" class="card notes-card"><text class="card-label">备注</text><text class="notes-text">{{pet.notes}}</text></view>
+    <button class="delete-button" bindtap="deletePet">删除这份档案</button>
+  </view>
+</view>

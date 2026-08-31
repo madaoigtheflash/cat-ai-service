@@ -1,0 +1,40 @@
+# 本地模型凭据，禁止提交。
+closeai.config.json
+
+# Python / 运行数据
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+*.db
+*.sqlite
+*.sqlite3
+data/uploads/
+
+# 根目录构建产物、临时文件和本地验证报告
+build/
+dist/
+tmp/
+artifacts/
+
+# Android 本机构建产物与 SDK 定位
+android/.gradle/
+android/local.properties
+android/**/build/
+
+# 宠物个体识别 POC：模型较大，按来源下载，不提交仓库
+tools/pet_reid/models/
+tools/pet_reid/reports/
+tools/pet_reid/.smoke/
+
+# 微信小程序本机设置与上传私钥
+miniapp/project.private.config.json
+miniapp/private.*.key
+miniapp/.miniprogram-ci/
+miniapp/cloudfunctions/**/node_modules/
+node_modules/
+.env
+.env.*
+cloudbaserc.private.json

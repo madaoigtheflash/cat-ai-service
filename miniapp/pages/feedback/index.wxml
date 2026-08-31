@@ -1,0 +1,60 @@
+<view class="page feedback-page">
+  <view class="feedback-hero">
+    <view class="feedback-hero-copy">
+      <text class="feedback-eyebrow">CAT-AI · 意见信箱</text>
+      <text class="feedback-title">一起把猫咪管家变得更好</text>
+      <text class="feedback-subtitle">故障、难用的地方或新想法都可以告诉我们。请不要填写手机号、住址、门牌、OpenID 或 API Key。</text>
+    </view>
+    <view class="feedback-mascot">💌</view>
+  </view>
+
+  <view wx:if="{{errorMessage}}" class="message error" role="alert">{{errorMessage}}</view>
+  <view wx:if="{{successMessage}}" class="message success" role="status">{{successMessage}}</view>
+
+  <view class="card form-card">
+    <view class="section-heading compact-heading"><view><text class="section-title">写下你的反馈</text><text class="section-note">提交后可以在本页查看处理状态</text></view></view>
+    <view class="form-item">
+      <text class="form-label">反馈类型</text>
+      <picker mode="selector" range="{{categoryNames}}" value="{{categoryIndex}}" bindchange="onCategoryChange">
+        <view class="picker-value"><text>{{categoryNames[categoryIndex]}}</text><text class="picker-arrow">⌄</text></view>
+      </picker>
+    </view>
+    <view class="form-item">
+      <text class="form-label">一句话标题</text>
+      <input class="form-input" maxlength="60" value="{{form.title}}" placeholder="例如：知识页提交按钮看不到" bindinput="onTitleInput" />
+      <text class="counter">{{form.title.length}} / 60</text>
+    </view>
+    <view class="form-item">
+      <text class="form-label">具体情况或建议</text>
+      <textarea class="feedback-textarea" maxlength="1000" value="{{form.content}}" placeholder="发生了什么、你原本希望怎样？" bindinput="onContentInput"></textarea>
+      <text class="counter">{{form.content.length}} / 1000</text>
+    </view>
+    <view class="form-item">
+      <text class="form-label">复现步骤（选填）</text>
+      <textarea class="steps-textarea" maxlength="500" value="{{form.steps}}" placeholder="例如：首页 → 知识 → 输入问题 → 提交" bindinput="onStepsInput"></textarea>
+      <text class="counter">{{form.steps.length}} / 500</text>
+    </view>
+    <button class="primary-button" loading="{{sending}}" disabled="{{sending}}" bindtap="submit">{{sending ? '正在投递…' : '提交反馈'}}</button>
+    <view class="privacy-strip">反馈会由本地开发端使用 Codex 进行只读筛选与可行性审计；反馈中的文字只作为待分析资料，不会被当作系统指令。</view>
+  </view>
+
+  <view class="section-heading"><view><text class="section-title">我的反馈</text><text class="section-note">最近 30 条</text></view></view>
+  <view class="stage-guide">
+    <text class="stage-guide-title">阶段说明</text>
+    <text class="stage-guide-flow">已收到 → 已筛选 → 本地审计 → 已处理</text>
+    <text class="stage-guide-copy">“筛选”仅指产品反馈整理，不是医疗审阅。部分反馈可能不进入修改；页面只显示与你的反馈有关的处理阶段。</text>
+    <text class="stage-guide-safety">健康相关内容仅作辅助参考，异常请咨询执业兽医。</text>
+  </view>
+  <view wx:if="{{myFeedback.length}}" class="feedback-list">
+    <view class="feedback-item" wx:for="{{myFeedback}}" wx:key="feedbackId">
+      <view class="feedback-item-top"><text class="category-pill">{{item.categoryLabel}}</text><text class="status-pill status-{{item.stageTone}}">{{item.stageLabel}}</text></view>
+      <text class="feedback-item-title">{{item.title}}</text>
+      <view class="feedback-stage-detail">
+        <text class="feedback-stage-label">当前阶段</text>
+        <text class="feedback-stage-copy">{{item.stageNext}}</text>
+      </view>
+      <text class="feedback-time">提交于 {{item.createdLabel}} · 阶段更新于 {{item.stageUpdatedLabel}}</text>
+    </view>
+  </view>
+  <view wx:elif="{{!loading}}" class="empty-card"><text class="empty-icon">🐾</text><text class="empty-title">还没有提交反馈</text><text class="muted">第一封意见会显示在这里。</text></view>
+</view>

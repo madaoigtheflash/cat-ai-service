@@ -1,0 +1,58 @@
+{
+  "version": "2.0",
+  "envId": "cloud1-d6gpjpxunc74669d7",
+  "functionRoot": "./miniapp/cloudfunctions",
+  "functions": [
+    {
+      "name": "askKnowledge",
+      "runtime": "Nodejs16.13",
+      "timeout": 60,
+      "memorySize": 512,
+      "installDependency": true,
+      "envVariables": {
+        "MINIMAX_API_KEY": "{{env.MINIMAX_API_KEY}}",
+        "MINIMAX_MODEL": "{{env.MINIMAX_MODEL}}"
+      }
+    },
+    {
+      "name": "identifyCat",
+      "runtime": "Nodejs16.13",
+      "timeout": 60,
+      "memorySize": 512,
+      "installDependency": true,
+      "envVariables": {
+        "MINIMAX_API_KEY": "{{env.MINIMAX_API_KEY}}",
+        "MINIMAX_MODEL": "{{env.MINIMAX_MODEL}}",
+        "IDENTIFY_UPLOAD_SECRET": "{{env.IDENTIFY_UPLOAD_SECRET}}",
+        "CLOUDBASE_ENV_ID": "cloud1-d6gpjpxunc74669d7"
+      }
+    },
+    {
+      "name": "catOnlineV2",
+      "dir": "catOnline",
+      "runtime": "Nodejs20.19",
+      "timeout": 60,
+      "memorySize": 512,
+      "installDependency": true,
+      "envVariables": {
+        "CAT_ONLINE_OWNER_SECRET": "{{env.CAT_ONLINE_OWNER_SECRET}}",
+        "CAT_ONLINE_OWNER_KEY_VERSION": "v1",
+        "CLOUDBASE_ENV_ID": "cloud1-d6gpjpxunc74669d7"
+      }
+    },
+    {
+      "name": "catIdentity",
+      "runtime": "Nodejs16.13",
+      "timeout": 60,
+      "memorySize": 512,
+      "installDependency": true,
+      "envVariables": {
+        "CAT_ONLINE_OWNER_SECRET": "{{env.CAT_ONLINE_OWNER_SECRET}}",
+        "CAT_ONLINE_OWNER_KEY_VERSION": "v1",
+        "REID_WORKER_URL": "{{env.REID_WORKER_URL}}",
+        "REID_WORKER_HMAC_SECRET": "{{env.REID_WORKER_HMAC_SECRET}}",
+        "REID_WORKER_TIMEOUT_MS": "20000"
+      }
+    }
+  ]
+}

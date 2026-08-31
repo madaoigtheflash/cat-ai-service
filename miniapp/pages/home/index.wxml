@@ -1,0 +1,72 @@
+<view class="page home-page">
+  <view class="hero">
+    <view class="hero-copy">
+      <text class="eyebrow">今日陪伴 · CAT AI</text>
+      <text class="hero-title">{{greeting}}，一起更懂猫咪</text>
+      <text class="hero-subtitle">拍张照片、记下成长，让每次互动都成为猫咪的小日记。</text>
+      <button class="hero-button" bindtap="goIdentify">和猫咪互动</button>
+    </view>
+    <view class="cat-orbit">
+      <view class="cat-face">🐱</view>
+      <text class="cat-mood">心情很好</text>
+    </view>
+  </view>
+
+  <view class="service-status {{configured ? 'status-ok' : 'status-warn'}}" bindtap="goSettings">
+    <view class="status-dot"></view>
+    <view class="status-copy">
+      <text>{{configured ? '云端猫咪助手在线' : '云端猫咪助手未就绪'}}</text>
+      <text class="muted">{{configured ? 'MiniMax-M3 · CloudBase 安全调用' : '点击检查云开发环境，本地档案仍可使用'}}</text>
+    </view>
+    <text class="chevron">›</text>
+  </view>
+
+  <view class="online-entry" bindtap="goOnline">
+    <view class="online-entry-icon">☁</view>
+    <view class="online-entry-copy">
+      <text class="online-entry-title">云端猫站 · 猫友协作</text>
+      <text class="online-entry-desc">创建邀请制猫友小屋，共同上传和确认猫咪目击。</text>
+    </view>
+    <text class="online-entry-action">进入 ›</text>
+  </view>
+
+  <view class="online-entry feedback-entry" bindtap="goFeedback">
+    <view class="online-entry-icon">💌</view>
+    <view class="online-entry-copy">
+      <text class="online-entry-title">意见信箱 · 一起改进</text>
+      <text class="online-entry-desc">反馈故障与建议，查看审阅和修改提案状态。</text>
+    </view>
+    <text class="online-entry-action">去反馈 ›</text>
+  </view>
+
+  <view class="section-heading">
+    <view><text class="section-title">常用功能</text><text class="section-note">快速开始</text></view>
+  </view>
+  <view class="action-grid">
+    <view class="action-card coral" bindtap="goIdentify"><text class="action-icon">📷</text><text class="action-title">认识猫咪</text><text class="action-desc">拍照发现品种与特征</text><text class="action-reward">＋新发现</text></view>
+    <view class="action-card blush" bindtap="goPets"><text class="action-icon">♡</text><text class="action-title">成长手账</text><text class="action-desc">记录健康与日常变化</text><text class="action-reward">＋陪伴值</text></view>
+    <view class="action-card lilac" bindtap="goKnowledge"><text class="action-icon">✦</text><text class="action-title">喵喵课堂</text><text class="action-desc">本地资料与 AI 问答</text><text class="action-reward">＋养猫经验</text></view>
+    <view class="action-card cream" bindtap="goRelationships"><text class="action-icon">🐾</text><text class="action-title">猫际关系</text><text class="action-desc">看见猫咪之间的相处线索</text><text class="action-reward">＋关系卡</text></view>
+  </view>
+
+  <view class="section-heading">
+    <view><text class="section-title">我的猫咪</text><text class="section-note">{{pets.length ? '最近档案' : '还没有档案'}}</text></view>
+    <text class="section-link" bindtap="goPets">查看全部</text>
+  </view>
+  <view wx:if="{{pets.length}}" class="pet-strip">
+    <view class="pet-mini-card" wx:for="{{pets}}" wx:key="id" data-id="{{item.id}}" bindtap="openPet">
+      <image wx:if="{{item.imagePath}}" class="pet-mini-avatar" src="{{item.imagePath}}" mode="aspectFill" />
+      <view wx:else class="pet-mini-avatar placeholder">🐾</view>
+      <text class="pet-mini-name">{{item.name}}</text>
+      <text class="muted one-line">{{item.breed || '等待补充品种'}}</text>
+    </view>
+  </view>
+  <view wx:else class="empty-card">
+    <text class="empty-icon">🐈</text>
+    <text class="empty-title">为第一只猫建立档案</text>
+    <text class="muted">识别后可一键保存，也可以手动创建。</text>
+    <button class="secondary-button compact" bindtap="goPets">去创建</button>
+  </view>
+
+  <view class="privacy-note">识别结论仅供辅助参考，健康异常请及时咨询执业兽医。</view>
+</view>

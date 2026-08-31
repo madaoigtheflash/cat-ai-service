@@ -1,0 +1,176 @@
+<view class="page insights-page">
+  <view class="insights-hero">
+    <view class="hero-copy">
+      <text class="hero-eyebrow">CAT CIRCLE · 邀请制小屋</text>
+      <text class="hero-title">{{communityName}}</text>
+      <text class="hero-subtitle">一起记录可观察的互动，也用模糊热区回顾猫咪在哪里被看见。</text>
+    </view>
+    <view class="hero-sticker">♡🐾</view>
+  </view>
+
+  <view wx:if="{{errorMessage}}" class="feedback error">{{errorMessage}}</view>
+  <view wx:if="{{feedbackMessage}}" class="feedback success">{{feedbackMessage}}</view>
+
+  <view wx:if="{{loading}}" class="card loading-card">
+    <text class="loading-paw">🐾</text>
+    <text>正在整理小屋里的关系线索…</text>
+  </view>
+
+  <block wx:else>
+    <view class="section-heading">
+      <view><text class="section-title">猫际关系投票</text><text class="section-note">每个箭头方向独立判断，提交后再看该方向的分布</text></view>
+    </view>
+
+    <view wx:if="{{cats.length >= 2}}" class="card vote-card">
+      <view wx:if="{{!directionReady}}" class="direction-upgrade-note">有向关系云端契约尚未启用，本页暂时只读；本地猫际关系仍可正常记录。</view>
+      <view wx:if="{{catsTruncated}}" class="direction-upgrade-note">小屋猫咪较多，当前只载入部分活动档案；未显示的猫咪暂时不能在本页发起关系观察。</view>
+      <view class="cat-picker-grid">
+        <view class="cat-picker-item">
+          <text class="form-label">第一只猫 · 角色主体</text>
+          <picker range="{{catNames}}" value="{{catAIndex}}" bindchange="onCatAChange">
+            <view class="picker-row"><text>{{catNames[catAIndex]}}</text><text class="picker-arrow">⌄</text></view>
+          </picker>
+        </view>
+        <view class="pair-heart">→</view>
+        <view class="cat-picker-item">
+          <text class="form-label">第二只猫 · 关系对象</text>
+          <picker range="{{catNames}}" value="{{catBIndex}}" bindchange="onCatBChange">
+            <view class="picker-row"><text>{{catNames[catBIndex]}}</text><text class="picker-arrow">⌄</text></view>
+          </picker>
+        </view>
+      </view>
+
+      <view wx:if="{{pairInvalid}}" class="pair-warning">请选择两只不同的猫咪。</view>
+      <view wx:else class="selected-pair"><text class="selected-pair-label">当前箭头</text><text class="selected-pair-name">{{selectedPairLabel}}</text></view>
+
+      <text class="vote-prompt">第一只猫指向第二只猫时，你持续观察到什么？</text>
+      <view class="choice-list">
+        <button
+          class="choice-button {{selectedChoice === item.value ? 'selected' : ''}}"
+          wx:for="{{voteChoices}}"
+          wx:key="value"
+          data-value="{{item.value}}"
+          disabled="{{actionLoading || !directionReady}}"
+          bindtap="selectChoice"
+        >
+          <view class="choice-copy">
+            <text class="choice-title">{{item.label}}</text>
+            <text class="choice-roles">第一只：{{item.fromRole}} · 第二只：{{item.toRole}}</text>
+            <text class="choice-hint">{{item.hint}}</text>
+          </view>
+          <text class="choice-check">{{selectedChoice === item.value ? '✓' : '○'}}</text>
+        </button>
+      </view>
+
+      <view wx:if="{{selectedRelationship && selectedRelationship.canSeeDistribution}}" class="distribution-panel">
+        <view class="distribution-heading"><text>{{selectedPairLabel}} · 小屋投票热力</text><text>{{selectedRelationship.totalVotes}} 票</text></view>
+        <view class="heat-row" wx:for="{{distributionRows}}" wx:key="value">
+          <view class="heat-meta"><text>{{item.label}}</text><text>{{item.count}} 票 · {{item.percent}}%</text></view>
+          <view class="heat-track"><view class="heat-fill {{item.value}}" style="{{item.widthStyle}}"></view></view>
+        </view>
+        <text class="my-vote">我的当前选择：{{selectedRelationship.myChoiceLabel || '尚未选择'}}</text>
+        <text wx:if="{{selectedRoleSummary}}" class="my-role">{{selectedRoleSummary}}</text>
+      </view>
+      <view wx:else class="blind-panel">
+        <text class="blind-icon">◌</text>
+        <view class="blind-copy"><text class="blind-title">投票前保持盲看</text><text class="blind-desc">为减少跟票，在你提交这个箭头方向的独立观察前，不展示该方向的票数和比例。</text></view>
+      </view>
+
+      <button class="primary-button vote-submit" loading="{{actionLoading === 'vote'}}" disabled="{{actionLoading || !directionReady || pairInvalid || !selectedChoice}}" bindtap="castVote">
+        {{!directionReady ? '有向关系云端待启用' : (selectedRelationship && selectedRelationship.myChoice ? '更新我的观察' : '提交独立观察')}}
+      </button>
+      <text class="vote-safety">箭头表达这次观察中的角色方向，不是猫咪固定身份或地位。关系会随时间变化；“需要空间”不是行为或医学诊断，外貌相似也不能证明亲缘。</text>
+    </view>
+
+    <view wx:else class="empty-card cats-empty">
+      <text class="empty-icon">🐈</text>
+      <text class="empty-title">小屋里还没有两只猫咪</text>
+      <text class="empty-copy">先回到猫友小屋同步至少两份基础档案，再来记录它们的相处线索。</text>
+    </view>
+
+    <view class="section-heading">
+      <view><text class="section-title">有向关系热力概览</text><text class="section-note">A → B 与 B → A 分开统计；点击新关系卡可继续投票</text></view>
+    </view>
+    <view wx:if="{{relationshipTruncated}}" class="direction-upgrade-note">小屋关系较多，当前只展示前 100 条活动关系；投票前请先确认目标箭头是否已显示。</view>
+    <view wx:if="{{relationships.length}}" class="relationship-list">
+      <view
+        class="relationship-card"
+        wx:for="{{relationships}}"
+        wx:key="id"
+        data-state="{{item.directionState}}"
+        data-from="{{item.fromCat.catId}}"
+        data-to="{{item.toCat.catId}}"
+        hover-class="relationship-card-active"
+        bindtap="selectRelationship"
+      >
+        <view class="relationship-symbol {{item.isLegacy ? 'legacy' : ''}}">{{item.isLegacy ? '×' : '→'}}</view>
+        <view wx:if="{{!item.isLegacy}}" class="relationship-copy">
+          <text class="relationship-name">{{item.fromCat.displayName}} → {{item.toCat.displayName}}</text>
+          <text class="relationship-summary">{{item.leadingLabel}}</text>
+          <text wx:if="{{item.roleSummary}}" class="relationship-roles">{{item.roleSummary}}</text>
+          <text wx:if="{{item.myChoiceLabel}}" class="relationship-mine">我的观察：{{item.myChoiceLabel}}</text>
+        </view>
+        <view wx:else class="relationship-copy">
+          <text class="relationship-name">{{item.legacyPairLabel}}</text>
+          <text class="relationship-summary legacy">{{item.leadingLabel}}</text>
+          <text class="relationship-roles">{{item.roleSummary}}</text>
+        </view>
+        <text class="relationship-arrow {{item.isLegacy ? 'legacy' : ''}}">{{item.isLegacy ? '待确认' : '›'}}</text>
+      </view>
+    </view>
+    <view wx:else class="empty-card relation-empty"><text class="empty-icon small">♡</text><text class="empty-title">还没有关系投票</text><text class="empty-copy">从上方选择两只猫，记录第一条持续观察到的线索。</text></view>
+
+    <view class="section-heading map-heading">
+      <view><text class="section-title">猫咪分布地图</text><text class="section-note">仅展示已审核目击的模糊热区，不获取你的当前位置</text></view>
+    </view>
+
+    <view wx:if="{{mapTruncated}}" class="map-truncated-note">
+      目击记录较多，当前地图展示最近 100 条已审核记录的粗略热区。
+    </view>
+
+    <block wx:if="{{hasMap}}">
+      <view class="card map-card">
+        <map
+          class="community-map"
+          latitude="{{mapLatitude}}"
+          longitude="{{mapLongitude}}"
+          scale="12"
+          circles="{{mapCircles}}"
+          include-points="{{mapPoints}}"
+          show-location="{{false}}"
+          enable-zoom="{{true}}"
+          enable-scroll="{{true}}"
+        ></map>
+        <view class="map-legend">
+          <view class="legend-item"><text class="legend-dot light"></text><text>较少记录</text></view>
+          <view class="legend-item"><text class="legend-dot medium"></text><text>多次记录</text></view>
+          <view class="legend-item"><text class="legend-dot high"></text><text>较多记录</text></view>
+        </view>
+        <text class="map-privacy">本页不会获取或显示你的当前位置，也不进行持续定位；仅展示已审核目击的约 2 公里网格，精确经纬度和选点名称不会返回本页。</text>
+      </view>
+
+      <view class="section-heading area-heading">
+        <view><text class="section-title">热区文字列表</text><text class="section-note">与地图等价，便于大字体阅读</text></view>
+      </view>
+      <view class="area-list">
+        <view class="area-card {{item.intensity}}" wx:for="{{mapCells}}" wx:key="id">
+          <view class="area-heat"><text>{{item.sightingCount}}</text><text>次目击</text></view>
+          <view class="area-copy">
+            <text class="area-title">{{item.areaText}}</text>
+            <text class="area-summary">约 {{item.precisionKm}} 公里网格 · {{item.catCount}} 只已关联猫咪</text>
+            <text class="area-cats">{{item.catNamesText}}</text>
+            <text class="area-time">{{item.latestLabel}}</text>
+          </view>
+        </view>
+      </view>
+    </block>
+
+    <view wx:else class="empty-card map-empty">
+      <text class="empty-icon">⌖</text>
+      <text class="empty-title">还没有可展示的粗略热区</text>
+      <text class="empty-copy">上传目击时可主动选择大致位置；审核通过后才会以模糊网格加入地图。</text>
+    </view>
+
+    <view class="safety-note">请勿通过地图追踪私人住址、救助点或猫咪实时路线。持续受伤、消瘦或异常行为仍需联系执业兽医或专业救助人员。</view>
+  </block>
+</view>

@@ -1,0 +1,52 @@
+{
+  "pages": [
+    "pages/home/index",
+    "pages/identify/index",
+    "pages/pets/index",
+    "pages/pet-detail/index",
+    "pages/pet-edit/index",
+    "pages/relationships/index",
+    "pages/online/index",
+    "pages/community-insights/index",
+    "pages/identity/index",
+    "pages/knowledge/index",
+    "pages/feedback/index",
+    "pages/settings/index"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#FF6F91",
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "Cat-AI 猫咪管家",
+    "backgroundColor": "#FFF7FA",
+    "backgroundTextStyle": "dark"
+  },
+  "networkTimeout": {
+    "request": 60000,
+    "connectSocket": 60000,
+    "uploadFile": 60000,
+    "downloadFile": 60000
+  },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "用于主动选择猫咪目击地点，审核后仅展示约2公里模糊热区"
+    }
+  },
+  "requiredPrivateInfos": [
+    "chooseLocation"
+  ],
+  "tabBar": {
+    "color": "#9A7B70",
+    "selectedColor": "#FF6F91",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "white",
+    "list": [
+      { "pagePath": "pages/home/index", "text": "首页" },
+      { "pagePath": "pages/identify/index", "text": "识别" },
+      { "pagePath": "pages/pets/index", "text": "档案" },
+      { "pagePath": "pages/knowledge/index", "text": "知识" }
+    ]
+  },
+  "style": "v2",
+  "lazyCodeLoading": "requiredComponents",
+  "sitemapLocation": "sitemap.json"
+}

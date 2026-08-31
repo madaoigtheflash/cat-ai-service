@@ -1,0 +1,37 @@
+<view class="page knowledge-page">
+  <view class="knowledge-hero">
+    <text class="knowledge-kicker">喵喵课堂 · 养猫经验</text>
+    <text class="knowledge-title">今天想和猫咪一起学什么？</text>
+    <text class="knowledge-subtitle">常用资料保存在小程序中，随时可以翻开这本养猫手账。</text>
+    <view class="search-box"><text class="search-icon">⌕</text><input value="{{query}}" placeholder="搜索食物、症状、品种…" bindinput="onSearchInput" /></view>
+  </view>
+
+  <scroll-view class="category-scroll" scroll-x enable-flex show-scrollbar="{{false}}">
+    <view class="category-row">
+      <view class="category-pill {{category === item ? 'active' : ''}}" wx:for="{{categories}}" wx:key="*this" data-category="{{item}}" bindtap="selectCategory">{{item}}</view>
+    </view>
+  </scroll-view>
+
+  <view class="article-count">找到 {{articles.length}} 条本地资料</view>
+  <view class="article-list">
+    <view class="article-card" wx:for="{{articles}}" wx:key="id" data-id="{{item.id}}" bindtap="toggleArticle">
+      <view class="article-top">
+        <view class="article-icon">{{item.icon}}</view>
+        <view class="article-copy"><text class="article-category">{{item.category}}</text><text class="article-title">{{item.title}}</text></view>
+        <text class="article-arrow">{{expandedId === item.id ? '−' : '+'}}</text>
+      </view>
+      <text class="article-summary">{{item.summary}}</text>
+      <view wx:if="{{expandedId === item.id}}" class="article-content"><text>{{item.content}}</text><text class="reference-note">健康相关内容仅供科普，不能替代兽医诊断。</text></view>
+    </view>
+  </view>
+  <view wx:if="{{!articles.length}}" class="empty-card"><text class="empty-icon">⌕</text><text class="empty-title">没有找到匹配资料</text><text class="muted">换一个关键词，或使用下方 AI 问答。</text></view>
+
+  <view class="ai-card">
+    <view class="ai-heading"><view class="ai-badge">AI</view><view><text class="ai-title">问问喵博士</text><text class="muted ai-note">本地资料检索 + CloudBase 模型回答</text></view></view>
+    <textarea class="question-input" value="{{question}}" placeholder="例如：幼猫到家后应该先做什么？" maxlength="300" cursor-spacing="96" disable-default-padding show-confirm-bar="{{false}}" bindinput="onQuestionInput" />
+    <view wx:if="{{!configured}}" class="offline-line" bindtap="goSettings">云端助手未连接 · 前往设置</view>
+    <view wx:if="{{askError}}" class="ask-error">{{askError}}</view>
+    <button class="primary-button ask-button" loading="{{asking}}" disabled="{{asking}}" bindtap="askAI">{{asking ? '正在检索资料…' : '提交问题'}}</button>
+    <view wx:if="{{answer}}" class="answer-box"><text class="answer-label">AI 回答</text><text class="answer-text">{{answer}}</text><text class="reference-note">内容由 AI 生成，请结合资料来源和专业意见判断。</text></view>
+  </view>
+</view>

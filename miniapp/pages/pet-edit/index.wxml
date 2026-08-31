@@ -1,0 +1,29 @@
+<view class="page edit-page">
+  <view class="avatar-editor" bindtap="chooseImage">
+    <image wx:if="{{form.imagePath}}" class="edit-avatar" src="{{form.imagePath}}" mode="aspectFill" />
+    <view wx:else class="edit-avatar avatar-placeholder">🐱</view>
+    <text class="avatar-action">{{form.imagePath ? '更换照片' : '添加照片'}}</text>
+  </view>
+
+  <view class="card form-card">
+    <text class="form-section-title">基本信息</text>
+    <view class="form-item"><text class="form-label">名字 *</text><input class="form-input" value="{{form.name}}" placeholder="例如：小橘" data-field="name" bindinput="onInput" maxlength="20" /></view>
+    <view class="form-item"><text class="form-label">品种</text><input class="form-input" value="{{form.breed}}" placeholder="例如：中华田园猫" data-field="breed" bindinput="onInput" /></view>
+    <view class="form-row">
+      <view class="form-item half"><text class="form-label">性别</text><picker mode="selector" range="{{genders}}" value="{{genderIndex}}" bindchange="onGenderChange"><view class="picker-value">{{form.gender}}</view></picker></view>
+      <view class="form-item half"><text class="form-label">体重（kg）</text><input class="form-input" type="digit" value="{{form.weight}}" placeholder="0.0" data-field="weight" bindinput="onInput" /></view>
+    </view>
+    <view class="form-item"><text class="form-label">生日</text><picker mode="date" value="{{form.birthday}}" end="2026-12-31" bindchange="onBirthdayChange"><view class="picker-value {{form.birthday ? '' : 'placeholder-text'}}">{{form.birthday || '选择日期'}}</view></picker></view>
+    <view class="form-row">
+      <view class="form-item half"><text class="form-label">毛色</text><input class="form-input" value="{{form.coatColor}}" placeholder="例如：橘白" data-field="coatColor" bindinput="onInput" /></view>
+      <view class="form-item half"><text class="form-label">年龄估计</text><input class="form-input" value="{{form.estimatedAge}}" placeholder="例如：约 2 岁" data-field="estimatedAge" bindinput="onInput" /></view>
+    </view>
+  </view>
+
+  <view class="card form-card">
+    <text class="form-section-title">健康与备注</text>
+    <view class="form-item"><text class="form-label">健康状态</text><input class="form-input" value="{{form.healthStatus}}" placeholder="例如：状态良好" data-field="healthStatus" bindinput="onInput" /></view>
+    <view class="form-item"><text class="form-label">备注</text><textarea class="form-textarea" value="{{form.notes}}" placeholder="性格、饮食偏好、需要留意的事项…" data-field="notes" bindinput="onInput" maxlength="500" /></view>
+  </view>
+  <button class="primary-button save-button" bindtap="save">保存档案</button>
+</view>

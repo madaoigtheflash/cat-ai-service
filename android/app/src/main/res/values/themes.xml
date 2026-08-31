@@ -1,0 +1,11 @@
+<resources>
+    <style name="Theme.CatAI" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:statusBarColor">@color/cat_orange_dark</item>
+        <item name="android:navigationBarColor">@color/white</item>
+        <item name="android:colorAccent">@color/cat_orange</item>
+        <item name="android:windowActionModeOverlay">true</item>
+    </style>
+</resources>
+

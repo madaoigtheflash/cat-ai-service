@@ -1,0 +1,5 @@
+interface:
+  display_name: "Ã¨Ý®Ð¡³ÌÐò UI"
+  short_description: "Pink playful WeChat mini program UI guardrails"
+  default_prompt: "Use $cat-miniapp-ui to redesign this WeChat mini program page with safe typography and playful pink interactions."
+  brand_color: "#FF6F91"

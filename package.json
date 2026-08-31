@@ -1,0 +1,9 @@
+{
+  "name": "cat-ai-service",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cat-AI 智能猫咪管家 — AI 照片识别猫咪品种 + 知识库 + 登记建档（FastAPI + 原生前端）",
+  "scripts": {
+    "dev": "python start.py"
+  }
+}

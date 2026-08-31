@@ -1,0 +1,37 @@
+.knowledge-page { padding-top: 0; }
+.knowledge-hero { margin: 0 -32rpx; padding: 46rpx 38rpx 40rpx; color: #fff; background: linear-gradient(145deg, #d95c82, #ff9db4); }
+.knowledge-kicker { display: block; color: #fff3f7; font-size: 21rpx; font-weight: 700; line-height: 1.45; letter-spacing: 2rpx; }
+.knowledge-title { display: block; max-width: 620rpx; margin-top: 14rpx; font-size: 42rpx; font-weight: 700; line-height: 1.35; word-break: break-word; }
+.knowledge-subtitle { display: block; margin-top: 13rpx; font-size: 24rpx; line-height: 1.65; opacity: .92; word-break: break-word; }
+.search-box { display: flex; align-items: center; gap: 16rpx; min-height: 88rpx; margin-top: 28rpx; padding: 16rpx 24rpx; border-radius: 28rpx; color: #4f3943; background: #fff; box-shadow: 0 8rpx 24rpx rgba(130,45,72,.1); }
+.search-box input { flex: 1; min-width: 0; height: 56rpx; font-size: 26rpx; line-height: 1.55; }
+.search-icon { flex: none; color: #d94f75; font-size: 36rpx; line-height: 1; }
+.category-scroll { width: 100%; margin-top: 26rpx; white-space: nowrap; }
+.category-row { display: flex; gap: 14rpx; padding: 2rpx 0 10rpx; }
+.category-pill { display: flex; flex: none; align-items: center; justify-content: center; min-height: 88rpx; padding: 16rpx 30rpx; border: 1rpx solid #f2dfe7; border-radius: 44rpx; color: #765f69; background: #fff; font-size: 24rpx; line-height: 1.45; }
+.category-pill.active { color: #fff; background: #ff6f91; border-color: #ff6f91; box-shadow: 0 7rpx 18rpx rgba(255,111,145,.18); }
+.article-count { margin: 24rpx 3rpx 16rpx; color: #9d8490; font-size: 23rpx; line-height: 1.5; }
+.article-list { display: flex; flex-direction: column; gap: 18rpx; }
+.article-card { padding: 26rpx; border: 1rpx solid #f2dfe7; border-radius: 28rpx; background: #fff; box-shadow: 0 7rpx 24rpx rgba(119,64,86,.045); }
+.article-top { display: flex; align-items: center; gap: 18rpx; }
+.article-icon { display: flex; flex: none; align-items: center; justify-content: center; width: 72rpx; height: 72rpx; border-radius: 22rpx; background: #fff0f5; font-size: 34rpx; line-height: 1; }
+.article-copy { display: flex; flex: 1; flex-direction: column; min-width: 0; }
+.article-category { color: #d94f75; font-size: 21rpx; font-weight: 600; line-height: 1.45; }
+.article-title { display: block; margin-top: 4rpx; font-size: 29rpx; font-weight: 700; line-height: 1.45; word-break: break-word; }
+.article-arrow { flex: none; color: #b59da8; font-size: 36rpx; line-height: 1; }
+.article-summary { display: block; margin-top: 18rpx; color: #765f69; font-size: 24rpx; line-height: 1.7; word-break: break-word; }
+.article-content { margin-top: 20rpx; padding-top: 20rpx; border-top: 1rpx solid #f2dfe7; color: #5a4650; font-size: 25rpx; line-height: 1.8; word-break: break-word; }
+.reference-note { display: block; margin-top: 18rpx; color: #9d8490; font-size: 21rpx; line-height: 1.65; word-break: break-word; }
+.ai-card { margin-top: 32rpx; padding: 28rpx; border: 1rpx solid #f2dfe7; border-radius: 30rpx; background: #fff; box-shadow: 0 9rpx 28rpx rgba(119,64,86,.06); }
+.ai-heading { display: flex; align-items: center; gap: 18rpx; }
+.ai-heading > view:last-child { min-width: 0; }
+.ai-badge { display: flex; flex: none; align-items: center; justify-content: center; width: 64rpx; height: 64rpx; border-radius: 21rpx; color: #fff; background: linear-gradient(135deg,#ff6f91,#ff9db4); font-size: 23rpx; font-weight: 700; line-height: 1; }
+.ai-title { display: block; font-size: 30rpx; font-weight: 700; line-height: 1.45; }
+.ai-note { display: block; margin-top: 4rpx; font-size: 22rpx; line-height: 1.55; word-break: break-word; }
+.question-input { width: 100%; height: 128rpx; min-height: 128rpx; max-height: 128rpx; margin-top: 16rpx; padding: 18rpx 22rpx; overflow-y: auto; border: 1rpx solid #f2dfe7; border-radius: 22rpx; background: #fff9fb; font-size: 26rpx; line-height: 1.6; word-break: break-word; }
+.offline-line { display: flex; align-items: center; min-height: 88rpx; margin-top: 8rpx; padding: 14rpx 0; color: #d94f75; font-size: 23rpx; line-height: 1.5; }
+.ask-error { margin-top: 16rpx; padding: 18rpx; border-radius: 16rpx; color: #98404c; background: #ffe5eb; font-size: 23rpx; line-height: 1.65; word-break: break-word; }
+.ask-button { margin-top: 16rpx; }
+.answer-box { margin-top: 24rpx; padding: 24rpx; border-radius: 22rpx; background: #fff0f5; }
+.answer-label { display: block; margin-bottom: 12rpx; color: #c34e70; font-size: 22rpx; font-weight: 700; line-height: 1.5; }
+.answer-text { display: block; color: #4f3943; font-size: 25rpx; line-height: 1.8; white-space: pre-wrap; word-break: break-word; }

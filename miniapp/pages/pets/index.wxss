@@ -1,0 +1,14 @@
+.pets-header { display: flex; align-items: center; justify-content: space-between; gap: 24rpx; margin: 12rpx 4rpx 32rpx; }
+.pets-header > view { min-width: 0; }
+.pets-title { display: block; font-size: 43rpx; font-weight: 700; line-height: 1.35; }.pets-count { display: block; margin-top: 8rpx; font-size: 23rpx; line-height: 1.5; }
+.header-actions { display: flex; flex: none; align-items: center; gap: 12rpx; }
+.network-button { display: flex; align-items: center; justify-content: center; min-width: 136rpx; min-height: 88rpx; margin: 0; padding: 18rpx 20rpx; border: 1rpx solid #f2dfe7; border-radius: 44rpx; color: #d94f75; background: #fff0f5; font-size: 24rpx; font-weight: 600; line-height: 1.4; }
+.add-button { display: flex; flex: none; align-items: center; justify-content: center; min-width: 176rpx; min-height: 88rpx; margin: 0; padding: 18rpx 24rpx; border: 0; border-radius: 44rpx; color: #fff; background: #ff6f91; font-size: 26rpx; font-weight: 600; line-height: 1.4; }
+.pet-list { display: flex; flex-direction: column; gap: 20rpx; }
+.pet-card { display: flex; align-items: center; min-height: 184rpx; padding: 20rpx; border: 1rpx solid #f2dfe7; border-radius: 28rpx; background: #fff; box-shadow: 0 8rpx 26rpx rgba(119,64,86,.055); }
+.pet-avatar { display: flex; flex: none; align-items: center; justify-content: center; width: 140rpx; height: 140rpx; border-radius: 24rpx; background: #fff0f5; }.avatar-empty { font-size: 48rpx; }
+.pet-copy { flex: 1; min-width: 0; padding: 0 22rpx; }.pet-title-row { display: flex; align-items: center; gap: 12rpx; min-width: 0; }.pet-name { overflow: hidden; min-width: 0; font-size: 32rpx; font-weight: 700; line-height: 1.4; text-overflow: ellipsis; white-space: nowrap; }
+.gender-pill { flex: none; padding: 6rpx 13rpx; border-radius: 16rpx; color: #c34e70; background: #fff0f5; font-size: 21rpx; line-height: 1.4; }.pet-breed { display: block; margin-top: 8rpx; color: #6f5a64; font-size: 25rpx; line-height: 1.55; word-break: break-word; }.pet-meta { display: flex; flex-wrap: wrap; gap: 10rpx 18rpx; margin-top: 12rpx; color: #9d8490; font-size: 22rpx; line-height: 1.5; }
+.more { align-self: flex-start; padding: 4rpx 10rpx 20rpx; color: #a99891; font-size: 31rpx; }
+.pets-empty { margin-top: 110rpx; }.empty-copy { max-width: 500rpx; line-height: 1.6; }
+.local-banner { display: flex; gap: 18rpx; margin-top: 30rpx; padding: 25rpx; border-radius: 24rpx; color: #765f69; background: #fff0f5; }.local-banner > view { min-width: 0; }.local-icon { flex: none; font-size: 34rpx; }.local-title { display: block; margin-bottom: 5rpx; font-weight: 700; line-height: 1.45; }.local-banner .muted { color: #9d8490; font-size: 22rpx; line-height: 1.6; word-break: break-word; }

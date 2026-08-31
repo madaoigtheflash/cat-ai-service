@@ -1,0 +1,46 @@
+{
+  "appid": "wx1112379224ace9f9",
+  "compileType": "miniprogram",
+  "cloudfunctionRoot": "cloudfunctions/",
+  "libVersion": "3.17.1",
+  "miniprogramRoot": "./",
+  "projectname": "Cat-AI 猫咪管家",
+  "description": "AI 猫咪品种辅助识别、知识查询与档案管理",
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true,
+    "checkInvalidKey": true,
+    "ignoreUploadUnusedFiles": true,
+    "compileHotReLoad": true,
+    "compileWorklet": false,
+    "uglifyFileName": false,
+    "uploadWithSourceMap": true,
+    "packNpmManually": false,
+    "packNpmRelationList": [],
+    "minifyWXSS": true,
+    "minifyWXML": true,
+    "localPlugins": false,
+    "disableUseStrict": false,
+    "useCompilerPlugins": false,
+    "condition": false,
+    "babelSetting": {
+      "ignore": [],
+      "disablePlugins": [],
+      "outputPath": ""
+    }
+  },
+  "condition": {},
+  "simulatorPluginLibVersion": {},
+  "packOptions": {
+    "ignore": [
+      { "type": "folder", "value": ".miniprogram-ci" },
+      { "type": "folder", "value": "tests" },
+      { "type": "file", "value": "README.md" }
+    ],
+    "include": []
+  },
+  "editorSetting": {}
+}

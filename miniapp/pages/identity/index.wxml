@@ -1,0 +1,89 @@
+<view class="page identity-page">
+  <view class="identity-hero">
+    <view class="identity-hero-icon">🐈‍⬛</view>
+    <view class="identity-hero-copy">
+      <text class="identity-eyebrow">同猫识别 · 实验候选</text>
+      <text class="identity-title">一起核对是不是熟悉的它</text>
+      <text class="identity-subtitle">模型只负责缩小候选范围，最终由你根据花纹、耳缘和多次目击确认。</text>
+    </view>
+  </view>
+
+  <view class="identity-warning">一次照片不能证明身份。纯色猫、幼猫成长、夜间光线和相似背景都可能造成误判；本页不会自动合并档案。</view>
+  <view wx:if="{{errorMessage}}" class="feedback error">{{errorMessage}}</view>
+  <view wx:if="{{feedbackMessage}}" class="feedback success">{{feedbackMessage}}</view>
+
+  <view wx:if="{{loading}}" class="card loading-card">
+    <view class="loading-orbit"><text>🐾</text></view>
+    <text class="loading-title">正在整理可核对的猫咪</text>
+    <text class="muted">会先检查小屋里已有的人工确认模板</text>
+  </view>
+
+  <block wx:elif="{{task}}">
+    <view class="card task-summary">
+      <view class="summary-row">
+        <view><text class="summary-kicker">当前状态</text><text class="summary-value">{{task.stateLabel}}</text></view>
+        <text class="mode-pill {{task.simulation ? 'simulation' : ''}}">{{task.modeLabel}}</text>
+      </view>
+      <text wx:if="{{task.notice}}" class="task-notice">{{task.notice}}</text>
+      <text wx:if="{{task.simulation}}" class="simulation-note">这是工程模拟结果，没有视觉识别意义，不能用于真实身份判断。</text>
+      <button wx:if="{{task.state === 'PROCESSING' || task.state === 'FAILED'}}" class="secondary-button refresh-button" bindtap="refreshTask">刷新候选</button>
+      <button wx:if="{{task.state === 'UNDONE'}}" class="secondary-button refresh-button" bindtap="restartMatch">重新生成候选</button>
+    </view>
+
+    <view wx:if="{{task.isFinal}}" class="card completed-card">
+      <view class="completed-icon">{{task.needsMoreEvidence ? '…' : '✓'}}</view>
+      <text class="completed-title">{{task.needsMoreEvidence ? '已保留为待确认' : '这次确认已经保存'}}</text>
+      <text wx:if="{{task.isComplete}}" class="completed-name">{{task.assignment.displayName || task.assignment.catName || '猫咪身份'}}</text>
+      <text class="completed-desc">{{task.needsMoreEvidence ? '可以补拍正脸、左右侧身或独特花纹，再重新核对。' : '身份关联有审计记录，可撤销；系统不会因为一次结果自动合并其他猫咪。'}}</text>
+      <button class="danger-soft-button" loading="{{actionLoading === 'undo'}}" disabled="{{actionLoading}}" bindtap="undoDecision">撤销这次确认</button>
+    </view>
+
+    <block wx:if="{{task.canDecide}}">
+      <view class="section-heading">
+        <view><text class="section-title">优先核对候选</text><text class="section-note">排名不是概率，也不是最终结论</text></view>
+      </view>
+      <view wx:if="{{task.candidates.length}}" class="candidate-list">
+        <view class="candidate-card" wx:for="{{task.candidates}}" wx:key="catId">
+          <view class="candidate-rank">{{item.rank}}</view>
+          <view class="candidate-copy">
+            <text class="candidate-name">{{item.displayName}}</text>
+            <text class="candidate-evidence">{{item.evidenceLabel}}</text>
+          </view>
+          <button class="candidate-button" data-id="{{item.catId}}" loading="{{actionLoading === 'confirm'}}" disabled="{{actionLoading}}" bindtap="confirmCandidate">认真核对后确认</button>
+        </view>
+      </view>
+      <view wx:else class="empty-candidates">
+        <text class="empty-icon">🔎</text>
+        <text class="empty-title">暂时没有可靠候选</text>
+        <text class="muted">这不等于一定是新猫，也可能是小屋模板还不够。你可以人工选择或先保留待确认。</text>
+      </view>
+
+      <view class="section-heading">
+        <view><text class="section-title">人工确认</text><text class="section-note">模型没找对时，以你的观察为准</text></view>
+      </view>
+      <view class="card manual-card">
+        <block wx:if="{{task.availableCats.length}}">
+          <text class="form-label">从小屋已有猫咪中选择</text>
+          <picker range="{{knownCatNames}}" value="{{knownCatIndex}}" bindchange="onKnownCatChange">
+            <view class="picker-row"><text>{{knownCatNames[knownCatIndex]}}</text><text class="picker-arrow">⌄</text></view>
+          </picker>
+          <button class="secondary-button manual-button" loading="{{actionLoading === 'confirm'}}" disabled="{{actionLoading}}" bindtap="confirmKnownCat">确认是这只猫</button>
+        </block>
+
+        <view class="manual-divider"><text>或者</text></view>
+        <text class="form-label">作为尚未建档的新猫</text>
+        <input class="form-input" maxlength="30" placeholder="给它一个便于辨认的昵称" value="{{newCatName}}" bindinput="onNewCatName" />
+        <button class="secondary-button manual-button" loading="{{actionLoading === 'confirm'}}" disabled="{{actionLoading}}" bindtap="confirmNewCat">暂存为新猫</button>
+
+        <button class="unsure-button" loading="{{actionLoading === 'confirm'}}" disabled="{{actionLoading}}" bindtap="confirmUnsure">照片不够清楚，暂时不判断</button>
+      </view>
+    </block>
+
+    <view class="capture-guide">
+      <text class="guide-title">下次这样拍，更容易区分</text>
+      <view class="guide-grid">
+        <text>① 正脸与耳缘</text><text>② 左右侧身体</text><text>③ 尾巴和腿部</text><text>④ 不同日期再拍</text>
+      </view>
+    </view>
+  </block>
+</view>

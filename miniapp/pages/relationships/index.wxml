@@ -1,0 +1,102 @@
+<view class="page relationships-page">
+  <view class="relationship-hero">
+    <text class="eyebrow">陪伴地图 · CAT CIRCLE</text>
+    <text class="page-title">猫际关系网</text>
+    <text class="page-subtitle">用箭头记录双方各自的身份：谁照护谁、谁是母亲或孩子；朋友和玩伴仍可双向相连。</text>
+    <view class="hero-stats">
+      <text>{{pets.length}} 只猫咪</text>
+      <text>{{relationCount}} 条关系卡</text>
+    </view>
+  </view>
+
+  <view class="trust-note">
+    <text class="trust-icon">♡</text>
+    <view><text class="trust-title">双方身份由你确认</text><text class="trust-copy">AI 不会凭照片判断血缘、照护、亲密或冲突；旧版无方向记录也不会被自动猜成母子关系。</text></view>
+  </view>
+
+  <view wx:if="{{!pets.length}}" class="empty-card network-empty">
+    <text class="empty-icon">🐈‍⬛</text>
+    <text class="empty-title">先认识第一只猫咪</text>
+    <text class="muted empty-copy">建立至少两份猫咪档案后，就能点亮它们之间的关系线。</text>
+    <button class="primary-button compact" bindtap="addPet">新建档案</button>
+  </view>
+
+  <block wx:else>
+    <view class="network-card">
+      <view class="network-heading">
+        <view><text class="network-title">{{focusedPet.name}}的伙伴圈</text><text class="network-tip">箭头从起点身份指向终点身份；点击猫咪可切换视角</text></view>
+        <text class="focus-pill">焦点</text>
+      </view>
+
+      <view class="network-stage">
+        <view
+          class="relation-line {{item.className}} {{item.directionClass}}"
+          wx:for="{{lines}}"
+          wx:key="id"
+          style="left: {{item.x}}rpx; top: {{item.y}}rpx; width: {{item.width}}rpx; transform: rotate({{item.angle}}deg);"
+        ></view>
+        <view
+          class="network-node {{item.current ? 'node-current' : ''}} {{item.className}}"
+          wx:for="{{nodes}}"
+          wx:key="id"
+          data-id="{{item.id}}"
+          bindtap="selectNode"
+          style="left: {{item.x}}rpx; top: {{item.y}}rpx;"
+        >
+          <view class="node-avatar-wrap">
+            <image wx:if="{{item.imagePath}}" class="node-avatar" src="{{item.imagePath}}" mode="aspectFill" />
+            <view wx:else class="node-avatar node-placeholder">🐾</view>
+          </view>
+          <text class="node-name">{{item.name}}</text>
+          <text class="node-relation">{{item.relationLabel}}</text>
+        </view>
+      </view>
+      <text wx:if="{{hiddenPetCount}}" class="hidden-tip">关系图先展示 6 位伙伴，下面仍可查看其余 {{hiddenPetCount}} 只猫咪。</text>
+    </view>
+
+    <view class="legend-card">
+      <view class="legend-item {{item.className}}" wx:for="{{relationTypes}}" wx:key="value"><text class="legend-dot"></text><text>{{item.label}}</text></view>
+    </view>
+
+    <view class="section-heading relationship-heading">
+      <view><text class="section-title">关系卡</text><text class="section-note">逐一确认{{focusedPet.name}}与伙伴各自代表的身份</text></view>
+    </view>
+
+    <view wx:if="{{relationshipRows.length}}" class="relationship-list">
+      <view class="relationship-card {{item.className}}" wx:for="{{relationshipRows}}" wx:key="petId">
+        <view class="relationship-main">
+          <image wx:if="{{item.pet.imagePath}}" class="relation-avatar" src="{{item.pet.imagePath}}" mode="aspectFill" />
+          <view wx:else class="relation-avatar relation-placeholder">🐾</view>
+          <view class="relation-copy">
+            <view class="relation-title-row"><text class="relation-name">{{item.pet.name}}</text><text class="relation-tag">{{item.typeLabel}}</text></view>
+            <view wx:if="{{item.relationship && !item.isLegacy}}" class="relation-role-row">
+              <text class="role-chip current-role">{{focusedPet.name}} · {{item.sourceRoleLabel}}</text>
+              <text class="role-arrow">{{item.arrow}}</text>
+              <text class="role-chip">{{item.pet.name}} · {{item.targetRoleLabel}}</text>
+            </view>
+            <text wx:if="{{item.relationship && item.isLegacy}}" class="legacy-role-note">旧版无方向记录 · 请重新确认双方身份</text>
+            <text class="relation-hint">{{item.displayNote}}</text>
+          </view>
+        </view>
+        <view class="relation-actions">
+          <button class="relation-edit" data-id="{{item.pet.id}}" catchtap="editRelationship">{{item.isLegacy ? '确认双方身份' : (item.relationship ? '调整身份' : '记录身份')}}</button>
+          <button wx:if="{{item.relationship}}" class="relation-remove" data-id="{{item.pet.id}}" catchtap="deleteRelationship">移除</button>
+        </view>
+      </view>
+    </view>
+
+    <view wx:else class="empty-card one-cat-empty">
+      <text class="empty-icon">🐾</text>
+      <text class="empty-title">还差一位猫伙伴</text>
+      <text class="muted empty-copy">再建立一份档案，就能开始记录猫际关系。</text>
+      <button class="secondary-button compact" bindtap="addPet">添加猫咪</button>
+    </view>
+
+    <view class="observation-card">
+      <text class="observation-title">观察小提示</text>
+      <text>友好互动通常是双向、可随时停止的；如果持续追逐、堵路、护食或躲藏，请先增加资源点并让猫咪保持距离。</text>
+      <text class="observation-warning">突然攻击或行为显著改变也可能与疼痛、疾病有关，必要时请咨询执业兽医或猫行为专业人士。</text>
+    </view>
+    <view class="local-note">关系卡与猫咪档案一样，仅保存在本机微信存储；旧版无方向关系会保留但需要重新确认双方身份。清理微信数据或更换设备前请留意备份。</view>
+  </block>
+</view>

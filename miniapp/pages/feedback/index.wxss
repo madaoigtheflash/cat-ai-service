@@ -1,0 +1,42 @@
+.feedback-page { padding-top: 28rpx; }
+.feedback-hero { display: flex; align-items: center; gap: 22rpx; padding: 34rpx 32rpx; border: 1rpx solid #f2dfe7; border-radius: 34rpx; background: linear-gradient(145deg, #fff0f5, #f3ecff); box-shadow: 0 12rpx 30rpx rgba(119,64,86,.07); }
+.feedback-hero-copy { flex: 1; min-width: 0; }
+.feedback-eyebrow { display: block; color: #d94f75; font-size: 21rpx; font-weight: 600; line-height: 1.5; letter-spacing: 2rpx; }
+.feedback-title { display: block; margin-top: 8rpx; font-size: 37rpx; font-weight: 700; line-height: 1.42; word-break: break-word; }
+.feedback-subtitle { display: block; margin-top: 12rpx; color: #765f69; font-size: 23rpx; line-height: 1.7; word-break: break-word; }
+.feedback-mascot { display: flex; flex: none; align-items: center; justify-content: center; width: 118rpx; min-height: 118rpx; border-radius: 40rpx; background: rgba(255,255,255,.78); font-size: 48rpx; }
+.message { margin-top: 20rpx; padding: 20rpx 24rpx; border-radius: 20rpx; font-size: 24rpx; line-height: 1.65; word-break: break-word; }
+.message.error { color: #b94955; background: #ffe8ed; }
+.message.success { color: #3f8e75; background: #e7f6f0; }
+.form-card { margin-top: 24rpx; }
+.compact-heading { margin: 0 0 26rpx; }
+.picker-value { display: flex; align-items: center; justify-content: space-between; gap: 20rpx; }
+.picker-arrow { flex: none; color: #c9abb8; font-size: 30rpx; }
+.feedback-textarea, .steps-textarea { display: block; width: 100%; padding: 22rpx 24rpx; border: 1rpx solid #f2dfe7; border-radius: 20rpx; color: #3e2d35; background: #fff9fb; font-size: 27rpx; line-height: 1.62; }
+.feedback-textarea { height: 240rpx; min-height: 240rpx; }
+.steps-textarea { height: 176rpx; min-height: 176rpx; }
+.counter { display: block; margin-top: 8rpx; color: #aa939d; font-size: 21rpx; line-height: 1.45; text-align: right; }
+.privacy-strip { margin-top: 22rpx; padding: 18rpx 20rpx; border-radius: 18rpx; color: #765c67; background: #fff3d8; font-size: 22rpx; line-height: 1.65; word-break: break-word; }
+.stage-guide { margin: -6rpx 0 20rpx; padding: 24rpx 26rpx; border: 1rpx solid #f2dfe7; border-radius: 26rpx; background: #fff0f5; }
+.stage-guide-title { display: block; color: #3e2d35; font-size: 28rpx; font-weight: 700; line-height: 1.45; }
+.stage-guide-flow { display: block; margin-top: 10rpx; color: #c94e70; font-size: 24rpx; font-weight: 600; line-height: 1.65; word-break: break-word; }
+.stage-guide-copy, .stage-guide-safety { display: block; margin-top: 10rpx; color: #6f5a64; font-size: 23rpx; font-weight: 400; line-height: 1.7; word-break: break-word; }
+.stage-guide-safety { color: #a66a20; }
+.feedback-list { display: grid; gap: 18rpx; }
+.feedback-item { padding: 24rpx; border: 1rpx solid #f2dfe7; border-radius: 26rpx; background: #fff; box-shadow: 0 8rpx 24rpx rgba(119,64,86,.05); }
+.feedback-item-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10rpx 18rpx; }
+.category-pill, .status-pill { display: inline-flex; align-items: center; min-height: 48rpx; padding: 7rpx 16rpx; border-radius: 24rpx; font-size: 21rpx; line-height: 1.4; }
+.category-pill { color: #c94e70; background: #fff0f5; }
+.status-pill { color: #6b5d80; background: #f3ecff; }
+.status-pill.status-success { color: #3f8e75; background: #e7f6f0; }
+.status-pill.status-warning { color: #a66a20; background: #fff3d8; }
+.status-pill.status-error { color: #b94955; background: #ffe8ed; }
+.feedback-item-title { display: block; margin-top: 16rpx; font-size: 28rpx; font-weight: 700; line-height: 1.5; word-break: break-word; }
+.feedback-stage-detail { min-width: 0; margin-top: 16rpx; padding: 18rpx 20rpx; border-radius: 18rpx; background: #fff7fa; }
+.feedback-stage-label { display: block; color: #9d8490; font-size: 21rpx; font-weight: 600; line-height: 1.45; }
+.feedback-stage-copy { display: block; min-width: 0; margin-top: 6rpx; color: #6f5a64; font-size: 24rpx; font-weight: 400; line-height: 1.65; word-break: break-word; }
+.feedback-time { display: block; margin-top: 10rpx; color: #9d8490; font-size: 21rpx; line-height: 1.5; }
+@media (max-width: 340px) {
+  .feedback-hero { align-items: flex-start; }
+  .feedback-mascot { width: 88rpx; min-height: 88rpx; font-size: 38rpx; }
+}

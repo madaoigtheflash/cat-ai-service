@@ -1,0 +1,56 @@
+<view class="page identify-page">
+  <view class="page-intro">
+    <text class="kicker">今日新发现</text>
+    <text class="page-title">拍张照片，认识眼前的小猫</text>
+    <text class="page-description">建议正面或侧面拍摄，保证光线充足，并让猫咪主体占画面的大部分。</text>
+  </view>
+
+  <view class="upload-card {{imagePath ? 'has-image' : ''}}" bindtap="chooseImage">
+    <image wx:if="{{imagePath}}" class="preview-image" src="{{imagePath}}" mode="aspectFill" />
+    <view wx:else class="upload-empty">
+      <view class="camera-icon">📷</view>
+      <text class="upload-title">拍照或从相册选择</text>
+      <text class="muted">支持 JPG、PNG 等常见图片格式</text>
+    </view>
+    <view wx:if="{{imagePath}}" class="replace-pill">更换照片</view>
+  </view>
+
+  <view wx:if="{{!configured}}" class="notice warning">
+    <text class="notice-title">需要先连接云端识别服务</text>
+    <text>模型密钥保存在 CloudBase 云函数环境变量中，不会写入小程序。</text>
+    <text class="notice-link" bindtap="goSettings">前往设置 →</text>
+  </view>
+  <view wx:if="{{error}}" class="notice error"><text>{{error}}</text></view>
+
+  <button class="primary-button" loading="{{loading}}" disabled="{{loading}}" bindtap="runIdentify">{{loading ? '猫咪观察员正在认真看看…' : '开始发现猫咪特征'}}</button>
+  <button wx:if="{{!configured}}" class="text-button" bindtap="showDemo">只查看结果界面演示</button>
+
+  <view wx:if="{{result}}" class="result-card">
+    <view class="result-head">
+      <view>
+        <text class="result-label">{{result.demo ? '界面演示' : '识别结果'}}</text>
+        <text class="result-breed">{{result.breed}}</text>
+      </view>
+      <view class="confidence"><text>{{result.confidence || '--'}}</text><text class="confidence-unit">%</text></view>
+    </view>
+    <view wx:if="{{result.demo}}" class="demo-banner">演示数据 · 未调用识别服务</view>
+    <view class="result-grid">
+      <view class="result-field"><text class="field-label">毛色</text><text>{{result.coat_color || '未知'}}</text></view>
+      <view class="result-field"><text class="field-label">花纹</text><text>{{result.coat_pattern || '未知'}}</text></view>
+      <view class="result-field"><text class="field-label">年龄估计</text><text>{{result.estimated_age || '未知'}}</text></view>
+      <view class="result-field"><text class="field-label">性别</text><text>{{result.gender || '未知'}}</text></view>
+    </view>
+    <view wx:if="{{result.features && result.features.length}}" class="feature-list">
+      <text class="feature-chip" wx:for="{{result.features}}" wx:key="*this">{{item}}</text>
+    </view>
+    <text class="result-description">{{result.description}}</text>
+    <button class="secondary-button" bindtap="saveToPet">保存到猫咪档案</button>
+  </view>
+
+  <view class="tips-card">
+    <text class="tips-title">提高识别质量</text>
+    <view class="tips-row"><text>①</text><text>避免逆光、滤镜与严重模糊</text></view>
+    <view class="tips-row"><text>②</text><text>尽量拍到脸部、躯干和毛色花纹</text></view>
+    <view class="tips-row"><text>③</text><text>品种结论仅供参考，不能替代血统证明</text></view>
+  </view>
+</view>

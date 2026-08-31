@@ -1,0 +1,36 @@
+.page-intro { padding: 16rpx 6rpx 30rpx; }
+.kicker { display: block; color: #d94f75; font-size: 21rpx; font-weight: 700; line-height: 1.45; letter-spacing: 2rpx; }
+.page-title { display: block; margin-top: 12rpx; font-size: 42rpx; line-height: 1.35; font-weight: 700; word-break: break-word; }
+.page-description { display: block; margin-top: 14rpx; color: #6f5a64; font-size: 25rpx; line-height: 1.7; word-break: break-word; }
+.upload-card { position: relative; overflow: hidden; height: 470rpx; border: 3rpx dashed #efaac0; border-radius: 34rpx; background: #fff9fb; }
+.upload-card.has-image { border-style: solid; border-color: #fff; background: #f4edf0; box-shadow: 0 12rpx 32rpx rgba(119,64,86,.09); }
+.preview-image { width: 100%; height: 100%; }
+.upload-empty { display: flex; height: 100%; padding: 32rpx; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.camera-icon { display: flex; align-items: center; justify-content: center; width: 104rpx; height: 104rpx; margin-bottom: 24rpx; border-radius: 32rpx; color: #d94f75; background: #ffe2eb; font-size: 50rpx; line-height: 1; }
+.upload-title { display: block; margin-bottom: 10rpx; font-size: 30rpx; font-weight: 700; line-height: 1.45; }
+.upload-empty .muted { font-size: 23rpx; line-height: 1.6; }
+.replace-pill { position: absolute; right: 24rpx; bottom: 24rpx; min-height: 56rpx; padding: 12rpx 22rpx; border-radius: 28rpx; color: #fff; background: rgba(62,45,53,.76); font-size: 23rpx; line-height: 1.4; }
+.notice { display: flex; flex-direction: column; gap: 10rpx; margin-top: 22rpx; padding: 24rpx; border-radius: 22rpx; font-size: 24rpx; line-height: 1.65; word-break: break-word; }
+.warning { color: #765d2f; background: #fff2d7; }
+.error { color: #98404c; background: #ffe5eb; }
+.notice-title { font-size: 27rpx; font-weight: 700; line-height: 1.5; }
+.notice-link { align-self: flex-start; padding: 8rpx 0; color: #d94f75; font-weight: 600; }
+.text-button { min-height: 88rpx; margin-top: 8rpx; padding: 18rpx 24rpx; border: 0; color: #d94f75; background: transparent; font-size: 25rpx; line-height: 1.5; }
+.result-card { margin-top: 28rpx; padding: 32rpx; border: 1rpx solid #f2dfe7; border-radius: 32rpx; background: #fff; box-shadow: 0 12rpx 32rpx rgba(119,64,86,.07); }
+.result-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 24rpx; }
+.result-head > view:first-child { min-width: 0; }
+.result-label { display: block; margin-bottom: 6rpx; color: #9d8490; font-size: 22rpx; line-height: 1.5; }
+.result-breed { display: block; font-size: 39rpx; font-weight: 700; line-height: 1.35; word-break: break-word; }
+.confidence { flex: none; color: #d94f75; font-size: 46rpx; font-weight: 700; line-height: 1.2; }
+.confidence-unit { font-size: 22rpx; }
+.demo-banner { margin: 22rpx 0 4rpx; padding: 14rpx 18rpx; border-radius: 16rpx; color: #765f2d; background: #fff2d7; font-size: 22rpx; line-height: 1.5; }
+.result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16rpx; margin-top: 24rpx; }
+.result-field { display: flex; min-width: 0; flex-direction: column; gap: 8rpx; padding: 20rpx; border-radius: 20rpx; background: #fff7fa; font-size: 26rpx; line-height: 1.55; word-break: break-word; }
+.field-label { color: #9d8490; font-size: 21rpx; line-height: 1.45; }
+.feature-list { display: flex; flex-wrap: wrap; gap: 12rpx; margin-top: 22rpx; }
+.feature-chip { padding: 10rpx 18rpx; border-radius: 22rpx; color: #c34e70; background: #ffe9f0; font-size: 22rpx; line-height: 1.45; }
+.result-description { display: block; margin: 22rpx 0; color: #6f5a64; font-size: 25rpx; line-height: 1.75; word-break: break-word; }
+.tips-card { margin: 28rpx 0; padding: 30rpx; border: 1rpx solid #f2dfe7; border-radius: 28rpx; background: #fff; }
+.tips-title { display: block; margin-bottom: 18rpx; font-size: 30rpx; font-weight: 700; line-height: 1.45; }
+.tips-row { display: flex; align-items: flex-start; gap: 18rpx; margin: 16rpx 0; color: #6f5a64; font-size: 24rpx; line-height: 1.65; }
+.tips-row text:last-child { flex: 1; min-width: 0; word-break: break-word; }
