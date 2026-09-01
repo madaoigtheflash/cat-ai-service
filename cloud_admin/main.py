@@ -1,4 +1,4 @@
-"""Cat-AI CloudBase 本地主体只读、反馈工作流受控写入管理台。"""
+"""Cat-AI CloudBase 本地受审计管理台。"""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ import copy
 import time
 import uuid
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 from urllib.parse import urlsplit
 
 from fastapi import FastAPI, HTTPException, Query, Request
@@ -113,6 +113,27 @@ class ProposalExecutionRequest(BaseModel):
     expected_version: int = Field(alias="expectedVersion", ge=1)
 
 
+class CommunityCreateRequest(BaseModel):
+    name: str = Field(min_length=1, max_length=40)
+    scope: Literal["invite", "private"] = "invite"
+    reason: str = Field(default="本地管理台创建", max_length=200)
+    idempotency_key: str = Field(alias="idempotencyKey", min_length=8, max_length=128)
+
+
+class CommunityUpdateRequest(BaseModel):
+    name: str = Field(min_length=1, max_length=40)
+    scope: Literal["invite", "private"] = "invite"
+    expected_version: int = Field(alias="expectedVersion", ge=0)
+    reason: str = Field(default="本地管理台编辑", max_length=200)
+    idempotency_key: str = Field(alias="idempotencyKey", min_length=8, max_length=128)
+
+
+class CommunityActionRequest(BaseModel):
+    expected_version: int = Field(alias="expectedVersion", ge=0)
+    reason: str = Field(min_length=2, max_length=200)
+    idempotency_key: str = Field(alias="idempotencyKey", min_length=8, max_length=128)
+
+
 def _safe_error(exc: Exception) -> str:
     text = str(exc).strip().replace("\r", " ").replace("\n", " ")
     return (text or "云端数据读取失败")[:280]
@@ -172,10 +193,30 @@ def create_app(
         "insert_change_proposal", "link_feedback_to_proposal",
         "claim_change_proposal", "complete_change_proposal", "sync_feedback_for_proposal",
     )) and not isinstance(source, UnavailableSource)
+    community_writes_enabled = callable(getattr(source, "mutate_community", None)) and not isinstance(
+        source, UnavailableSource
+    )
+    community_write_lock = asyncio.Lock()
 
     def require_workflow_writes() -> None:
         if not workflow_writes_enabled:
             raise HTTPException(status_code=503, detail="当前数据源不支持反馈工作流写入")
+
+    def require_community_writes() -> None:
+        if not community_writes_enabled:
+            raise HTTPException(status_code=503, detail="当前数据源不支持小屋管理写入")
+
+    async def mutate_community(payload: dict[str, Any]) -> dict[str, Any]:
+        require_community_writes()
+        async with community_write_lock:
+            try:
+                result = await asyncio.to_thread(source.mutate_community, payload)
+            except CloudSourceError as exc:
+                message = _safe_error(exc)
+                status = 409 if message.startswith(("VERSION_CONFLICT:", "STATE_CONFLICT:", "CONFLICT:")) else 404 if message.startswith("NOT_FOUND:") else 503
+                raise HTTPException(status_code=status, detail=message.split(": ", 1)[-1]) from exc
+            service.invalidate()
+            return result
 
     def get_codex_workflow():
         if workflow_holder["value"] is None:
@@ -196,7 +237,7 @@ def create_app(
     app = FastAPI(
         title="Cat-AI 云端管理台",
         description="本机聚合 CloudBase 数据，并受控处理反馈、Codex 审计与本地确认修改",
-        version="1.1.0",
+        version="1.2.0",
         docs_url=None,
         redoc_url=None,
         openapi_url=None,
@@ -255,7 +296,8 @@ def create_app(
             "ok": True,
             "service": "cat-ai-cloud-admin",
             "readOnly": False,
-            "primaryDataReadOnly": True,
+            "primaryDataReadOnly": not community_writes_enabled,
+            "communityWritesEnabled": community_writes_enabled,
             "feedbackWorkflowWritesEnabled": workflow_writes_enabled,
             "codexAvailable": codex_available(),
             "localOnly": True,
@@ -271,11 +313,27 @@ def create_app(
         return {"ok": True, "data": await service.get(force=refresh)}
 
     @app.get("/api/communities")
-    async def communities(refresh: bool = Query(False)):
+    async def communities(
+        refresh: bool = Query(False),
+        q: str = Query("", max_length=80),
+        status: str = Query("", max_length=24),
+        min_members: int = Query(0, alias="minMembers", ge=0),
+        max_members: int | None = Query(None, alias="maxMembers", ge=0),
+    ):
         payload = await service.get(force=refresh)
+        rows = payload["communities"]
+        needle = q.strip().casefold()
+        if needle:
+            rows = [item for item in rows if needle in f"{item['name']} {item['id']}".casefold()]
+        if status:
+            rows = [item for item in rows if item["status"] == status]
+        rows = [item for item in rows if item["memberCount"] >= min_members]
+        if max_members is not None:
+            rows = [item for item in rows if item["memberCount"] <= max_members]
         return {
             "ok": True,
-            "data": payload["communities"],
+            "data": rows,
+            "count": len(rows),
             "generatedAt": payload["generatedAt"],
             "stale": bool(payload.get("stale")),
         }
@@ -290,6 +348,7 @@ def create_app(
             "ok": True,
             "data": {
                 "community": community,
+                "members": [item for item in payload.get("members", []) if item["communityId"] == community_id],
                 "cats": [item for item in payload["cats"] if item["communityId"] == community_id],
                 "relationships": [
                     item for item in payload["relationships"] if item["communityId"] == community_id
@@ -303,9 +362,45 @@ def create_app(
                 "issues": [
                     item for item in payload["issues"] if item["communityId"] == community_id
                 ],
+                "auditLogs": [
+                    item for item in payload.get("auditLogs", []) if item["entityId"] == community_id
+                ],
+                "feedback": [],
+                "feedbackLinkSupported": False,
             },
             "generatedAt": payload["generatedAt"],
         }
+
+    @app.post("/api/communities")
+    async def create_community(body: CommunityCreateRequest):
+        data = await mutate_community({
+            "operation": "create", "patch": {"name": body.name.strip(), "scope": body.scope},
+            "reason": body.reason.strip(), "idempotencyKey": body.idempotency_key,
+        })
+        return {"ok": True, "data": data}
+
+    @app.patch("/api/communities/{community_id}")
+    async def update_community(community_id: str, body: CommunityUpdateRequest):
+        data = await mutate_community({
+            "operation": "update", "communityId": community_id,
+            "expectedVersion": body.expected_version,
+            "patch": {"name": body.name.strip(), "scope": body.scope},
+            "reason": body.reason.strip(), "idempotencyKey": body.idempotency_key,
+        })
+        return {"ok": True, "data": data}
+
+    @app.post("/api/communities/{community_id}/{operation}")
+    async def change_community_state(
+        community_id: str,
+        operation: Literal["disable", "restore", "delete"],
+        body: CommunityActionRequest,
+    ):
+        data = await mutate_community({
+            "operation": operation, "communityId": community_id,
+            "expectedVersion": body.expected_version,
+            "reason": body.reason.strip(), "idempotencyKey": body.idempotency_key,
+        })
+        return {"ok": True, "data": data}
 
     @app.get("/api/cats")
     async def cats(
@@ -344,6 +439,45 @@ def create_app(
         if community_id:
             rows = [item for item in rows if item["communityId"] == community_id]
         return {"ok": True, "data": rows, "count": len(rows)}
+
+    @app.get("/api/map-distribution")
+    async def map_distribution(
+        community_id: str = Query("", alias="communityId"),
+        cat_id: str = Query("", alias="catId"),
+        start: str = Query("", max_length=40),
+        end: str = Query("", max_length=40),
+        review_status: Literal["APPROVED"] = Query("APPROVED", alias="reviewStatus"),
+    ):
+        payload = await service.get()
+        rows = payload["sightings"]
+        if community_id:
+            rows = [item for item in rows if item["communityId"] == community_id]
+        if cat_id:
+            rows = [item for item in rows if item.get("catId") == cat_id]
+        if start:
+            rows = [item for item in rows if (item.get("reviewedAt") or item.get("submittedAt") or "") >= start]
+        if end:
+            rows = [item for item in rows if (item.get("reviewedAt") or item.get("submittedAt") or "") <= end]
+        rows = [item for item in rows if item.get("state") == review_status and item.get("coarseLocation") and item["coarseLocation"].get("longitude") is not None]
+        cells: dict[tuple[str, str], dict[str, Any]] = {}
+        for row in rows:
+            location = row["coarseLocation"]
+            key = (row["communityId"], location.get("cellId") or row["id"])
+            cell = cells.setdefault(key, {
+                **location, "communityId": row["communityId"], "sightingCount": 0,
+                "catIds": set(), "catNames": set(), "sightingIds": [], "latestTimeBucket": "",
+            })
+            cell["sightingCount"] += 1
+            if row.get("catId"): cell["catIds"].add(row["catId"])
+            if row.get("catName"): cell["catNames"].add(row["catName"])
+            cell["sightingIds"].append(row["id"])
+            cell["latestTimeBucket"] = max(cell["latestTimeBucket"], row.get("observedTimeBucket") or "")
+        safe_cells = [{**cell, "catIds": sorted(cell["catIds"]), "catNames": sorted(cell["catNames"])} for cell in cells.values()]
+        return {
+            "ok": True,
+            "data": {"cells": safe_cells, "sightings": rows, "privacy": {"precisionKm": 2, "exactCoordinatesReturned": False}},
+            "count": len(rows),
+        }
 
     @app.get("/api/feedback")
     async def feedback(

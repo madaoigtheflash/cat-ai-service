@@ -156,6 +156,7 @@ def fixture_result() -> SourceResult:
                 "generatedAt": "2026-08-29T09:00:00Z",
             }
         ],
+        "ci_admin_audit_logs": [],
     }
     return SourceResult(collections=collections, truncated_collections=tuple(), source_name="fixture")
 
@@ -212,6 +213,45 @@ class WritableFakeSource:
                 item.update(status="CLOSED", updatedAt=now)
                 item["version"] = int(item.get("version") or 1) + 1
 
+
+class CommunityWritableFakeSource(FakeSource):
+    def __init__(self):
+        super().__init__()
+        self.result = fixture_result()
+        self.mutations = []
+
+    def load(self):
+        self.calls += 1
+        return copy.deepcopy(self.result)
+
+    def mutate_community(self, payload):
+        self.mutations.append(copy.deepcopy(payload))
+        communities = self.result.collections["ci_communities"]
+        operation = payload["operation"]
+        now = "2026-09-01T01:00:00Z"
+        if operation == "create":
+            row = {
+                "_id": "com_created", "name": payload["patch"]["name"],
+                "scope": payload["patch"]["scope"], "status": "active",
+                "version": 1, "ownerPending": True, "managedByLocalAdmin": True,
+                "createdAt": now, "updatedAt": now,
+            }
+            communities.append(row)
+            return {"community": {**row, "id": row["_id"]}, "auditId": "audit_create", "inviteCode": "ABCDE-FGHJK"}
+        row = next(item for item in communities if item["_id"] == payload["communityId"])
+        assert int(row.get("version") or 0) == payload["expectedVersion"]
+        row["version"] = int(row.get("version") or 0) + 1
+        row["updatedAt"] = now
+        if operation == "update":
+            row.update(payload["patch"])
+        else:
+            row["status"] = {"disable": "disabled", "restore": "active", "delete": "deleted"}[operation]
+        self.result.collections["ci_admin_audit_logs"].append({
+            "_id": f"audit_{operation}", "entityType": "community", "entityId": row["_id"],
+            "operation": operation, "operator": "local-cloudbase-cli", "reason": payload["reason"],
+            "before": {}, "after": {}, "result": "SUCCESS", "createdAt": now,
+        })
+        return {"community": {**row, "id": row["_id"]}, "auditId": f"audit_{operation}"}
 
 class FakeCodexWorkflow:
     def __init__(self):
@@ -480,6 +520,46 @@ def test_fastapi_admin_routes_keep_primary_data_read_only_and_filterable():
     assert "管理员登记" not in root.text
     assert "获批执行" not in root.text
     assert source.calls == 1
+
+
+def test_house_crud_routes_are_versioned_audited_and_map_is_coarse_only():
+    source = CommunityWritableFakeSource()
+    app = create_app(
+        AdminSettings(env_id="cloud-test", host="127.0.0.1", port=8510, cache_ttl_seconds=0),
+        source, enforce_loopback=False,
+    )
+    client = TestClient(app)
+    health = client.get("/api/health").json()
+    assert health["communityWritesEnabled"] is True
+    assert health["primaryDataReadOnly"] is False
+
+    created = client.post("/api/communities", json={
+        "name": "新小屋", "scope": "invite", "reason": "验收创建",
+        "idempotencyKey": "create-test-001",
+    })
+    assert created.status_code == 200
+    assert created.json()["data"]["inviteCode"] == "ABCDE-FGHJK"
+
+    updated = client.patch("/api/communities/com_a", json={
+        "name": "花园猫屋", "scope": "private", "expectedVersion": 0,
+        "reason": "验收编辑", "idempotencyKey": "update-test-001",
+    })
+    assert updated.status_code == 200
+    disabled = client.post("/api/communities/com_a/disable", json={
+        "expectedVersion": 1, "reason": "暂停维护", "idempotencyKey": "disable-test-001",
+    })
+    assert disabled.status_code == 200
+    detail = client.get("/api/communities/com_a").json()["data"]
+    assert detail["community"]["status"] == "disabled"
+    assert {item["operation"] for item in detail["auditLogs"]} >= {"update", "disable"}
+
+    map_result = client.get("/api/map-distribution", params={"communityId": "com_a", "reviewStatus": "APPROVED"})
+    assert map_result.status_code == 200
+    map_data = map_result.json()["data"]
+    assert map_data["privacy"]["exactCoordinatesReturned"] is False
+    assert map_data["privacy"]["precisionKm"] == 2
+    serialized = json.dumps(map_data, ensure_ascii=False)
+    assert "exactLocation" not in serialized
 
 
 def test_fastapi_rejects_dns_rebinding_and_cross_origin_requests():

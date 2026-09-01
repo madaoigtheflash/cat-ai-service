@@ -181,9 +181,12 @@ class CloudRepository {
     })
   }
 
-  async findCommunityByInviteHash(inviteHash) {
+  async findCommunityByInviteHash(inviteHash, adminInviteHash) {
     const matches = await queryDocuments(COLLECTIONS.communities, { inviteHash }, 1)
-    return matches[0] || null
+    if (matches[0]) return matches[0]
+    if (!adminInviteHash) return null
+    const managedMatches = await queryDocuments(COLLECTIONS.communities, { adminInviteHash }, 1)
+    return managedMatches[0] || null
   }
 
   async joinCommunity(community, membership) {
@@ -194,10 +197,22 @@ class CloudRepository {
       }
       const existing = await getDocument(COLLECTIONS.members, membership.id, transaction)
       if (existing && existing.status === 'active') return existing
+      const claimOwner = currentCommunity.managedByLocalAdmin === true && currentCommunity.ownerPending === true
       const value = existing
-        ? Object.assign({}, existing, { role: existing.role || 'member', status: 'active', updatedAt: membership.updatedAt })
-        : membership
+        ? Object.assign({}, existing, {
+          role: claimOwner ? 'owner' : (existing.role || 'member'),
+          status: 'active', updatedAt: membership.updatedAt
+        })
+        : Object.assign({}, membership, { role: claimOwner ? 'owner' : membership.role })
       await setDocument(COLLECTIONS.members, value, transaction)
+      if (claimOwner) {
+        await updateDocument(COLLECTIONS.communities, community.id, {
+          ownerPending: false,
+          creatorOwnerKey: membership.ownerKey,
+          claimedAt: membership.updatedAt,
+          updatedAt: membership.updatedAt
+        }, transaction)
+      }
       return value
     })
   }

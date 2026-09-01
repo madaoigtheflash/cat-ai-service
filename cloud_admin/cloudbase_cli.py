@@ -1,4 +1,4 @@
-"""通过本机已登录的 CloudBase CLI 查询主体数据并受控写入反馈工作流。"""
+"""通过本机已登录的 CloudBase CLI 查询数据并调用受审计的管理云函数。"""
 
 from __future__ import annotations
 
@@ -26,12 +26,16 @@ READ_COLLECTIONS = (
     "ci_identity_templates",
     "ci_feedback",
     "ci_change_proposals",
+    "ci_admin_audit_logs",
 )
 
 # 管理员 QUERY 也坚持最小化：敏感字段不应先下载后再脱敏。
 FIELD_PROJECTIONS: dict[str, tuple[str, ...]] = {
-    "ci_communities": ("_id", "name", "scope", "status", "createdAt", "updatedAt"),
-    "ci_members": ("_id", "communityId", "role", "status"),
+    "ci_communities": (
+        "_id", "name", "scope", "status", "version", "ownerPending",
+        "managedByLocalAdmin", "createdAt", "updatedAt", "disabledAt", "deletedAt",
+    ),
+    "ci_members": ("_id", "communityId", "role", "status", "createdAt", "updatedAt"),
     "ci_user_pet_links": (
         "_id", "catId", "communityId", "displayName", "breed", "gender",
         "coatColor", "estimatedAge", "state", "createdAt", "updatedAt",
@@ -67,6 +71,12 @@ FIELD_PROJECTIONS: dict[str, tuple[str, ...]] = {
         "status", "version", "generatedAt", "decidedAt", "decisionNote",
         "executionSummary", "updatedAt",
     ),
+    "ci_admin_audit_logs": (
+        "_id", "entityType", "entityId", "operation", "operator", "reason",
+        "before.id", "before.name", "before.scope", "before.status", "before.version",
+        "after.id", "after.name", "after.scope", "after.status", "after.version",
+        "result", "createdAt",
+    ),
 }
 
 SAFE_DOCUMENT_ID = re.compile(r"^[A-Za-z0-9._:-]{3,160}$")
@@ -90,6 +100,7 @@ class SourceResult:
 
 class CloudSource(Protocol):
     def load(self) -> SourceResult: ...
+    def mutate_community(self, payload: dict[str, Any]) -> dict[str, Any]: ...
     def sync_feedback_for_proposal(
         self, proposal_id: str, status: str, now: str
     ) -> None: ...
@@ -145,10 +156,11 @@ class JsonSnapshotSource:
     claim_change_proposal = _write_disabled
     complete_change_proposal = _write_disabled
     sync_feedback_for_proposal = _write_disabled
+    mutate_community = _write_disabled
 
 
 class TcbCliSource:
-    """使用 CloudBase CLI 登录态执行只读 QUERY 命令。"""
+    """使用 CloudBase CLI 登录态查询，并调用仅管理端可用的云函数。"""
 
     def __init__(self, settings: AdminSettings):
         self.settings = settings
@@ -289,6 +301,44 @@ class TcbCliSource:
         if not isinstance(results, list):
             raise CloudSourceError(f"CloudBase {operation}未返回结果数组")
         return [_plain_ejson(item) for item in results]
+
+    def _invoke_function(self, name: str, payload: dict[str, Any]) -> dict[str, Any]:
+        args = [
+            self.node_bin, self.tcb_bin, "fn", "invoke", name,
+            "-e", self.settings.env_id,
+            "--params", json.dumps(payload, ensure_ascii=False, separators=(",", ":")),
+            "--json",
+        ]
+        creation_flags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+        try:
+            completed = subprocess.run(
+                args, capture_output=True, text=True, encoding="utf-8", errors="replace",
+                timeout=self.settings.query_timeout_seconds, check=False,
+                env=os.environ.copy(), creationflags=creation_flags,
+            )
+        except subprocess.TimeoutExpired as exc:
+            raise CloudSourceError("CloudBase 管理云函数调用超时") from exc
+        except OSError as exc:
+            raise CloudSourceError(f"无法启动 CloudBase CLI：{exc}") from exc
+        combined = "\n".join(part for part in (completed.stdout, completed.stderr) if part)
+        try:
+            envelope = json.loads(completed.stdout)
+            invoke_data = envelope.get("data", {}) if isinstance(envelope, dict) else {}
+            raw = invoke_data.get("RetMsg", "") if isinstance(invoke_data, dict) else ""
+            result = json.loads(raw) if isinstance(raw, str) else raw
+        except (json.JSONDecodeError, TypeError, AttributeError) as exc:
+            raise CloudSourceError("CloudBase 管理云函数未返回可解析结果") from exc
+        if completed.returncode != 0 or not isinstance(result, dict):
+            raise CloudSourceError("CloudBase 管理云函数调用失败")
+        if result.get("ok") is not True:
+            error = result.get("error") if isinstance(result.get("error"), dict) else {}
+            code = str(error.get("code") or "ADMIN_ERROR")[:80]
+            message = str(error.get("message") or "云端管理操作失败")[:240]
+            raise CloudSourceError(f"{code}: {message}")
+        return _plain_ejson(result.get("data") or {})
+
+    def mutate_community(self, payload: dict[str, Any]) -> dict[str, Any]:
+        return self._invoke_function("catAdmin", {"action": "mutateCommunity", **payload})
 
     @staticmethod
     def _safe_id(value: str, field: str) -> str:

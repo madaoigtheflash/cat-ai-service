@@ -41,6 +41,13 @@
       }
     },
     {
+      "name": "catAdmin",
+      "runtime": "Nodejs20.19",
+      "timeout": 30,
+      "memorySize": 256,
+      "installDependency": true
+    },
+    {
       "name": "catIdentity",
       "runtime": "Nodejs16.13",
       "timeout": 60,

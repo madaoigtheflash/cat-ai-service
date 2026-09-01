@@ -20,16 +20,16 @@
       </div>
       <nav class="nav-list">
         <button class="nav-item is-active" data-view="overview"><span>⌂</span>总览</button>
-        <button class="nav-item" data-view="houses"><span>⌗</span>所有小屋</button>
+        <button class="nav-item" data-view="houses"><span>⌗</span>小屋管理</button>
         <button class="nav-item" data-view="cats"><span>🐱</span>云端猫咪</button>
         <button class="nav-item" data-view="relations"><span>↗</span>猫际关系</button>
-        <button class="nav-item" data-view="sightings"><span>◎</span>目击与分布</button>
+        <button class="nav-item" data-view="sightings"><span>◎</span>地图分布</button>
         <button class="nav-item" data-view="quality"><span>◇</span>数据质量</button>
         <button class="nav-item" data-view="feedback"><span>✉</span>反馈与 Codex</button>
       </nav>
       <div class="privacy-note">
         <strong>本机受控</strong>
-        <span>业务数据只读；仅反馈审计报告与本地执行状态受控写入。不会返回 OpenID、ownerKey、精确位置或识别向量。</span>
+        <span>小屋变更经管理云函数原子写入并记录审计日志。不会返回 OpenID、ownerKey、精确位置或识别向量。</span>
       </div>
     </aside>
 
@@ -108,10 +108,11 @@
 
         <section class="view" data-view-panel="houses">
           <div class="section-intro">
-            <div><span class="section-kicker">COMMUNITIES</span><h2>所有猫友小屋</h2></div>
-            <p>以小屋为边界查看成员数量、规范猫身份、关系投票和目击记录。同名小屋仍按云端 ID 独立管理。</p>
+            <div><span class="section-kicker">COMMUNITY ADMIN</span><h2>小屋管理</h2></div>
+            <button id="createHouseButton" class="primary-button" type="button">＋ 新建小屋</button>
           </div>
-          <div id="houseCards" class="house-grid wide"></div>
+          <article class="panel table-panel"><div id="houseTable" class="data-table"></div></article>
+          <div id="housePagination" class="pagination" aria-label="小屋分页"></div>
         </section>
 
         <section class="view" data-view-panel="cats">
@@ -143,8 +144,17 @@
 
         <section class="view" data-view-panel="sightings">
           <div class="section-intro">
-            <div><span class="section-kicker">COARSE MAP</span><h2>目击与粗粒度分布</h2></div>
+            <div><span class="section-kicker">COARSE MAP</span><h2>猫咪地图分布</h2></div>
             <p>这里只显示审核后的约 2 公里网格中心；没有定位的目击仍保留在列表中。</p>
+          </div>
+          <div class="map-toolbar" aria-label="地图筛选">
+            <label class="field"><span>猫咪</span><select id="mapCatFilter"><option value="">全部猫咪</option></select></label>
+            <label class="field"><span>开始日期</span><input id="mapStartDate" type="date"></label>
+            <label class="field"><span>结束日期</span><input id="mapEndDate" type="date"></label>
+            <label class="field"><span>审核状态</span><select disabled><option>已通过</option></select></label>
+            <div class="segmented" role="group" aria-label="地图显示模式">
+              <button type="button" data-map-mode="cluster" class="is-active">聚合</button><button type="button" data-map-mode="heat">热力</button><button type="button" data-map-mode="point">单点</button>
+            </div>
           </div>
           <div class="dashboard-grid map-layout">
             <article class="panel">
@@ -199,6 +209,18 @@
   </div>
 
   <div id="sidebarBackdrop" class="sidebar-backdrop" hidden></div>
+  <dialog id="houseDialog" class="admin-dialog">
+    <form id="houseForm" method="dialog">
+      <div class="dialog-heading"><div><span class="section-kicker">COMMUNITY</span><h2 id="houseDialogTitle">新建小屋</h2></div><button class="icon-button" value="cancel" aria-label="关闭">×</button></div>
+      <input id="houseId" type="hidden"><input id="houseVersion" type="hidden">
+      <label class="field"><span>小屋名称</span><input id="houseName" maxlength="40" required></label>
+      <label class="field"><span>访问范围</span><select id="houseScope"><option value="invite">邀请制</option><option value="private">私密</option></select></label>
+      <label class="field"><span>变更原因</span><input id="houseReason" maxlength="200" placeholder="用于审计记录" required></label>
+      <div id="houseImpact" class="impact-box" hidden></div>
+      <div class="dialog-actions"><button class="secondary-button" value="cancel">取消</button><button id="saveHouseButton" class="primary-button" type="submit">保存</button></div>
+    </form>
+  </dialog>
+  <dialog id="houseDetailDialog" class="admin-dialog wide-dialog"><div id="houseDetailContent"></div></dialog>
   <div id="toast" class="toast" hidden role="status"></div>
   <script src="/assets/app.js" defer></script>
 </body>

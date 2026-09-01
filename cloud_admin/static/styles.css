@@ -167,6 +167,15 @@ h2 { margin-bottom: 0; font-size: 19px; line-height: 1.4; }
 .data-table tbody tr:hover { background: #fffafd; }
 .result-limit-note { padding: 11px 16px; border-bottom: 1px solid var(--line); color: #8a5b18; background: #fff8ea; font-size: 12px; line-height: 1.55; }
 .house-grid > .result-limit-note { grid-column: 1 / -1; border: 1px solid #f8deb4; border-radius: 12px; }
+.row-actions { display: flex; flex-wrap: wrap; gap: 7px; min-width: 230px; }
+.row-actions button, .pagination button, .secondary-button, .segmented button {
+  min-height: 36px; padding: 0 12px; border: 1px solid var(--line); border-radius: 10px; color: var(--text); background: #fff; font-weight: 700;
+}
+.row-actions button:hover, .pagination button:hover, .secondary-button:hover { border-color: var(--pink); color: var(--pink-dark); }
+.row-actions .danger-link { color: var(--danger); }
+.row-actions button:disabled, .pagination button:disabled { opacity: .45; cursor: not-allowed; }
+.pagination { display: flex; align-items: center; justify-content: flex-end; gap: 12px; margin: 14px 0 24px; }
+.pagination span { color: var(--muted); font-size: 12px; }
 .cell-title { font-weight: 750; }
 .cell-sub, .id-text { color: var(--muted); font: 11px/1.45 ui-monospace, SFMono-Regular, Consolas, monospace; overflow-wrap: anywhere; }
 .tag-list { display: flex; flex-wrap: wrap; gap: 5px; }
@@ -185,10 +194,17 @@ h2 { margin-bottom: 0; font-size: 19px; line-height: 1.4; }
 .line { width: 18px; height: 0; border-top: 2px solid var(--muted); }
 .line.dashed { border-top-style: dashed; }
 .map-layout { grid-template-columns: minmax(0, 1.4fr) minmax(280px, .8fr); }
+.map-toolbar { margin-bottom: 18px; padding: 16px; display: grid; grid-template-columns: minmax(180px, 1fr) repeat(3, minmax(140px, .65fr)) auto; align-items: end; gap: 12px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+.map-toolbar select, .map-toolbar input { width: 100%; }
+.segmented { display: inline-flex; padding: 4px; border-radius: 12px; background: var(--surface-soft); }
+.segmented button { border: 0; background: transparent; }
+.segmented button.is-active { color: #fff; background: var(--pink); box-shadow: 0 5px 12px rgba(217,79,117,.2); }
 .coarse-map { min-height: 410px; border-radius: 15px; overflow: hidden; position: relative; border: 1px solid var(--line); background-color: #fffafd; background-image: linear-gradient(#f1e7ed 1px, transparent 1px), linear-gradient(90deg, #f1e7ed 1px, transparent 1px); background-size: 34px 34px; }
 .coarse-map svg { width: 100%; height: 100%; min-height: inherit; display: block; }
 .map-node circle { fill: rgba(255,111,145,.86); stroke: #fff; stroke-width: 4; filter: drop-shadow(0 8px 12px rgba(217,79,117,.2)); }
 .map-node text { fill: #fff; font-size: 18px; font-weight: 800; pointer-events: none; }
+.map-node.map-heat circle { fill: rgba(255,111,145,.25); stroke: rgba(217,79,117,.15); stroke-width: 2; filter: drop-shadow(0 0 18px rgba(255,80,130,.45)); }
+.map-node.map-point circle { fill: #7b61b5; stroke-width: 3; }
 .map-caption { fill: var(--muted); font-size: 15px; }
 
 .quality-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 18px; }
@@ -244,6 +260,23 @@ h2 { margin-bottom: 0; font-size: 19px; line-height: 1.4; }
 .proposal-footer > span { color: var(--muted); font-size: 11px; }
 .proposal-footer .primary-button { min-width: 210px; justify-content: center; }
 .toast { position: fixed; right: 24px; bottom: 24px; z-index: 80; max-width: min(390px, calc(100vw - 32px)); padding: 14px 18px; border-radius: 14px; color: #fff; background: #483941; box-shadow: 0 18px 44px rgba(62,45,53,.22); font-size: 13px; }
+.admin-dialog { width: min(560px, calc(100vw - 32px)); max-height: calc(100vh - 40px); padding: 0; border: 1px solid var(--line); border-radius: 20px; color: var(--text); background: var(--surface); box-shadow: 0 30px 80px rgba(62,45,53,.25); }
+.admin-dialog::backdrop { background: rgba(35,24,30,.42); backdrop-filter: blur(3px); }
+.admin-dialog form, #houseDetailContent { padding: 24px; display: grid; gap: 18px; }
+.wide-dialog { width: min(820px, calc(100vw - 32px)); }
+.dialog-heading { display: flex; align-items: start; justify-content: space-between; gap: 16px; }
+.dialog-heading h2 { margin-top: 5px; }
+.dialog-heading p { margin: 4px 0 0; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 10px; padding-top: 4px; }
+.impact-box, .privacy-detail { padding: 13px 15px; border: 1px solid #f4d5a6; border-radius: 12px; color: #80571b; background: #fff8ea; font-size: 12px; line-height: 1.65; }
+.detail-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.detail-stats div { padding: 14px; border-radius: 12px; background: var(--surface-soft); text-align: center; }
+.detail-stats strong, .detail-stats span { display: block; }
+.detail-stats strong { font-size: 22px; }
+.detail-stats span { margin-top: 4px; color: var(--muted); font-size: 11px; }
+.detail-list { display: grid; gap: 8px; }
+.detail-list > div { display: flex; justify-content: space-between; gap: 12px; padding: 11px 13px; border: 1px solid var(--line); border-radius: 11px; }
+.detail-list span { color: var(--muted); font-size: 12px; }
 .sidebar-backdrop { position: fixed; inset: 0; z-index: 20; background: rgba(62,45,53,.28); }
 
 @media (max-width: 1250px) {
@@ -257,7 +290,7 @@ h2 { margin-bottom: 0; font-size: 19px; line-height: 1.4; }
   body.sidebar-open .sidebar { transform: translateX(0); }
   .menu-button { display: inline-grid; place-items: center; }
   .main-content { padding: 22px 18px 42px; }
-  .dashboard-grid, .map-layout, .proposal-columns { grid-template-columns: 1fr; }
+  .dashboard-grid, .map-layout, .proposal-columns, .map-toolbar { grid-template-columns: 1fr; }
   .section-intro { display: block; }
   .section-intro p { margin-top: 9px; }
 }
@@ -285,6 +318,9 @@ h2 { margin-bottom: 0; font-size: 19px; line-height: 1.4; }
   .feedback-toolbar .primary-button, .proposal-footer .primary-button { width: 100%; justify-content: center; }
   .proposal-score-row { grid-template-columns: 1fr 1fr; }
   .proposal-score-row p { grid-column: 1 / -1; }
+  .detail-stats { grid-template-columns: repeat(2, 1fr); }
+  .dialog-actions { flex-direction: column-reverse; }
+  .dialog-actions button { width: 100%; justify-content: center; }
 }
 
 @media (prefers-reduced-motion: reduce) {

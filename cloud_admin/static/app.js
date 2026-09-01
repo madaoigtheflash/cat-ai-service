@@ -7,15 +7,22 @@ const state = {
   query: '',
   loading: false,
   workflowBusy: false,
+  houseBusy: false,
+  housePage: 1,
+  housePageSize: 12,
+  mapCatId: '',
+  mapStart: '',
+  mapEnd: '',
+  mapMode: 'cluster',
   selectedFeedback: new Set()
 }
 
 const titles = {
   overview: '云端数据总览',
-  houses: '所有猫友小屋',
+  houses: '小屋管理',
   cats: '云端猫咪身份',
   relations: '猫际有向关系',
-  sightings: '目击与粗粒度分布',
+  sightings: '猫咪地图分布',
   quality: '数据质量检查',
   feedback: '反馈审计与本地修改'
 }
@@ -151,7 +158,9 @@ function filteredData() {
       .some(value => String(value || '').toLowerCase().includes(needle))
   }
   return {
-    communities: snapshot.communities.filter(item => !communityId || item.id === communityId),
+    communities: snapshot.communities.filter(item => (!communityId || item.id === communityId) && (
+      !needle || [item.name, item.id, item.status].some(value => String(value || '').toLowerCase().includes(needle))
+    )),
     cats: snapshot.cats.filter(item => (!communityId || item.communityId === communityId) && match(item)),
     relationships: snapshot.relationships.filter(item => (!communityId || item.communityId === communityId) && match(item)),
     sightings: snapshot.sightings.filter(item => (!communityId || item.communityId === communityId) && match(item)),
@@ -178,7 +187,7 @@ function renderCurrentView() {
     renderStats(data)
     renderHouseCards($('#overviewHouses'), data)
   } else if (state.currentView === 'houses') {
-    renderHouseCards($('#houseCards'), data)
+    renderHouseManagement(data)
   } else if (state.currentView === 'cats') {
     renderCats(data)
   } else if (state.currentView === 'relations') {
@@ -195,7 +204,7 @@ function renderCurrentView() {
 function clearInactiveRenderedViews() {
   const containersByView = {
     overview: ['#statsGrid', '#recentSightings', '#overviewGraph', '#overviewHouses'],
-    houses: ['#houseCards'],
+    houses: ['#houseTable', '#housePagination'],
     cats: ['#catsTable'],
     relations: ['#relationGraph', '#relationsTable'],
     sightings: ['#coarseMap', '#mapCellList', '#sightingsTable'],
@@ -271,6 +280,110 @@ function renderHouseCards(container, data) {
     $('#communityFilter').value = state.communityId
     switchView('cats')
   }))
+}
+
+function statusLabel(status) {
+  return ({ active: '活跃', disabled: '已停用', deleted: '已删除' })[status] || status
+}
+
+function renderHouseManagement(data) {
+  const totalPages = Math.max(1, Math.ceil(data.communities.length / state.housePageSize))
+  state.housePage = Math.min(state.housePage, totalPages)
+  const start = (state.housePage - 1) * state.housePageSize
+  const rows = data.communities.slice(start, start + state.housePageSize).map(item => {
+    const impact = `${item.memberCount} 成员 · ${item.catCount} 猫咪 · ${item.relationshipCount} 关系 · ${item.sightingCount} 目击`
+    const stateAction = item.status === 'active'
+      ? `<button data-house-action="disable" data-house-id="${escapeHtml(item.id)}">停用</button>`
+      : `<button data-house-action="restore" data-house-id="${escapeHtml(item.id)}">恢复</button>`
+    return `<tr>
+      <td><div class="cell-title">${escapeHtml(item.name)}</div><div class="cell-sub">${escapeHtml(item.id)}</div></td>
+      <td><span class="state-pill ${item.status === 'active' ? '' : 'warn'}">${escapeHtml(statusLabel(item.status))}</span>${item.ownerPending ? '<div class="cell-sub">等待首位成员认领</div>' : ''}</td>
+      <td>${escapeHtml(item.scope === 'private' ? '私密' : '邀请制')}</td><td>${item.memberCount}</td><td>${item.catCount}</td>
+      <td><div>${item.relationshipCount} 关系 / ${item.sightingCount} 目击</div><div class="cell-sub">${escapeHtml(impact)}</div></td>
+      <td>${escapeHtml(formatTime(item.updatedAt || item.createdAt))}<div class="cell-sub">版本 ${Number(item.version || 0)}</div></td>
+      <td><div class="row-actions"><button data-house-action="detail" data-house-id="${escapeHtml(item.id)}">详情</button><button data-house-action="edit" data-house-id="${escapeHtml(item.id)}">编辑</button>${stateAction}<button class="danger-link" data-house-action="delete" data-house-id="${escapeHtml(item.id)}" ${item.status === 'deleted' ? 'disabled' : ''}>删除</button></div></td>
+    </tr>`
+  }).join('')
+  $('#houseTable').innerHTML = rows ? `<table><thead><tr><th>小屋</th><th>状态</th><th>范围</th><th>成员</th><th>猫咪</th><th>关联数据</th><th>更新时间</th><th>操作</th></tr></thead><tbody>${rows}</tbody></table>` : emptyMarkup('没有符合条件的小屋', '可清除筛选或新建小屋。')
+  $('#housePagination').innerHTML = `<button data-page="${state.housePage - 1}" ${state.housePage <= 1 ? 'disabled' : ''}>上一页</button><span>第 ${state.housePage} / ${totalPages} 页 · 共 ${data.communities.length} 个</span><button data-page="${state.housePage + 1}" ${state.housePage >= totalPages ? 'disabled' : ''}>下一页</button>`
+  $$('#houseTable [data-house-action]').forEach(button => button.addEventListener('click', () => handleHouseAction(button.dataset.houseAction, button.dataset.houseId)))
+  $$('#housePagination [data-page]').forEach(button => button.addEventListener('click', () => { state.housePage = Number(button.dataset.page); renderCurrentView() }))
+}
+
+function idempotencyKey(prefix) {
+  const random = self.crypto && self.crypto.randomUUID ? self.crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`
+  return `${prefix}-${random}`
+}
+
+function openHouseForm(item) {
+  $('#houseDialogTitle').textContent = item ? '编辑小屋' : '新建小屋'
+  $('#houseId').value = item ? item.id : ''
+  $('#houseVersion').value = item ? Number(item.version || 0) : 0
+  $('#houseName').value = item ? item.name : ''
+  $('#houseScope').value = item ? item.scope : 'invite'
+  $('#houseReason').value = item ? '更新小屋资料' : '本地管理台创建'
+  $('#houseImpact').hidden = !item
+  $('#houseImpact').textContent = item ? `本次编辑不会删除关联数据。当前影响范围：${item.memberCount} 名成员、${item.catCount} 只猫、${item.relationshipCount} 条关系、${item.sightingCount} 条目击。` : ''
+  $('#houseDialog').showModal()
+}
+
+async function saveHouse(event) {
+  event.preventDefault()
+  if (state.houseBusy) return
+  const id = $('#houseId').value
+  const body = {
+    name: $('#houseName').value.trim(), scope: $('#houseScope').value,
+    reason: $('#houseReason').value.trim(), idempotencyKey: idempotencyKey(id ? 'update' : 'create')
+  }
+  if (!body.name || body.reason.length < 2) return showToast('请填写名称和变更原因')
+  if (id) body.expectedVersion = Number($('#houseVersion').value || 0)
+  state.houseBusy = true
+  $('#saveHouseButton').disabled = true
+  try {
+    const result = await requestJson(id ? `/api/communities/${encodeURIComponent(id)}` : '/api/communities', id ? 'PATCH' : 'POST', body)
+    $('#houseDialog').close()
+    if (result.inviteCode) window.alert(`小屋已创建。请立即保存邀请码：${result.inviteCode}\n该邀请码只在本次创建结果中显示。首位加入者将成为小屋创建者。`)
+    showToast(id ? '小屋资料已更新' : '小屋已创建')
+    await loadSnapshot(true)
+  } catch (error) { showToast(error.message || '小屋保存失败') }
+  finally { state.houseBusy = false; $('#saveHouseButton').disabled = false }
+}
+
+async function handleHouseAction(action, id) {
+  const item = state.snapshot.communities.find(row => row.id === id)
+  if (!item || state.houseBusy) return
+  if (action === 'edit') return openHouseForm(item)
+  if (action === 'detail') return showHouseDetail(id)
+  const labels = { disable: '停用', restore: '恢复', delete: '删除' }
+  const impact = `${item.memberCount} 名成员、${item.catCount} 只猫、${item.relationshipCount} 条关系、${item.sightingCount} 条目击`
+  if (!window.confirm(`${labels[action]}“${item.name}”？\n影响范围：${impact}。\n删除采用可恢复的软删除，不清理关联数据。`)) return
+  const reason = window.prompt(`请填写${labels[action]}原因（写入审计日志）：`, `${labels[action]}小屋`) || ''
+  if (reason.trim().length < 2) return showToast('已取消：必须填写操作原因')
+  state.houseBusy = true
+  renderCurrentView()
+  try {
+    await requestJson(`/api/communities/${encodeURIComponent(id)}/${action}`, 'POST', { expectedVersion: Number(item.version || 0), reason: reason.trim(), idempotencyKey: idempotencyKey(action) })
+    showToast(`小屋已${labels[action]}`)
+    await loadSnapshot(true)
+  } catch (error) { showToast(error.message || `${labels[action]}失败`) }
+  finally { state.houseBusy = false; renderCurrentView() }
+}
+
+async function showHouseDetail(id) {
+  try {
+    const response = await fetch(`/api/communities/${encodeURIComponent(id)}?refresh=false`, { cache: 'no-store' })
+    const payload = await response.json()
+    if (!response.ok || payload.ok !== true) throw new Error(payload.detail || '详情读取失败')
+    const data = payload.data
+    const audits = data.auditLogs || []
+    $('#houseDetailContent').innerHTML = `<div class="dialog-heading"><div><span class="section-kicker">COMMUNITY DETAIL</span><h2>${escapeHtml(data.community.name)}</h2><p class="cell-sub">${escapeHtml(data.community.id)}</p></div><button class="icon-button" data-close-detail aria-label="关闭">×</button></div>
+      <div class="detail-stats"><div><strong>${data.members.length}</strong><span>成员记录</span></div><div><strong>${data.cats.length}</strong><span>猫咪</span></div><div><strong>${data.relationships.length}</strong><span>关系</span></div><div><strong>${data.sightings.length}</strong><span>目击</span></div></div>
+      <h3>成员</h3><div class="detail-list">${data.members.length ? data.members.map(row => `<div><strong>${escapeHtml(row.roleLabel)}</strong><span>${escapeHtml(row.status)} · ${escapeHtml(shortId(row.id))}</span></div>`).join('') : '<p>暂无成员</p>'}</div>
+      <h3>最近审计</h3><div class="detail-list">${audits.length ? audits.slice(0, 10).map(row => `<div><strong>${escapeHtml(row.operation)} · ${escapeHtml(row.result)}</strong><span>${escapeHtml(row.reason || '无说明')} · ${escapeHtml(formatTime(row.createdAt))}</span></div>`).join('') : '<p>暂无管理操作记录</p>'}</div>
+      <p class="privacy-detail">反馈集合目前没有 communityId，因此不会猜测归属；详情中明确返回未关联状态。</p>`
+    $('#houseDetailDialog').showModal()
+    $('[data-close-detail]').addEventListener('click', () => $('#houseDetailDialog').close())
+  } catch (error) { showToast(error.message || '详情读取失败') }
 }
 
 function sourceLabel(source) {
@@ -413,17 +526,40 @@ function renderGraph(container, cats, relationships, houseName) {
 }
 
 function renderSightings(data) {
-  renderMap(data.mapCells)
-  $('#mapCellList').innerHTML = data.mapCells.length ? data.mapCells.slice(0, 8).map(item => `
+  const cats = data.cats.filter(item => !state.communityId || item.communityId === state.communityId)
+  const catFilter = $('#mapCatFilter')
+  const priorCat = state.mapCatId
+  catFilter.innerHTML = '<option value="">全部猫咪</option>' + cats.map(item => `<option value="${escapeHtml(item.id)}">${escapeHtml(item.displayName)}</option>`).join('')
+  if (cats.some(item => item.id === priorCat)) catFilter.value = priorCat
+  else state.mapCatId = ''
+  const sightings = data.sightings.filter(item => {
+    const date = item.reviewedAt || item.submittedAt || ''
+    return (!state.mapCatId || item.catId === state.mapCatId) && (!state.mapStart || date >= `${state.mapStart}T00:00:00`) && (!state.mapEnd || date <= `${state.mapEnd}T23:59:59`)
+  })
+  const byCell = new Map()
+  sightings.forEach(item => {
+    const location = item.coarseLocation
+    if (!location || !Number.isFinite(location.longitude) || !Number.isFinite(location.latitude)) return
+    const key = `${item.communityId}|${location.cellId || item.id}`
+    const cell = byCell.get(key) || { ...location, communityId: item.communityId, sightingCount: 0, catNames: new Set(), latestTimeBucket: '', sightings: [] }
+    cell.sightingCount += 1
+    cell.catNames.add(item.catName)
+    cell.latestTimeBucket = [cell.latestTimeBucket, item.observedTimeBucket || ''].sort().at(-1)
+    cell.sightings.push(item)
+    byCell.set(key, cell)
+  })
+  const cells = [...byCell.values()].map(item => ({ ...item, catNames: [...item.catNames] }))
+  renderMap(cells, state.mapMode)
+  $('#mapCellList').innerHTML = cells.length ? cells.slice(0, 8).map(item => `
     <div class="activity-item"><div class="activity-top"><strong>${escapeHtml(item.cellId || '未命名网格')}</strong><time>${item.sightingCount} 条</time></div>
     <p>${escapeHtml(item.catNames.join('、') || '未关联猫咪')} · 精度约 ${item.precisionKm} km · ${escapeHtml(item.latestTimeBucket || '无时间')}</p></div>`).join('')
     : emptyMarkup('暂无可展示位置', '有目击记录也可能没有粗略经纬度。')
 
-  if (!data.sightings.length) {
+  if (!sightings.length) {
     $('#sightingsTable').innerHTML = emptyMarkup('尚无审核目击', '当前筛选范围内没有已公开目击。')
     return
   }
-  const visible = data.sightings.slice(0, MAX_RENDERED_ITEMS)
+  const visible = sightings.slice(0, MAX_RENDERED_ITEMS)
   const rows = visible.map(item => `<tr>
     <td><div class="cell-title">${escapeHtml(item.catName)}</div><div class="cell-sub">${escapeHtml(shortId(item.id))}</div></td>
     <td>${escapeHtml(communityName(item.communityId))}</td>
@@ -433,10 +569,10 @@ function renderSightings(data) {
     <td><span class="state-pill ${item.identityTemplateReady ? '' : 'muted'}">${item.identityTemplateReady ? '已入识别库' : '未入识别库'}</span></td>
     <td>${escapeHtml(formatTime(item.reviewedAt))}</td>
   </tr>`).join('')
-  $('#sightingsTable').innerHTML = `${renderLimitNotice(data.sightings.length, '目击')}<table><thead><tr><th>猫咪</th><th>小屋</th><th>观察时段</th><th>粗略位置</th><th>说明</th><th>身份模板</th><th>审核时间</th></tr></thead><tbody>${rows}</tbody></table>`
+  $('#sightingsTable').innerHTML = `${renderLimitNotice(sightings.length, '目击')}<table><thead><tr><th>猫咪</th><th>小屋</th><th>观察时段</th><th>粗略位置</th><th>说明</th><th>身份模板</th><th>审核时间</th></tr></thead><tbody>${rows}</tbody></table>`
 }
 
-function renderMap(cells) {
+function renderMap(cells, mode = 'cluster') {
   const container = $('#coarseMap')
   const located = cells.filter(item => Number.isFinite(item.longitude) && Number.isFinite(item.latitude))
   if (!located.length) {
@@ -455,15 +591,19 @@ function renderMap(cells) {
   const width = 1000
   const height = 560
   const padding = 72
-  const points = visible.map(item => {
+  const expanded = mode === 'point' ? visible.flatMap(item => (item.sightings || []).map(sighting => ({ ...item, sightingCount: 1, pointSighting: sighting }))) : visible
+  const points = expanded.map((item, index) => {
     const x = padding + ((item.longitude - minLng + (lngRange - (maxLng - minLng)) / 2) / lngRange) * (width - padding * 2)
     const y = height - padding - ((item.latitude - minLat + (latRange - (maxLat - minLat)) / 2) / latRange) * (height - padding * 2)
-    const radius = Math.min(20 + Math.sqrt(item.sightingCount) * 8, 48)
-    const title = `${communityName(item.communityId)}｜${item.cellId || '未命名网格'}｜${item.sightingCount}条目击`
-    return `<g class="map-node"><title>${escapeHtml(title)}</title><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${radius.toFixed(1)}"/><text x="${x.toFixed(1)}" y="${(y + 4).toFixed(1)}" text-anchor="middle">${item.sightingCount}</text></g>`
+    const jitterX = mode === 'point' ? ((index % 5) - 2) * 7 : 0
+    const jitterY = mode === 'point' ? ((Math.floor(index / 5) % 5) - 2) * 7 : 0
+    const radius = mode === 'heat' ? Math.min(32 + Math.sqrt(item.sightingCount) * 18, 78) : mode === 'point' ? 9 : Math.min(20 + Math.sqrt(item.sightingCount) * 8, 48)
+    const sighting = item.pointSighting
+    const title = sighting ? `${communityName(item.communityId)}｜${sighting.catName}｜${formatTime(sighting.reviewedAt)}｜${sighting.caption || '无说明'}` : `${communityName(item.communityId)}｜${item.cellId || '未命名网格'}｜${item.sightingCount}条目击｜${(item.catNames || []).join('、')}`
+    return `<g class="map-node map-${mode}" data-sighting-id="${escapeHtml(sighting && sighting.id || '')}"><title>${escapeHtml(title)}</title><circle cx="${(x + jitterX).toFixed(1)}" cy="${(y + jitterY).toFixed(1)}" r="${radius.toFixed(1)}"/>${mode === 'cluster' ? `<text x="${x.toFixed(1)}" y="${(y + 4).toFixed(1)}" text-anchor="middle">${item.sightingCount}</text>` : ''}</g>`
   }).join('')
   const limitText = located.length > MAX_RENDERED_ITEMS ? `｜地图仅显示前 ${MAX_RENDERED_ITEMS}/${located.length} 个网格` : ''
-  container.innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="猫咪目击粗粒度分布图">${points}<text class="map-caption" x="24" y="${height - 20}">仅表示粗网格相对分布，不是实时定位${escapeHtml(limitText)}</text></svg>`
+  container.innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="猫咪目击粗粒度分布图">${points}<text class="map-caption" x="24" y="${height - 20}">${mode === 'heat' ? '热力强度' : mode === 'point' ? '单条目击' : '网格聚合'} · 约 2 公里模糊坐标，不是实时定位${escapeHtml(limitText)}</text></svg>`
 }
 
 function renderQuality(data) {
@@ -471,7 +611,7 @@ function renderQuality(data) {
   $('#qualitySummary').innerHTML = `
     <div class="quality-card"><strong>${data.issues.length}</strong><span>当前筛选关联提醒</span></div>
     <div class="quality-card"><strong>${truncated.length}</strong><span>达到读取上限的集合</span></div>
-    <div class="quality-card"><strong>${state.snapshot.primaryDataReadOnly ? '主体只读' : '未知'}</strong><span>小屋、猫与关系操作模式</span></div>`
+    <div class="quality-card"><strong>${state.snapshot.primaryDataReadOnly ? '主体只读' : '小屋受控写入'}</strong><span>猫、关系、目击和身份仍为只读</span></div>`
   const rows = [...data.issues]
   truncated.forEach(name => rows.unshift({ kind: 'collection_truncated', message: `${name} 已达到读取上限，当前统计可能不完整`, communityId: '', referenceId: name }))
   const visible = rows.slice(0, MAX_RENDERED_ITEMS)
@@ -558,9 +698,9 @@ function renderProposals(proposals) {
   )))
 }
 
-async function postJson(url, body) {
+async function requestJson(url, method, body) {
   const response = await fetch(url, {
-    method: 'POST',
+    method,
     headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
     cache: 'no-store',
     body: JSON.stringify(body || {})
@@ -574,6 +714,8 @@ async function postJson(url, body) {
   }
   return payload.data
 }
+
+async function postJson(url, body) { return requestJson(url, 'POST', body) }
 
 async function auditSelectedFeedback() {
   if (state.workflowBusy || !state.selectedFeedback.size) return
@@ -660,6 +802,16 @@ function bindEvents() {
     $('#sidebarBackdrop').hidden = true
   })
   $('#auditFeedbackButton').addEventListener('click', auditSelectedFeedback)
+  $('#createHouseButton').addEventListener('click', () => openHouseForm(null))
+  $('#houseForm').addEventListener('submit', saveHouse)
+  $('#mapCatFilter').addEventListener('change', event => { state.mapCatId = event.target.value; renderCurrentView() })
+  $('#mapStartDate').addEventListener('change', event => { state.mapStart = event.target.value; renderCurrentView() })
+  $('#mapEndDate').addEventListener('change', event => { state.mapEnd = event.target.value; renderCurrentView() })
+  $$('[data-map-mode]').forEach(button => button.addEventListener('click', () => {
+    state.mapMode = button.dataset.mapMode
+    $$('[data-map-mode]').forEach(item => item.classList.toggle('is-active', item === button))
+    renderCurrentView()
+  }))
 }
 
 bindEvents()

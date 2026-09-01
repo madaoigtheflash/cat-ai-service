@@ -533,6 +533,7 @@ def build_snapshot(source: SourceResult, env_id: str) -> dict[str, Any]:
         })
 
     members_by_community: dict[str, Counter[str]] = defaultdict(Counter)
+    members: list[dict[str, Any]] = []
     for member in data.get("ci_members", []):
         community_id = _text(member.get("communityId"), 120)
         if not community_id:
@@ -542,6 +543,15 @@ def build_snapshot(source: SourceResult, env_id: str) -> dict[str, Any]:
         state = _text(member.get("status"), 32) or "active"
         role = _text(member.get("role"), 32) or "member"
         members_by_community[community_id][f"{state}:{role}"] += 1
+        members.append({
+            "id": _doc_id(member),
+            "communityId": community_id,
+            "role": role,
+            "roleLabel": ROLE_LABELS.get(role, role),
+            "status": state,
+            "createdAt": _timestamp(member.get("createdAt")),
+            "updatedAt": _timestamp(member.get("updatedAt")),
+        })
 
     cats_list: list[dict[str, Any]] = []
     cat_counts: Counter[str] = Counter()
@@ -605,6 +615,9 @@ def build_snapshot(source: SourceResult, env_id: str) -> dict[str, Any]:
             "name": _text(community.get("name"), 60) or "未命名小屋",
             "scope": _text(community.get("scope"), 32) or "invite",
             "status": _text(community.get("status"), 32) or "active",
+            "version": _number(community.get("version")),
+            "ownerPending": community.get("ownerPending") is True,
+            "managedByLocalAdmin": community.get("managedByLocalAdmin") is True,
             "memberCount": active_members,
             "roleCounts": {
                 ROLE_LABELS.get(role, role): count for role, count in sorted(roles.items())
@@ -615,6 +628,8 @@ def build_snapshot(source: SourceResult, env_id: str) -> dict[str, Any]:
             "identityTaskCount": job_counts[community_id],
             "createdAt": _timestamp(community.get("createdAt")),
             "updatedAt": _timestamp(community.get("updatedAt")),
+            "disabledAt": _timestamp(community.get("disabledAt")),
+            "deletedAt": _timestamp(community.get("deletedAt")),
         })
 
     communities.sort(key=lambda item: (item["status"] != "active", item["name"], item["id"]))
@@ -694,6 +709,24 @@ def build_snapshot(source: SourceResult, env_id: str) -> dict[str, Any]:
         })
     change_proposals.sort(key=lambda item: item["generatedAt"], reverse=True)
 
+    audit_logs = []
+    for document in data.get("ci_admin_audit_logs", []):
+        before = document.get("before") if isinstance(document.get("before"), dict) else None
+        after = document.get("after") if isinstance(document.get("after"), dict) else None
+        audit_logs.append({
+            "id": _doc_id(document),
+            "entityType": _text(document.get("entityType"), 40),
+            "entityId": _text(document.get("entityId"), 160),
+            "operation": _text(document.get("operation"), 32),
+            "operator": _text(document.get("operator"), 80),
+            "reason": _text(document.get("reason"), 200),
+            "before": before,
+            "after": after,
+            "result": _text(document.get("result"), 32),
+            "createdAt": _timestamp(document.get("createdAt")),
+        })
+    audit_logs.sort(key=lambda item: item["createdAt"], reverse=True)
+
     generated_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
     return {
         "schemaVersion": 1,
@@ -701,7 +734,7 @@ def build_snapshot(source: SourceResult, env_id: str) -> dict[str, Any]:
         "envId": env_id,
         "source": source.source_name,
         "readOnly": False,
-        "primaryDataReadOnly": True,
+        "primaryDataReadOnly": False,
         "stats": {
             "communityCount": len(communities),
             "activeCommunityCount": sum(item["status"] == "active" for item in communities),
@@ -731,6 +764,7 @@ def build_snapshot(source: SourceResult, env_id: str) -> dict[str, Any]:
             ),
         },
         "communities": communities,
+        "members": members,
         "cats": cats_list,
         "relationships": relationships,
         "sightings": sightings,
@@ -738,5 +772,6 @@ def build_snapshot(source: SourceResult, env_id: str) -> dict[str, Any]:
         "issues": issues,
         "feedback": feedback,
         "changeProposals": change_proposals,
+        "auditLogs": audit_logs,
         "truncatedCollections": list(source.truncated_collections),
     }

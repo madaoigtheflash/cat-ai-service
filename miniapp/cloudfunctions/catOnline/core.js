@@ -699,7 +699,8 @@ function createCatOnlineCore(options) {
     const normalizedCode = normalizeInviteCode(requireText(event.inviteCode, '邀请码', 32))
     if (normalizedCode.length !== 10) throw new DomainError('INVALID_INVITE', '邀请码格式不正确')
     const inviteHash = hmacHex(ownerSecret, `invite-hash|${normalizedCode}`)
-    const community = await repository.findCommunityByInviteHash(inviteHash)
+    const adminInviteHash = sha256Hex(`cat-admin-invite|${normalizedCode}`)
+    const community = await repository.findCommunityByInviteHash(inviteHash, adminInviteHash)
     if (!community || community.status !== 'active' || community.scope !== 'invite') {
       throw new DomainError('INVALID_INVITE', '邀请码无效或已停用')
     }

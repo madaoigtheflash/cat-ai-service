@@ -48,7 +48,7 @@ def _port_is_open(host: str, port: int) -> bool:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="启动 Cat-AI 云端管理台（主体只读、反馈工作流受控写入）")
+    parser = argparse.ArgumentParser(description="启动 Cat-AI 云端管理台（小屋受审计写入、反馈工作流受控写入）")
     parser.add_argument("--host", default=os.getenv("CAT_ADMIN_HOST", "127.0.0.1"))
     parser.add_argument(
         "--port",
@@ -94,7 +94,7 @@ def main() -> None:
     print("=" * 62)
     print(f" 云环境: {args.env}")
     print(f" 地址:   {url}")
-    print(" 权限:   主体数据只读；仅反馈审计工作流受控写入")
+    print(" 权限:   小屋经 catAdmin 原子写入并审计；其余主体数据保持只读")
     print(" 安全:   小程序只反馈；Codex 修改必须由本机操作者确认")
     print(" 停止:   Ctrl+C\n")
 

@@ -1,10 +1,11 @@
 # 微信云开发部署与验证
 
-小程序绑定 CloudBase 环境 `cloud1-d6gpjpxunc74669d7`，AppID 为 `wx1112379224ace9f9`。当前代码包含四个云函数入口和一条独立模型路径：
+小程序绑定 CloudBase 环境 `cloud1-d6gpjpxunc74669d7`，AppID 为 `wx1112379224ace9f9`。当前代码包含五个云函数入口和一条独立模型路径：
 
 - `askKnowledge` / `identifyCat`：MiniMax 知识问答和品种外观辅助识别；
 - `catOnlineV2`：邀请制猫友小屋、本地档案映射、受控照片上传、人工审核、猫际关系投票、粗粒度分布地图，以及仅面向本人状态的用户反馈；
 - `catIdentity`：已审核目击的同猫候选、人工确认、撤销，以及已关联猫咪的显式模板登记；
+- `catAdmin`：仅供本机 CloudBase CLI 管理身份调用的小屋原子变更与审计，不接受小程序用户调用；
 - `services/reid-service/`：独立 Re-ID Worker，只计算向量和候选排序，不写业务库，也不决定身份合并。
 
 本地健康档案、疫苗、驱虫、体重、就医记录和设备内的私有猫际角色卡仍只保存在设备中。联机只同步昵称、品种、性别、花色、估算年龄等公开最小字段；社区有向观察投票是独立的云端数据，不会上传或覆盖本地私有角色卡。完整字段、不变量、v1 兼容和上线门槛见 [`猫际有向关系云端契约-v2.md`](./猫际有向关系云端契约-v2.md)。
@@ -22,6 +23,7 @@
 | `catOnlineV2` | `CAT_ONLINE_OWNER_SECRET`、`CAT_ONLINE_OWNER_KEY_VERSION=v1` | 至少 32 字节随机密钥，用于不可逆用户标识、确定性 ID 和位置网格 ID |
 | `catIdentity` | `CAT_ONLINE_OWNER_SECRET`、`CAT_ONLINE_OWNER_KEY_VERSION=v1` | 必须与 `catOnlineV2` 完全一致 |
 | `catIdentity`（模型路径） | `REID_WORKER_URL`、`REID_WORKER_HMAC_SECRET` | 仅在真实 Worker 部署后配置；未配置时必须失败关闭，不能伪装为已完成识别 |
+| `catAdmin` | 无 | 必须设置客户端云函数安全规则 `invoke: false`；管理端 CLI 调用不受客户端规则影响 |
 
 `IDENTIFY_UPLOAD_SECRET`、`CAT_ONLINE_OWNER_SECRET` 与 `REID_WORKER_HMAC_SECRET` 应分别生成，不能复用 MiniMax Key，也不要写入源码、文档、截图或聊天记录。仓库根目录 `cloudbaserc.json` 只保留 `{{env.NAME}}` 占位符。
 
@@ -29,7 +31,7 @@
 
 ## 2. 数据库集合、权限与索引
 
-环境 `cloud1-d6gpjpxunc74669d7` 现有 19 个集合，其中 `ci_app_admins` 是停用的旧版遗留集合。新环境部署或灾备恢复只需重建以下 18 个活动集合：
+环境 `cloud1-d6gpjpxunc74669d7` 原有 19 个集合，其中 `ci_app_admins` 是停用的旧版遗留集合。启用本地小屋管理后，新环境部署或灾备恢复需建立以下 19 个活动集合：
 
 ```text
 ci_identify_upload_sessions
@@ -50,6 +52,7 @@ ci_relationship_edges
 ci_relationship_votes
 ci_feedback
 ci_change_proposals
+ci_admin_audit_logs
 ```
 
 所有活动 `ci_*` 集合均应设为 `ADMINONLY`，等价目标是客户端 `read: false, write: false`。现有环境可保留同样为 `ADMINONLY` 的 `ci_app_admins` 以便审计，但小程序、云函数和本地管理台均不读取或写入它。小程序页面只能通过云函数读取经过登录、成员权限和字段过滤后的安全投影。OpenID、ownerKey、原始 fileID、精确坐标、`locationGeo`、embedding、原始余弦分数、内部阈值和 Worker 签名均不得返回客户端。每次迁移和上线前仍要重新验收权限，避免后续控制台操作造成漂移。
@@ -59,6 +62,7 @@ ci_change_proposals
 | 集合 | 字段 | 类型 | 建议名称 |
 | --- | --- | --- | --- |
 | `ci_communities` | `inviteHash` | 唯一 | `uniq_invite_hash` |
+| `ci_communities` | `adminInviteHash` | 唯一稀疏 | `uniq_admin_invite_hash` |
 | `ci_members` | `communityId, ownerKey` | 联合唯一 | `uniq_community_owner` |
 | `ci_user_pet_links` | `communityId, ownerKey, localPetId` | 联合唯一 | `uniq_community_owner_localpet` |
 | `ci_identity_templates` | `communityId, state, modelVersion, modelSha256, preprocessVersion, cropVersion, embeddingEncoding, embeddingDimension` | 组合 | `idx_identity_template_contract` |
@@ -76,6 +80,7 @@ ci_change_proposals
 | `ci_sightings_public` | `communityId, state, reviewedAt`（降序） | 组合 | `idx_sighting_public_recent` |
 | `ci_feedback` | `ownerKey, createdAt`（降序） | 组合 | `idx_feedback_owner_created` |
 | `ci_change_proposals` | `generatedAt`（降序） | 普通 | `idx_change_proposal_generated` |
+| `ci_admin_audit_logs` | `entityType, entityId, createdAt`（降序） | 组合 | `idx_admin_audit_entity_created` |
 
 v2 将 `catAId` 固定为 `fromCatId`、`catBId` 固定为 `toCatId`，端点不得排序；服务端同时生成 `directionKey=fromCatId::toCatId`，因此 `A → B` 与 `B → A` 是两条独立关系边。legacy 边使用 `directionKey=legacy::<edgeId>`，保证所有文档都有非空唯一键且不会占用 v2 方向。每位成员对每条有向边只有一条投票记录；重复提交是幂等的，改票会在事务内扣减旧选项并增加新选项。代码中的确定性文档 ID 和事务是第一层防重，唯一索引是并发下的第二层保护。
 
