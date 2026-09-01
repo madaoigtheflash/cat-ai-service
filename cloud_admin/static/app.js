@@ -560,7 +560,7 @@ function renderSightings(data) {
     return
   }
   const visible = sightings.slice(0, MAX_RENDERED_ITEMS)
-  const rows = visible.map(item => `<tr>
+  const rows = visible.map(item => `<tr data-sighting-row="${escapeHtml(item.id)}">
     <td><div class="cell-title">${escapeHtml(item.catName)}</div><div class="cell-sub">${escapeHtml(shortId(item.id))}</div></td>
     <td>${escapeHtml(communityName(item.communityId))}</td>
     <td>${escapeHtml(item.observedTimeBucket || '未记录')}</td>
@@ -599,11 +599,25 @@ function renderMap(cells, mode = 'cluster') {
     const jitterY = mode === 'point' ? ((Math.floor(index / 5) % 5) - 2) * 7 : 0
     const radius = mode === 'heat' ? Math.min(32 + Math.sqrt(item.sightingCount) * 18, 78) : mode === 'point' ? 9 : Math.min(20 + Math.sqrt(item.sightingCount) * 8, 48)
     const sighting = item.pointSighting
+    const targetSighting = sighting || (item.sightings && item.sightings[0])
     const title = sighting ? `${communityName(item.communityId)}｜${sighting.catName}｜${formatTime(sighting.reviewedAt)}｜${sighting.caption || '无说明'}` : `${communityName(item.communityId)}｜${item.cellId || '未命名网格'}｜${item.sightingCount}条目击｜${(item.catNames || []).join('、')}`
-    return `<g class="map-node map-${mode}" data-sighting-id="${escapeHtml(sighting && sighting.id || '')}"><title>${escapeHtml(title)}</title><circle cx="${(x + jitterX).toFixed(1)}" cy="${(y + jitterY).toFixed(1)}" r="${radius.toFixed(1)}"/>${mode === 'cluster' ? `<text x="${x.toFixed(1)}" y="${(y + 4).toFixed(1)}" text-anchor="middle">${item.sightingCount}</text>` : ''}</g>`
+    return `<g class="map-node map-${mode}" role="button" tabindex="0" aria-label="${escapeHtml(title)}，定位到记录" data-sighting-id="${escapeHtml(targetSighting && targetSighting.id || '')}"><title>${escapeHtml(title)}</title><circle cx="${(x + jitterX).toFixed(1)}" cy="${(y + jitterY).toFixed(1)}" r="${radius.toFixed(1)}"/>${mode === 'cluster' ? `<text x="${x.toFixed(1)}" y="${(y + 4).toFixed(1)}" text-anchor="middle">${item.sightingCount}</text>` : ''}</g>`
   }).join('')
   const limitText = located.length > MAX_RENDERED_ITEMS ? `｜地图仅显示前 ${MAX_RENDERED_ITEMS}/${located.length} 个网格` : ''
   container.innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="猫咪目击粗粒度分布图">${points}<text class="map-caption" x="24" y="${height - 20}">${mode === 'heat' ? '热力强度' : mode === 'point' ? '单条目击' : '网格聚合'} · 约 2 公里模糊坐标，不是实时定位${escapeHtml(limitText)}</text></svg>`
+  container.querySelectorAll('[data-sighting-id]').forEach(node => {
+    const locate = () => {
+      const row = Array.from(document.querySelectorAll('[data-sighting-row]')).find(item => item.dataset.sightingRow === node.dataset.sightingId)
+      if (!row) return
+      row.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      row.classList.remove('is-located')
+      void row.offsetWidth
+      row.classList.add('is-located')
+      setTimeout(() => row.classList.remove('is-located'), 2200)
+    }
+    node.addEventListener('click', locate)
+    node.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); locate() } })
+  })
 }
 
 function renderQuality(data) {
