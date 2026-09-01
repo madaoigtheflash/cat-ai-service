@@ -587,6 +587,28 @@ def test_fastapi_rejects_dns_rebinding_and_cross_origin_requests():
     ).status_code == 403
 
 
+def test_amap_config_exposes_public_js_key_but_never_security_code():
+    settings = AdminSettings(
+        env_id="cloud-test", host="127.0.0.1", port=8510,
+        amap_key="public-web-js-key", amap_security_code="server-only-security-code",
+    )
+    client = TestClient(create_app(settings, FakeSource(), enforce_loopback=False))
+    response = client.get("/api/map-config")
+    assert response.status_code == 200
+    assert response.json()["data"] == {
+        "provider": "amap",
+        "enabled": True,
+        "key": "public-web-js-key",
+        "serviceHost": "/_AMapService",
+        "coordinateSystem": "gcj02",
+        "precisionKm": 2,
+    }
+    health = client.get("/api/health").json()
+    assert health["amapEnabled"] is True
+    serialized = json.dumps({"config": response.json(), "health": health})
+    assert "server-only-security-code" not in serialized
+
+
 def test_feedback_audit_and_local_review_execution_gate():
     source = WritableFakeSource()
     codex = FakeCodexWorkflow()

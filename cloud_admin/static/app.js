@@ -14,6 +14,10 @@ const state = {
   mapStart: '',
   mapEnd: '',
   mapMode: 'cluster',
+  mapConfig: null,
+  amapPromise: null,
+  amapMap: null,
+  mapRenderToken: 0,
   selectedFeedback: new Set()
 }
 
@@ -108,6 +112,7 @@ async function loadSnapshot(force = false) {
       throw new Error(message || `读取失败（HTTP ${response.status}）`)
     }
     state.snapshot = payload.data
+    await loadMapConfig()
     const availableFeedback = new Set((state.snapshot.feedback || [])
       .filter(item => ['OPEN', 'TRIAGED'].includes(item.status)).map(item => item.id))
     state.selectedFeedback = new Set([...state.selectedFeedback].filter(id => availableFeedback.has(id)))
@@ -132,6 +137,34 @@ async function loadSnapshot(force = false) {
   } finally {
     setLoading(false)
   }
+}
+
+async function loadMapConfig() {
+  if (state.mapConfig) return state.mapConfig
+  try {
+    const response = await fetch('/api/map-config', { headers: { Accept: 'application/json' }, cache: 'no-store' })
+    const payload = await response.json()
+    state.mapConfig = response.ok && payload.ok === true ? payload.data : { enabled: false, provider: 'local-fallback' }
+  } catch (_) {
+    state.mapConfig = { enabled: false, provider: 'local-fallback' }
+  }
+  return state.mapConfig
+}
+
+function ensureAmap() {
+  if (!state.mapConfig || !state.mapConfig.enabled) return Promise.resolve(null)
+  if (window.AMap) return Promise.resolve(window.AMap)
+  if (state.amapPromise) return state.amapPromise
+  window._AMapSecurityConfig = { serviceHost: state.mapConfig.serviceHost }
+  state.amapPromise = new Promise((resolve, reject) => {
+    const script = document.createElement('script')
+    script.src = `https://webapi.amap.com/maps?v=2.0&key=${encodeURIComponent(state.mapConfig.key)}`
+    script.async = true
+    script.onload = () => resolve(window.AMap)
+    script.onerror = () => reject(new Error('高德地图脚本加载失败'))
+    document.head.appendChild(script)
+  })
+  return state.amapPromise
 }
 
 function syncCommunityOptions() {
@@ -550,9 +583,17 @@ function renderSightings(data) {
   })
   const cells = [...byCell.values()].map(item => ({ ...item, catNames: [...item.catNames] }))
   renderMap(cells, state.mapMode)
-  $('#mapCellList').innerHTML = cells.length ? cells.slice(0, 8).map(item => `
+  const mapEnabled = Boolean(state.mapConfig && state.mapConfig.enabled)
+  $('#mapProviderBadge').textContent = mapEnabled ? '高德地图 · GCJ-02' : '本地分布图'
+  $('#mapConfigNotice').hidden = mapEnabled
+  if (!mapEnabled) $('#mapConfigNotice').innerHTML = '尚未配置高德 Web JS Key。设置 <code>CAT_ADMIN_AMAP_KEY</code> 与 <code>CAT_ADMIN_AMAP_SECURITY_CODE</code> 并重启后，将在此加载高德底图；当前仍可通过下方链接查看粗略范围。'
+  $('#mapCellList').innerHTML = cells.length ? cells.slice(0, 8).map(item => {
+    const amapUrl = `https://uri.amap.com/marker?position=${encodeURIComponent(`${item.longitude},${item.latitude}`)}&name=${encodeURIComponent(`${communityName(item.communityId)} · 约${item.precisionKm}公里范围`)}&src=cat-ai-admin&coordinate=gaode&callnative=0`
+    return `
     <div class="activity-item"><div class="activity-top"><strong>${escapeHtml(item.cellId || '未命名网格')}</strong><time>${item.sightingCount} 条</time></div>
-    <p>${escapeHtml(item.catNames.join('、') || '未关联猫咪')} · 精度约 ${item.precisionKm} km · ${escapeHtml(item.latestTimeBucket || '无时间')}</p></div>`).join('')
+    <p>${escapeHtml(item.catNames.join('、') || '未关联猫咪')} · 精度约 ${item.precisionKm} km · ${escapeHtml(item.latestTimeBucket || '无时间')}</p>
+    <a class="amap-range-link" href="${escapeHtml(amapUrl)}" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">在高德查看粗略范围 ↗</a></div>`
+  }).join('')
     : emptyMarkup('暂无可展示位置', '有目击记录也可能没有粗略经纬度。')
 
   if (!sightings.length) {
@@ -577,6 +618,10 @@ function renderMap(cells, mode = 'cluster') {
   const located = cells.filter(item => Number.isFinite(item.longitude) && Number.isFinite(item.latitude))
   if (!located.length) {
     container.innerHTML = emptyMarkup('暂无位置热区', '位置为可选信息，未定位目击不会在图中显示。')
+    return
+  }
+  if (state.mapConfig && state.mapConfig.enabled) {
+    renderAmapMap(container, located, mode)
     return
   }
   const visible = located.slice(0, MAX_RENDERED_ITEMS)
@@ -606,18 +651,73 @@ function renderMap(cells, mode = 'cluster') {
   const limitText = located.length > MAX_RENDERED_ITEMS ? `｜地图仅显示前 ${MAX_RENDERED_ITEMS}/${located.length} 个网格` : ''
   container.innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="猫咪目击粗粒度分布图">${points}<text class="map-caption" x="24" y="${height - 20}">${mode === 'heat' ? '热力强度' : mode === 'point' ? '单条目击' : '网格聚合'} · 约 2 公里模糊坐标，不是实时定位${escapeHtml(limitText)}</text></svg>`
   container.querySelectorAll('[data-sighting-id]').forEach(node => {
-    const locate = () => {
-      const row = Array.from(document.querySelectorAll('[data-sighting-row]')).find(item => item.dataset.sightingRow === node.dataset.sightingId)
-      if (!row) return
-      row.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      row.classList.remove('is-located')
-      void row.offsetWidth
-      row.classList.add('is-located')
-      setTimeout(() => row.classList.remove('is-located'), 2200)
-    }
+    const locate = () => locateSighting(node.dataset.sightingId)
     node.addEventListener('click', locate)
     node.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); locate() } })
   })
+}
+
+function locateSighting(sightingId) {
+  const row = Array.from(document.querySelectorAll('[data-sighting-row]')).find(item => item.dataset.sightingRow === sightingId)
+  if (!row) return
+  row.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  row.classList.remove('is-located')
+  void row.offsetWidth
+  row.classList.add('is-located')
+  setTimeout(() => row.classList.remove('is-located'), 2200)
+}
+
+async function renderAmapMap(container, cells, mode) {
+  const token = ++state.mapRenderToken
+  container.innerHTML = '<div class="map-loading"><strong>正在加载高德地图</strong><span>仅传递约 2 公里粗网格中心</span></div>'
+  try {
+    const AMap = await ensureAmap()
+    if (!AMap || token !== state.mapRenderToken || !container.isConnected) return
+    if (state.amapMap) state.amapMap.destroy()
+    container.innerHTML = ''
+    const center = [cells.reduce((sum, item) => sum + item.longitude, 0) / cells.length, cells.reduce((sum, item) => sum + item.latitude, 0) / cells.length]
+    const map = new AMap.Map(container, { center, zoom: 13, mapStyle: 'amap://styles/whitesmoke', viewMode: '2D', showLabel: true })
+    state.amapMap = map
+    const overlays = []
+    const rows = mode === 'point' ? cells.flatMap(cell => (cell.sightings || []).map((sighting, index) => ({ ...cell, sighting, index }))) : cells
+    rows.forEach((item, index) => {
+      const jitter = mode === 'point' ? [((index % 5) - 2) * 0.00012, ((Math.floor(index / 5) % 5) - 2) * 0.00012] : [0, 0]
+      const position = [item.longitude + jitter[0], item.latitude + jitter[1]]
+      const count = mode === 'point' ? 1 : item.sightingCount
+      const radius = mode === 'heat' ? Math.min(26 + Math.sqrt(count) * 13, 70) : mode === 'point' ? 8 : Math.min(15 + Math.sqrt(count) * 6, 36)
+      const circle = new AMap.CircleMarker({
+        center: position, radius, strokeColor: mode === 'point' ? '#5b3e9b' : '#ffffff', strokeWeight: 3,
+        fillColor: mode === 'heat' ? '#ff6f91' : mode === 'point' ? '#7b61b5' : '#e7658a',
+        fillOpacity: mode === 'heat' ? Math.min(0.25 + count * 0.08, 0.72) : 0.88,
+        zIndex: mode === 'point' ? 120 : 100
+      })
+      const sighting = item.sighting || (item.sightings && item.sightings[0])
+      const names = sighting ? sighting.catName : (item.catNames || []).join('、')
+      const time = sighting ? formatTime(sighting.reviewedAt || sighting.submittedAt) : item.latestTimeBucket
+      const summary = sighting && sighting.caption ? sighting.caption : `${count} 条审核目击`
+      circle.on('click', () => {
+        const content = `<div class="amap-info"><strong>${escapeHtml(names || '未关联猫咪')}</strong><span>${escapeHtml(communityName(item.communityId))} · ${escapeHtml(time || '无时间')}</span><p>${escapeHtml(summary)}</p><button type="button" data-amap-locate="${escapeHtml(sighting && sighting.id || '')}">定位到记录</button></div>`
+        const info = new AMap.InfoWindow({ content, offset: new AMap.Pixel(0, -8), anchor: 'bottom-center' })
+        info.open(map, position)
+        setTimeout(() => {
+          const button = document.querySelector('[data-amap-locate]')
+          if (button) button.addEventListener('click', () => locateSighting(button.dataset.amapLocate))
+        }, 0)
+      })
+      overlays.push(circle)
+      map.add(circle)
+      if (mode === 'cluster') {
+        const label = new AMap.Text({ text: String(count), position, anchor: 'center', style: { border: '0', background: 'transparent', color: '#fff', fontWeight: '800', fontSize: '13px' }, zIndex: 121 })
+        overlays.push(label)
+        map.add(label)
+      }
+    })
+    if (overlays.length) map.setFitView(overlays, false, [50, 50, 50, 50], 16)
+  } catch (error) {
+    if (token !== state.mapRenderToken) return
+    state.amapPromise = null
+    container.innerHTML = emptyMarkup('高德地图加载失败', '请检查 Web JS Key、安全密钥、网络和域名白名单；粗略位置仍可从右侧链接打开。')
+  }
 }
 
 function renderQuality(data) {

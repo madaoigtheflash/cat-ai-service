@@ -201,6 +201,19 @@ h2 { margin-bottom: 0; font-size: 19px; line-height: 1.4; }
 .segmented button.is-active { color: #fff; background: var(--pink); box-shadow: 0 5px 12px rgba(217,79,117,.2); }
 .coarse-map { min-height: 410px; border-radius: 15px; overflow: hidden; position: relative; border: 1px solid var(--line); background-color: #fffafd; background-image: linear-gradient(#f1e7ed 1px, transparent 1px), linear-gradient(90deg, #f1e7ed 1px, transparent 1px); background-size: 34px 34px; }
 .coarse-map svg { width: 100%; height: 100%; min-height: inherit; display: block; }
+.coarse-map .amap-container { min-height: inherit; }
+.map-config-notice { margin: -6px 0 14px; padding: 11px 13px; border: 1px solid #f4d5a6; border-radius: 11px; color: #80571b; background: #fff8ea; font-size: 12px; line-height: 1.65; }
+.map-config-notice code { padding: 2px 5px; border-radius: 5px; background: rgba(255,255,255,.75); font: 11px/1.4 ui-monospace, Consolas, monospace; }
+.map-loading { min-height: 410px; display: grid; place-items: center; align-content: center; gap: 7px; color: var(--muted); }
+.map-loading strong { color: var(--text); }
+.map-loading span { font-size: 12px; }
+.amap-range-link { display: inline-flex; margin-top: 8px; color: var(--pink-dark); font-size: 12px; font-weight: 700; text-decoration: none; }
+.amap-range-link:hover { text-decoration: underline; }
+.amap-info { min-width: 210px; padding: 4px; color: #3e2d35; }
+.amap-info strong, .amap-info span { display: block; }
+.amap-info span { margin-top: 4px; color: #806b75; font-size: 11px; }
+.amap-info p { margin: 8px 0; font-size: 12px; line-height: 1.5; }
+.amap-info button { min-height: 34px; padding: 0 11px; border: 0; border-radius: 9px; color: #fff; background: #e7658a; font-weight: 700; }
 .map-node circle { fill: rgba(255,111,145,.86); stroke: #fff; stroke-width: 4; filter: drop-shadow(0 8px 12px rgba(217,79,117,.2)); }
 .map-node text { fill: #fff; font-size: 18px; font-weight: 800; pointer-events: none; }
 .map-node[role="button"] { cursor: pointer; outline: none; }

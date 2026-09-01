@@ -6,12 +6,16 @@ import asyncio
 import copy
 import time
 import uuid
+import re
+import urllib.error
+import urllib.parse
+import urllib.request
 from pathlib import Path
 from typing import Any, Literal
 from urllib.parse import urlsplit
 
 from fastapi import FastAPI, HTTPException, Query, Request
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -30,6 +34,7 @@ from .projection import build_snapshot
 
 STATIC_DIR = Path(__file__).parent / "static"
 FORCE_REFRESH_COOLDOWN_SECONDS = 2.0
+AMAP_PROXY_PATH = re.compile(r"^[A-Za-z0-9_./-]{1,240}$")
 
 
 class UnavailableSource:
@@ -244,6 +249,7 @@ def create_app(
     )
     app.state.settings = settings
     app.state.snapshot_service = service
+    amap_enabled = bool(settings.amap_key and settings.amap_security_code)
 
     @app.middleware("http")
     async def local_only_and_security_headers(request: Request, call_next):
@@ -268,8 +274,10 @@ def create_app(
         response.headers["Referrer-Policy"] = "no-referrer"
         response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
         response.headers["Content-Security-Policy"] = (
-            "default-src 'self'; script-src 'self'; style-src 'self'; "
-            "img-src 'self' data:; connect-src 'self'; object-src 'none'; "
+            "default-src 'self'; script-src 'self' https://webapi.amap.com; "
+            "style-src 'self' 'unsafe-inline' https://webapi.amap.com https://*.amap.com; "
+            "img-src 'self' data: blob: https://*.amap.com https://*.autonavi.com; "
+            "connect-src 'self' https://*.amap.com https://*.autonavi.com; object-src 'none'; "
             "base-uri 'none'; frame-ancestors 'none'; form-action 'self'"
         )
         return response
@@ -305,12 +313,53 @@ def create_app(
             "snapshotLoaded": snapshot_loaded,
             "cloudReady": snapshot_loaded,
             "envId": settings.env_id,
+            "amapEnabled": amap_enabled,
             "cacheTtlSeconds": settings.cache_ttl_seconds,
         }
 
     @app.get("/api/snapshot")
     async def snapshot(refresh: bool = Query(False)):
         return {"ok": True, "data": await service.get(force=refresh)}
+
+    @app.get("/api/map-config")
+    async def map_config():
+        return {
+            "ok": True,
+            "data": {
+                "provider": "amap" if amap_enabled else "local-fallback",
+                "enabled": amap_enabled,
+                "key": settings.amap_key if amap_enabled else "",
+                "serviceHost": "/_AMapService" if amap_enabled else "",
+                "coordinateSystem": "gcj02",
+                "precisionKm": 2,
+            },
+        }
+
+    @app.get("/_AMapService/{proxy_path:path}", include_in_schema=False)
+    async def amap_service_proxy(proxy_path: str, request: Request):
+        if not amap_enabled:
+            raise HTTPException(status_code=404, detail="高德地图尚未配置")
+        if not AMAP_PROXY_PATH.fullmatch(proxy_path) or ".." in proxy_path:
+            raise HTTPException(status_code=400, detail="高德代理路径无效")
+        raw_query = request.url.query
+        if len(raw_query) > 3000:
+            raise HTTPException(status_code=400, detail="高德代理参数过长")
+        query = urllib.parse.parse_qsl(raw_query, keep_blank_values=True)
+        query = [(key, value) for key, value in query if key.lower() != "jscode"]
+        query.append(("jscode", settings.amap_security_code))
+        base = "https://webapi.amap.com/" if proxy_path.startswith("v4/map/styles") else "https://restapi.amap.com/"
+        upstream = f"{base}{proxy_path}?{urllib.parse.urlencode(query)}"
+
+        def fetch() -> tuple[bytes, str]:
+            outbound = urllib.request.Request(upstream, headers={"User-Agent": "Cat-AI-Local-Admin/1.2"})
+            try:
+                with urllib.request.urlopen(outbound, timeout=15) as response:
+                    return response.read(5 * 1024 * 1024), response.headers.get("Content-Type", "application/octet-stream")
+            except (urllib.error.URLError, TimeoutError) as exc:
+                raise CloudSourceError("高德地图代理请求失败") from exc
+
+        content, content_type = await asyncio.to_thread(fetch)
+        return Response(content=content, media_type=content_type.split(";", 1)[0], headers={"Cache-Control": "private, max-age=300"})
 
     @app.get("/api/communities")
     async def communities(

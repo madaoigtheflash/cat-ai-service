@@ -41,6 +41,8 @@ class AdminSettings:
     node_bin: str = "node"
     tcb_bin: str = ""
     snapshot_file: str = ""
+    amap_key: str = ""
+    amap_security_code: str = ""
 
     @classmethod
     def from_env(cls) -> "AdminSettings":
@@ -57,6 +59,8 @@ class AdminSettings:
             node_bin=os.getenv("CAT_ADMIN_NODE_BIN", "node").strip() or "node",
             tcb_bin=os.getenv("CAT_ADMIN_TCB_BIN", "").strip(),
             snapshot_file=os.getenv("CAT_ADMIN_SNAPSHOT_FILE", "").strip(),
+            amap_key=os.getenv("CAT_ADMIN_AMAP_KEY", "").strip(),
+            amap_security_code=os.getenv("CAT_ADMIN_AMAP_SECURITY_CODE", "").strip(),
         )
 
     def validate(self) -> None:
@@ -68,3 +72,7 @@ class AdminSettings:
             )
         if self.snapshot_file and not Path(self.snapshot_file).expanduser().is_file():
             raise RuntimeError("CAT_ADMIN_SNAPSHOT_FILE 指向的文件不存在")
+        if bool(self.amap_key) != bool(self.amap_security_code):
+            raise RuntimeError("高德地图必须同时配置 CAT_ADMIN_AMAP_KEY 与 CAT_ADMIN_AMAP_SECURITY_CODE")
+        if len(self.amap_key) > 128 or len(self.amap_security_code) > 256:
+            raise RuntimeError("高德地图配置长度无效")
