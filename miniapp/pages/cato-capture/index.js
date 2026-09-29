@@ -56,7 +56,7 @@ Page({
     if (this.data.batch || this._saving) return
     try {
       const batch = capture.parseDrafts(this.data.input, uid('capture'), this.data.source)
-      this.setData({ batch, saveUncertain: false, error: '', notice: '按换行、分号和句号拆分；不是 AI 理解。请逐条核对内容与时间，离开页面会丢弃未确认草稿。' })
+      this.setData({ batch, saveUncertain: false, error: '', notice: '仅按换行、分号和句号拆分，不做语义理解。请逐条核对内容与时间，离开页面会丢弃未确认草稿。' })
     } catch (error) { this.setData({ error: error.message, notice: '' }) }
   },
 
