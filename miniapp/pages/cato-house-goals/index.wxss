@@ -1,0 +1,31 @@
+@import "../../styles/cato-lab.wxss";
+
+.house-page { min-height: 100vh; }
+.house-page text, .house-page view { word-break: break-word; }
+.house-page .card { margin-top: 24rpx; }
+.notice-title { display: block; margin-bottom: 12rpx; font-size: 26rpx; font-weight: 600; }
+.identity-options { display: flex; flex-wrap: wrap; gap: 12rpx; }
+.identity-options > button { flex: 1 1 220rpx; min-width: 0; margin: 0 0 16rpx; }
+.identity-button.selected { color: #FFFFFF; background: #B94768; }
+.member-line { display: flex; flex-wrap: wrap; gap: 16rpx; justify-content: space-between; padding: 16rpx 0; border-bottom: 1rpx solid #F2DFE7; font-size: 26rpx; }
+.member-line > text { min-width: 0; }
+.message { margin: 24rpx 0; padding: 24rpx; border-radius: 22rpx; font-size: 26rpx; line-height: 1.65; }
+.error-message { color: #B94955; background: #FFF0F5; border: 1rpx solid #B94955; }
+.success-message { color: #3F8E75; background: #FFFFFF; border: 1rpx solid #F2DFE7; }
+.editor-card { border: 2rpx solid #EBC6D4; }
+.house-page .form-label { font-size: 26rpx; line-height: 1.65; }
+.title-input, .evidence-input { min-height: 120rpx; }
+.evidence-input { min-height: 180rpx; }
+.goal-title { display: block; margin-bottom: 12rpx; font-size: 32rpx; font-weight: 600; line-height: 1.45; }
+.progress-copy { display: block; margin-top: 20rpx; color: #6F5A64; font-size: 26rpx; line-height: 1.65; }
+.goal-progress { margin: 12rpx 0 24rpx; height: 12rpx; overflow: hidden; border-radius: 12rpx; background: #FFF0F5; }
+.goal-progress-fill { height: 12rpx; border-radius: 12rpx; background: #FF6F91; }
+.actions { display: flex; flex-wrap: wrap; gap: 12rpx; }
+.actions > button { flex: 1 1 220rpx; min-width: 0; margin: 12rpx 0; }
+.task-card { margin-top: 24rpx; padding: 24rpx; border: 1rpx solid #F2DFE7; border-radius: 24rpx; background: #FFF7FA; }
+.task-state { display: block; margin-bottom: 8rpx; color: #80616F; font-size: 24rpx; line-height: 1.55; }
+.task-done .task-state { color: #3F8E75; }
+.task-title { display: block; margin-bottom: 12rpx; font-size: 28rpx; font-weight: 600; line-height: 1.65; }
+.evidence { margin-top: 16rpx; padding: 20rpx; border-radius: 20rpx; color: #6F5A64; background: #FFFFFF; font-size: 26rpx; line-height: 1.65; white-space: pre-wrap; }
+.evidence-label { display: block; margin-bottom: 8rpx; color: #80616F; font-size: 24rpx; line-height: 1.55; }
+.safety-note { margin: 40rpx 0 0; }

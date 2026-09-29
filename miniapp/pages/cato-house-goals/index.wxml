@@ -1,0 +1,105 @@
+<view class="lab-page house-page">
+  <text class="lab-title">小屋协作目标</text>
+  <text class="lab-copy">共同写下小事，各自选择愿意承担的一步。</text>
+  <view class="lab-notice">
+    <text class="notice-title">离线模拟 · 云端未连接</text>
+    <text>这是邀请制小屋的合成演示：小林是初始房主，阿乔为已接受邀请的成员，访客未获邀请。身份切换只供审计，不代表真实登录或邀请。数据仅保存在本机，不读取真实小屋、照片或健康档案，不发送通知。</text>
+  </view>
+
+  <view class="card identity-card">
+    <text class="lab-heading">当前模拟身份</text>
+    <view class="identity-options">
+      <button wx:for="{{actors}}" wx:key="id" class="lab-secondary identity-button {{actorId === item.id ? 'selected' : ''}}" data-id="{{item.id}}" disabled="{{busy}}" bindtap="switchActor" aria-pressed="{{actorId === item.id}}">{{item.name}}{{actorId === item.id ? ' · 当前' : ''}}</button>
+    </view>
+    <text class="lab-muted">切换身份会清空未保存表单，目标仍按各成员权限保留。身份不跨页面保存。</text>
+  </view>
+
+  <text wx:if="{{loading}}" class="lab-copy">正在读取本机实验…</text>
+  <view wx:if="{{error}}" class="message error-message" role="alert"><text>{{error}}</text></view>
+  <view wx:if="{{feedback}}" class="message success-message" aria-live="polite"><text>{{feedback}}</text></view>
+
+  <view wx:if="{{!loading && !room.allowed}}" class="card">
+    <text class="lab-heading">{{room.closed ? '模拟小屋已关闭' : '此身份无内部访问权'}}</text>
+    <text class="lab-copy">{{room.closed ? '最后一位成员已退出。目标、子任务与完成记录不再向任何身份展示。' : '没有展示任何内部目标名称、子任务或完成记录。屋外访客与已退出成员不能通过切换身份重新加入。'}}</text>
+    <text class="lab-muted">可切换至仍在小屋的模拟成员。若两人均已退出，请返回审计入口重置本实验；重置会删除本实验数据。</text>
+    <button class="lab-secondary" bindtap="refresh">重新读取权限</button>
+  </view>
+
+  <block wx:if="{{!loading && room.allowed}}">
+    <view class="card room-summary">
+      <text class="lab-heading">邀请制演示小屋</text>
+      <text class="lab-muted">{{room.members.length}} 位有效成员 · 本地模拟版本 {{room.revision}}</text>
+      <view class="member-line" wx:for="{{room.members}}" wx:key="id">
+        <text>{{item.name}}</text><text>{{item.role === 'host' ? '房主' : '成员'}}</text>
+      </view>
+      <text class="lab-copy">所有成员可新建目标、添加子任务，只能以自己当前身份认领。房主也不能替别人认领、完成或释放。</text>
+      <button class="lab-primary" data-mode="create-goal" bindtap="openEditor" disabled="{{busy}}">新建共同目标</button>
+    </view>
+
+    <view wx:if="{{editor.mode}}" id="goal-editor" class="card editor-card">
+      <text class="lab-heading">{{editor.heading}}</text>
+      <text wx:if="{{editor.goalTitle}}" class="lab-copy">所属目标：{{editor.goalTitle}}</text>
+      <block wx:if="{{editor.mode !== 'complete'}}">
+        <text class="form-label">{{editor.mode === 'create-goal' || editor.mode === 'edit-goal' ? '目标名称' : '子任务名称'}}（必填，最多120字）</text>
+        <textarea class="lab-input title-input" auto-height maxlength="120" value="{{editor.title}}" data-field="title" bindinput="inputField" placeholder="写下你们自己确定的小事" aria-label="目标或子任务名称" />
+        <text class="form-label">截止日期（可选）</text>
+        <input class="lab-input" value="{{editor.due}}" data-field="due" bindinput="inputField" maxlength="10" placeholder="YYYY-MM-DD；留空不设截止" aria-label="截止日期，格式为四位年、两位月、两位日" />
+        <text class="lab-muted">使用 YYYY-MM-DD，如 2026-10-15。子任务日期不能晚于已设置的目标截止。这里只展示日期，不会发送提醒。</text>
+      </block>
+      <block wx:else>
+        <text class="lab-copy">将完成：{{editor.title}}</text>
+        <text class="form-label">完成记录（可选，最多500字）</text>
+        <textarea class="lab-input evidence-input" auto-height maxlength="500" value="{{editor.evidence}}" data-field="evidence" bindinput="inputField" placeholder="写下实际完成的内容；不要录入健康隐私" aria-label="完成记录" />
+        <text class="lab-muted">仅这个合成小屋的有效成员可见。撤销完成时会清空此记录，不会自动发布。</text>
+      </block>
+      <text wx:if="{{error}}" class="lab-error">{{error}}</text>
+      <button class="lab-primary" bindtap="saveEditor" disabled="{{busy}}">{{editor.mode === 'complete' ? '确认完成并保存' : '确认保存'}}</button>
+      <button class="lab-secondary" bindtap="cancelEditor" disabled="{{busy}}">取消编辑</button>
+    </view>
+
+    <view class="lab-section">
+      <text class="lab-heading">大家共同的小目标</text>
+      <view wx:if="{{!room.goals.length}}" class="card">
+        <text class="empty-title">还没有共同目标</text>
+        <text class="lab-copy">从“整理猫咪用品”之类的生活小事开始，再拆成由成员自愿认领的步骤。</text>
+      </view>
+      <view wx:for="{{room.goals}}" wx:for-item="goal" wx:key="id" class="card goal-card">
+        <text class="goal-title">{{goal.title}}</text>
+        <text class="lab-muted">目标截止：{{goal.due || '不设截止'}}</text>
+        <text class="progress-copy">已完成 {{goal.completed}} / {{goal.total}} 步{{goal.total ? ' · ' + goal.progress + '%' : ' · 先添加子任务'}}</text>
+        <view class="goal-progress" aria-label="完成进度 {{goal.progress}}%"><view class="goal-progress-fill" style="width: {{goal.progress}}%;"></view></view>
+        <view class="actions">
+          <button wx:if="{{goal.canEdit}}" class="lab-secondary" data-mode="edit-goal" data-goal-id="{{goal.id}}" bindtap="openEditor">编辑目标</button>
+          <button class="lab-secondary" data-mode="add-task" data-goal-id="{{goal.id}}" bindtap="openEditor">添加子任务</button>
+        </view>
+        <text wx:if="{{!goal.tasks.length}}" class="lab-muted">没有子任务时不会显示为完成。</text>
+        <view wx:for="{{goal.tasks}}" wx:for-item="task" wx:key="id" class="task-card {{task.done ? 'task-done' : ''}}">
+          <text class="task-state">{{task.done ? '已完成' : task.assignee ? '已认领 · 待完成' : '等待自愿认领'}}</text>
+          <text class="task-title">{{task.title}}</text>
+          <text class="lab-muted">截止：{{task.due || '不设截止'}}</text>
+          <text class="lab-muted">{{task.assigneeName}}{{task.assigneeLeft ? ' · 已退出，保留历史完成记录' : ''}}</text>
+          <view wx:if="{{task.done}}" class="evidence">
+            <text class="evidence-label">成员填写的完成记录</text>
+            <text>{{task.evidence || '未附加文字记录'}}</text>
+          </view>
+          <view class="actions">
+            <button wx:if="{{task.canClaim}}" class="lab-primary" data-action="claim" data-goal-id="{{goal.id}}" data-task-id="{{task.id}}" bindtap="taskAction">我来认领</button>
+            <button wx:if="{{task.canEdit}}" class="lab-secondary" data-mode="edit-task" data-goal-id="{{goal.id}}" data-task-id="{{task.id}}" bindtap="openEditor">编辑子任务</button>
+            <button wx:if="{{task.isMine && !task.done}}" class="lab-primary" data-mode="complete" data-goal-id="{{goal.id}}" data-task-id="{{task.id}}" bindtap="openEditor">标记完成</button>
+            <button wx:if="{{task.isMine && !task.done}}" class="lab-secondary" data-action="release" data-goal-id="{{goal.id}}" data-task-id="{{task.id}}" bindtap="taskAction">释放我的认领</button>
+            <button wx:if="{{task.isMine && task.done}}" class="lab-secondary" data-action="undo" data-goal-id="{{goal.id}}" data-task-id="{{task.id}}" bindtap="taskAction">撤销完成</button>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="card lab-section">
+      <text class="lab-heading">审计与退出</text>
+      <text class="lab-copy">房主与目标创建者可编辑目标；未认领子任务由目标创建者或房主编辑，认领后由认领者编辑。退出会释放自己的未完成任务，已完成记录保留；房主自动交接给剩余成员，最后一人退出关闭小屋。</text>
+      <button class="lab-secondary" bindtap="simulateFailure">{{failNextSave ? '取消下次保存失败模拟' : '模拟下次保存失败'}}</button>
+      <text class="lab-muted">用于检查错误时输入保留；不修改真实存储设置。</text>
+      <button class="lab-danger" bindtap="leaveRoom">退出模拟小屋</button>
+    </view>
+  </block>
+  <text class="lab-muted safety-note">仅记录成员自行确定的生活事项，不提供诊断、药量或治疗建议；健康异常请及时咨询执业兽医。</text>
+</view>
