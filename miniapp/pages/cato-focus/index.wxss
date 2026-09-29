@@ -1,0 +1,32 @@
+@import "../../styles/cato-lab.wxss";
+
+.focus-page { padding-bottom: calc(72rpx + env(safe-area-inset-bottom)); }
+.heading-row { display: flex; flex-wrap: wrap; gap: 12rpx; align-items: center; margin-bottom: 24rpx; }
+.offline { font-size: 23rpx; line-height: 1.55; word-break: break-word; }
+.offline { padding: 8rpx 16rpx; background: #FFF0F5; border-radius: 24rpx; color: #B94768; }
+.choice-row { display: flex; flex-wrap: wrap; gap: 16rpx; margin: 16rpx 0 24rpx; }
+.choice { flex: 1 1 200rpx; min-width: 0; min-height: 88rpx; padding: 20rpx 24rpx; margin: 0; color: #6F5A64; background: #FFF7FA; border: 1rpx solid #F2DFE7; border-radius: 24rpx; font-size: 27rpx; line-height: 1.5; white-space: normal; word-break: break-word; }
+.choice.selected { background: #FFF0F5; color: #B94768; border: 2rpx solid #B94768; font-weight: 600; }
+.field-label { display: block; color: #3E2D35; font-size: 26rpx; line-height: 1.55; font-weight: 600; word-break: break-word; }
+.lengths { display: flex; flex-wrap: wrap; gap: 16rpx; }
+.lengths > view { flex: 1 1 240rpx; min-width: 0; }
+.lab-input { box-sizing: border-box; }
+.timer-card { text-align: center; }
+.phase-label { display: block; color: #B94768; font-size: 24rpx; line-height: 1.55; }
+.active-title { display: block; margin: 16rpx 0; font-size: 30rpx; font-weight: 600; line-height: 1.45; word-break: break-word; }
+.timer { display: block; margin: 24rpx 0; font-size: 72rpx; font-weight: 700; line-height: 1.35; font-variant-numeric: tabular-nums; word-break: break-word; }
+.phase-note, .feedback { display: block; padding: 20rpx; margin: 20rpx 0; color: #705260; background: #FFF0F5; border-radius: 20rpx; font-size: 25rpx; line-height: 1.6; word-break: break-word; }
+.completion-row { display: flex; flex-wrap: wrap; align-items: center; gap: 16rpx; padding: 16rpx 0; }
+.completion-row > view { flex: 1 1 300rpx; min-width: 0; }
+.completion-row switch { display: flex; align-items: center; justify-content: center; min-width: 112rpx; min-height: 88rpx; }
+.summary-row { display: flex; flex-wrap: wrap; gap: 16rpx; margin-top: 24rpx; }
+.summary-cell { flex: 1 1 180rpx; min-width: 0; padding: 24rpx 16rpx; background: #FFFFFF; border: 1rpx solid #F2DFE7; border-radius: 24rpx; text-align: center; word-break: break-word; }
+.summary-label { display: block; color: #6F5A64; font-size: 26rpx; line-height: 1.55; }
+.summary-number { display: block; margin: 8rpx 0; color: #B94768; font-size: 42rpx; font-weight: 600; line-height: 1.35; }
+.record-title { display: block; margin-bottom: 12rpx; font-size: 29rpx; font-weight: 600; line-height: 1.45; word-break: break-word; }
+.record-state, .tags { display: block; margin-top: 12rpx; color: #705260; font-size: 24rpx; line-height: 1.55; word-break: break-word; }
+.tags { color: #B94768; }
+.empty-note { padding: 32rpx; background: #FFFFFF; border: 1rpx solid #F2DFE7; border-radius: 24rpx; color: #80616F; font-size: 26rpx; line-height: 1.65; }
+.date-picker { min-height: 88rpx; display: flex; align-items: center; padding: 20rpx 24rpx; margin: 16rpx 0; border: 1rpx solid #EBC6D4; border-radius: 20rpx; color: #B94768; background: #FFF7FA; font-size: 26rpx; line-height: 1.65; word-break: break-word; }
+.footer-note { display: block; margin: 32rpx 8rpx 0; color: #80616F; font-size: 23rpx; line-height: 1.6; word-break: break-word; }
+.lab-primary:active, .lab-secondary:active, .choice:active { transform: scale(.98); }

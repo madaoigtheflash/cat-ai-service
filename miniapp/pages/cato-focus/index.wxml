@@ -1,0 +1,91 @@
+<view class="lab-page focus-page">
+  <view class="heading-row"><text class="offline">本机离线实验</text></view>
+  <text class="lab-title">一起，慢慢把时间过好</text>
+  <text class="lab-copy">给自己一段安静的陪伴或学习时间。猫咪可以自由走开，不安排运动，也不提供医疗建议。</text>
+  <view class="lab-notice">只保存到这台设备，不连接云端、不发通知。切到后台可恢复计时；番茄钟到点后等待你选择下一阶段。</view>
+
+  <view wx:if="{{loadError}}" class="card">
+    <text class="lab-error">{{loadError}}</text>
+    <text class="lab-muted">为保护现有数据，暂时不能开始或修改记录。</text>
+    <button class="lab-secondary" bindtap="retryLoad">重试读取本机记录</button>
+  </view>
+  <text wx:if="{{error}}" class="lab-error" role="alert">{{error}}</text>
+  <text wx:if="{{notice}}" class="feedback">{{notice}}</text>
+
+  <view wx:if="{{!active && !loadError}}" class="card">
+    <text class="lab-heading">这段时间，想做什么？</text>
+    <view class="choice-row">
+      <button class="choice {{form.activity === 'companion' ? 'selected' : ''}}" data-value="companion" bindtap="chooseActivity">安静陪伴</button>
+      <button class="choice {{form.activity === 'study' ? 'selected' : ''}}" data-value="study" bindtap="chooseActivity">学习充电</button>
+    </view>
+    <label class="field-label" for="activity-title">活动名称</label>
+    <input id="activity-title" class="lab-input" value="{{form.title}}" maxlength="60" data-field="title" bindinput="changeForm" placeholder="写下你自己选择的小活动" />
+    <text class="field-label">计时方式</text>
+    <view class="choice-row">
+      <button class="choice {{form.mode === 'pomodoro' ? 'selected' : ''}}" data-value="pomodoro" bindtap="chooseMode">番茄钟</button>
+      <button class="choice {{form.mode === 'countup' ? 'selected' : ''}}" data-value="countup" bindtap="chooseMode">正计时</button>
+    </view>
+    <view wx:if="{{form.mode === 'pomodoro'}}" class="lengths">
+      <view><label class="field-label" for="work-length">专注 · 1–180 分钟</label><input id="work-length" class="lab-input" type="number" value="{{form.workMinutes}}" data-field="workMinutes" bindinput="changeForm" /></view>
+      <view><label class="field-label" for="rest-length">休息 · 1–60 分钟</label><input id="rest-length" class="lab-input" type="number" value="{{form.restMinutes}}" data-field="restMinutes" bindinput="changeForm" /></view>
+    </view>
+    <text wx:else class="lab-muted">从零开始累计；你可以随时暂停、核对并结束。</text>
+    <button class="lab-primary" bindtap="primaryAction">开始这段时间</button>
+  </view>
+
+  <view wx:if="{{active}}" class="card timer-card">
+    <text class="phase-label">{{active.mode === 'countup' ? '正计时' : (active.phase === 'work' ? '专注时间' : '休息时间')}} · {{current.reached ? '本阶段已到点' : (active.status === 'paused' ? '已暂停' : '进行中')}}</text>
+    <text class="active-title">{{active.title}}</text>
+    <text class="timer">{{timer}}</text>
+    <text class="lab-muted">本次专注 {{workTotal}} 分钟 · 休息 {{restTotal}} 分钟</text>
+    <text wx:if="{{current.reached}}" class="phase-note">{{active.phase === 'work' ? '这段时间已到点。可以自选休息，或核对结束；不代表任务已完成。' : '休息已到点。由你决定再专注一轮，或核对结束。'}} 后台超出的时间不计入本阶段。</text>
+    <text wx:if="{{current.clockMovedBack}}" class="lab-error">设备时间变早了，暂未增加时长。请核对系统时间，保存后也可编辑记录。</text>
+    <block wx:if="{{!reviewing}}">
+      <button class="lab-primary" disabled="{{!!loadError}}" bindtap="primaryAction">{{actionLabel}}</button>
+      <button class="lab-secondary" disabled="{{!!loadError}}" bindtap="reviewFinish">结束并核对</button>
+    </block>
+    <text wx:if="{{active.mode === 'pomodoro'}}" class="lab-muted">专注 {{active.workMinutes}} 分钟 / 休息 {{active.restMinutes}} 分钟 · 第 {{active.rounds}} 轮</text>
+  </view>
+
+  <view wx:if="{{reviewing}}" class="card review-card">
+    <text class="lab-heading">结束前，自己核对一下</text>
+    <text class="lab-copy">计时已经暂停。投入时间不等于完成任务；只保存你确认的记录。</text>
+    <label class="field-label" for="review-title">记录名称</label>
+    <input id="review-title" class="lab-input" value="{{review.title}}" maxlength="60" data-field="title" bindinput="changeReview" />
+    <label class="field-label" for="review-tags">标签 · 逗号分隔，最多 5 个</label>
+    <input id="review-tags" class="lab-input" value="{{review.tags}}" maxlength="100" data-field="tags" bindinput="changeReview" placeholder="例如：读书，客厅" />
+    <view class="completion-row"><view><text class="field-label">我确认自己的任务已完成</text><text class="lab-muted">默认不勾选，仅为本机实验标记，不改原有事项。</text></view><switch checked="{{review.taskCompleted}}" color="#B94768" bindchange="changeReviewCompletion" aria-label="我确认自己的任务已完成" /></view>
+    <button class="lab-primary" disabled="{{!!loadError}}" bindtap="confirmFinish">确认保存记录</button>
+    <button class="lab-secondary" bindtap="cancelFinish">取消核对，保持暂停</button>
+  </view>
+
+  <view class="lab-section">
+    <text class="lab-heading">时间小结</text>
+    <text class="lab-muted">只统计已确认记录的专注时间，休息不计入。按记录结束日期归属；本周从周一开始。</text>
+    <view class="summary-row"><view wx:for="{{summaries}}" wx:key="label" class="summary-cell"><text class="summary-label">{{item.label}}</text><text class="summary-number">{{item.minutes}}</text><text class="lab-muted">分钟 · {{item.count}} 次</text></view></view>
+  </view>
+
+  <view class="lab-section">
+    <text class="lab-heading">已确认的记录</text>
+    <view wx:if="{{!records.length}}" class="empty-note">还没有记录。结束计时并确认后，时间会留在这里，不用追赶连续打卡。</view>
+    <view wx:for="{{records}}" wx:key="id" class="card record-card">
+      <text class="record-title">{{item.title}}</text>
+      <text class="lab-muted">{{item.date}} · {{item.activityLabel}} · 专注 {{item.minutes}} 分钟</text>
+      <text class="record-state">{{item.taskCompleted ? '本人确认任务已完成（本机实验）' : '仅记录时间，未标记任务完成'}}{{item.edited ? ' · 已编辑' : ''}}</text>
+      <text wx:if="{{item.tagsText}}" class="tags">{{item.tagsText}}</text>
+      <button class="lab-secondary" disabled="{{!!loadError || reviewing}}" data-id="{{item.id}}" bindtap="openEdit">编辑这条记录</button>
+    </view>
+  </view>
+
+  <view wx:if="{{editing}}" class="card edit-card">
+    <text class="lab-heading">修改已确认记录</text>
+    <label class="field-label" for="edit-title">名称</label><input id="edit-title" class="lab-input" value="{{editing.title}}" maxlength="60" data-field="title" bindinput="changeEdit" />
+    <label class="field-label" for="edit-minutes">专注分钟数 · 0–10080，可填小数</label><input id="edit-minutes" class="lab-input" type="digit" value="{{editing.minutes}}" data-field="minutes" bindinput="changeEdit" />
+    <text class="field-label">记录结束日期</text><picker mode="date" value="{{editing.date}}" data-field="date" bindchange="changeEdit"><view class="date-picker">{{editing.date}} · 点击修改</view></picker>
+    <label class="field-label" for="edit-tags">标签 · 逗号分隔，最多 5 个</label><input id="edit-tags" class="lab-input" value="{{editing.tags}}" maxlength="100" data-field="tags" bindinput="changeEdit" />
+    <view class="completion-row"><view><text class="field-label">本人确认任务已完成</text><text class="lab-muted">仅保存本机实验标记</text></view><switch checked="{{editing.taskCompleted}}" color="#B94768" bindchange="changeEditCompletion" aria-label="本人确认任务已完成" /></view>
+    <button class="lab-secondary" disabled="{{!!loadError}}" bindtap="saveEdit">保存记录修改</button>
+    <button class="lab-secondary" bindtap="cancelEdit">取消修改</button>
+  </view>
+  <text class="footer-note">离线不等于永久备份：清理微信缓存、卸载或入口重置会移除本实验记录。没有奖励压力，随时可以停下来。</text>
+</view>
