@@ -1,0 +1,98 @@
+<view class="lab-page sync-page">
+  <text class="lab-title">多端一致性实验</text>
+  <view class="lab-notice">SIMULATED · 本机模拟。两台设备与权威端都保存在同一台手机，不是真实多端同步；不连接生产云端。</view>
+  <text class="lab-copy">用同一模拟用户 demo-user 的照护事项，观察离线排队、版本冲突与重试。只记录你或兽医已确定的安排，不提供诊断或用药建议。</text>
+  <view class="card instructions">
+    <text class="lab-heading">亲手制造一次冲突</text>
+    <text class="lab-copy">① A 新建事项，B 点“发送 / 拉取”。② B 切离线并修改，A 在线修改同一事项。③ B 重新连接，再明确选择保留哪份内容。</text>
+    <text class="lab-muted">本地版本含未发送的预测变更；权威版本仅在模拟端接受命令后递增。另一设备不会自动刷新。</text>
+  </view>
+  <view wx:if="{{error}}" class="error-panel">
+    <text class="lab-error" aria-live="assertive">{{error}}</text>
+    <button wx:if="{{retryAvailable}}" class="lab-primary" bindtap="retrySave">重试这次保存</button>
+  </view>
+  <block wx:if="{{ready}}">
+    <view wx:for="{{clients}}" wx:key="id" wx:for-item="client" class="card device-card">
+      <view class="device-header">
+        <text class="lab-heading">{{client.label}} · 模拟副本</text>
+        <text class="connection {{client.online ? 'online' : 'offline'}}">{{client.online ? '模拟在线' : '模拟离线'}}</text>
+      </view>
+      <text class="lab-muted">用户 {{client.userId}} · 队列 {{client.queue.length}} 条</text>
+      <view class="action-grid">
+        <button class="lab-secondary" data-device="{{client.id}}" bindtap="toggleOnline">{{client.online ? '切为离线' : '重新连接'}}</button>
+        <button class="lab-secondary" data-device="{{client.id}}" bindtap="sync" disabled="{{!client.online}}">发送 / 拉取</button>
+      </view>
+      <text class="status-copy">{{client.lastMessage}}</text>
+      <view class="new-task">
+        <text class="form-label">{{client.label}} 新事项名称</text>
+        <input class="lab-input" value="{{drafts[client.id]}}" data-device="{{client.id}}" bindinput="setDraft" maxlength="80" placeholder="如：记录今天的饮水情况" disabled="{{!!client.conflict}}" />
+        <button class="lab-primary" data-device="{{client.id}}" bindtap="createTask" disabled="{{!!client.conflict}}">{{client.online ? '新建并模拟发送' : '新建并加入离线队列'}}</button>
+      </view>
+      <text wx:if="{{!client.records.length}}" class="lab-muted">此副本还没有事项。先新建，或拉取另一设备已发送的内容。</text>
+      <view wx:for="{{client.records}}" wx:for-item="record" wx:key="id" class="record">
+        <text class="record-title">{{record.deleted ? '已删除的事项' : record.title}}</text>
+        <text class="lab-muted">{{record.id}} · {{record.status}}</text>
+        <text class="version-copy">本地 v{{record.version}} · 权威 v{{record.serverVersion}} · 待确认 {{record.pending}} 条</text>
+        <view wx:if="{{editing && editing.deviceId === client.id && editing.recordId === record.id}}" class="edit-panel">
+          <text class="form-label">修改事项名称</text>
+          <input class="lab-input" value="{{editing.title}}" bindinput="editTitle" maxlength="80" />
+          <view class="action-grid">
+            <button class="lab-primary" bindtap="saveEdit">保存修改</button>
+            <button class="lab-secondary" bindtap="cancelEdit">取消修改</button>
+          </view>
+        </view>
+        <view wx:elif="{{!record.deleted}}" class="action-grid">
+          <button class="lab-secondary" data-device="{{client.id}}" data-record="{{record.id}}" bindtap="editTask" disabled="{{!!client.conflict}}">修改名称</button>
+          <button class="lab-secondary" data-device="{{client.id}}" data-record="{{record.id}}" bindtap="completeTask" disabled="{{!!client.conflict}}">{{record.completed ? '撤销完成' : '标记完成'}}</button>
+          <button class="lab-danger" data-device="{{client.id}}" data-record="{{record.id}}" bindtap="deleteTask" disabled="{{!!client.conflict}}">删除事项</button>
+        </view>
+        <text wx:else class="lab-muted">墓碑保留此 ID，防止旧离线命令恢复事项。需要继续记录时请新建。</text>
+      </view>
+      <view class="queue-panel">
+        <text class="subheading">离线 / 待确认队列</text>
+        <text wx:if="{{!client.queue.length}}" class="lab-muted">0 条；没有待发送命令。</text>
+        <view wx:for="{{client.queue}}" wx:for-item="command" wx:key="id" class="queue-item">
+          <text>{{command.label}} · {{command.recordId}}</text>
+          <text class="lab-muted">{{command.id}} · expectedVersion={{command.expectedVersion}}</text>
+        </view>
+        <button wx:if="{{client.queue.length}}" class="lab-secondary" data-device="{{client.id}}" data-loseack="yes" bindtap="sync" disabled="{{!!client.conflict}}">{{client.online ? '发送并模拟一次回执丢失' : '重连并模拟一次回执丢失'}}</button>
+        <text wx:if="{{client.queue.length}}" class="lab-muted">模拟回执丢失后，权威端已经应用首条命令，但相同 ID 留在队列。再点“发送 / 拉取”可验证去重。</text>
+        <button wx:if="{{client.queue.length}}" class="lab-danger" data-device="{{client.id}}" bindtap="discardQueue">放弃此设备未确认意图</button>
+      </view>
+      <view class="conflict-panel">
+        <text class="subheading">最近一次冲突</text>
+        <text wx:if="{{!client.lastConflict}}" class="lab-muted">尚未发生冲突。</text>
+        <block wx:else>
+          <text class="lab-copy">{{client.lastConflict.code}} · {{client.lastConflict.resolution}}</text>
+          <text class="lab-muted">命令 {{client.lastConflict.commandId}}</text>
+          <text class="lab-copy">本地意图：{{client.conflictLocal}}</text>
+          <text class="lab-copy">当时权威端：{{client.conflictRemote}}</text>
+        </block>
+        <block wx:if="{{client.conflict}}">
+          <text class="lab-error">{{client.conflict.message}}</text>
+          <button class="lab-secondary" data-device="{{client.id}}" data-choice="remote" bindtap="resolve">保留权威端，放弃此事项队列</button>
+          <button wx:if="{{client.canResubmit}}" class="lab-primary" data-device="{{client.id}}" data-choice="local" bindtap="resolve">按最新版本重新提交本地意图</button>
+          <text wx:else class="lab-muted">权威端已删除，不能覆盖墓碑。保留权威端后可另建新事项。</text>
+        </block>
+      </view>
+    </view>
+    <view class="card server-card">
+      <text class="lab-heading">模拟权威端</text>
+      <text class="lab-copy">全局修订 {{revision}} · 幂等回执 {{receiptCount}} 条</text>
+      <text class="lab-muted">同一台手机内的本地对象，不是服务器。命令被接受后版本递增；重试同一 ID 返回已有回执。</text>
+      <text wx:if="{{!serverRecords.length}}" class="lab-copy">还没有收到任何事项。</text>
+      <view wx:for="{{serverRecords}}" wx:key="id" class="record">
+        <text class="record-title">{{item.deleted ? '删除墓碑（当前记录无名称）' : item.title}}</text>
+        <text class="lab-muted">{{item.id}} · v{{item.version}} · {{item.status}}</text>
+      </view>
+    </view>
+    <view class="card">
+      <text class="lab-heading">失败与权限检查</text>
+      <button class="lab-secondary" bindtap="armFailure">{{failNextSave ? '已启用：下一次保存失败（点此取消）' : '模拟下一次本地保存失败'}}</button>
+      <text class="lab-muted">失败不会推进副本、队列或权威端。重试会再次执行同一操作；输入草稿仍留在页面。</text>
+      <button class="lab-secondary" bindtap="permissionProbe">用另一模拟身份尝试读取</button>
+      <text wx:if="{{permissionResult}}" class="lab-copy">{{permissionResult}}</text>
+    </view>
+    <text class="lab-muted footer-copy">事项、队列、版本、回执与冲突历史仅保存到本实验命名空间。删除为逻辑删除，历史回执与冲突快照可能含旧名称；上一页可清空本实验。未提交的输入草稿、模拟故障开关不跨页面保存。</text>
+  </block>
+</view>

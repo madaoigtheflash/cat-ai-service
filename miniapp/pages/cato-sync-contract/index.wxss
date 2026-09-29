@@ -1,0 +1,24 @@
+@import "../../styles/cato-lab.wxss";
+
+.sync-page { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; }
+.sync-page view, .sync-page text { min-width: 0; word-break: break-word; }
+.instructions { margin-top: 24rpx; }
+.device-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12rpx; }
+.device-header .lab-heading { margin-bottom: 0; }
+.connection { display: block; padding: 8rpx 16rpx; border-radius: 16rpx; font-size: 24rpx; font-weight: 600; }
+.online { color: #3F8E75; background: #FFF7FA; }
+.offline { color: #A66A20; background: #FFF7FA; }
+.action-grid { display: flex; flex-wrap: wrap; gap: 12rpx; margin: 16rpx 0; }
+.action-grid button { flex: 1 1 220rpx; min-width: 0; margin: 0; }
+.status-copy { display: block; margin: 16rpx 0; color: #705260; font-size: 24rpx; line-height: 1.6; }
+.new-task, .queue-panel, .conflict-panel { padding-top: 24rpx; margin-top: 24rpx; border-top: 1rpx solid #F2DFE7; }
+.record { padding: 24rpx; margin: 20rpx 0; border: 1rpx solid #F2DFE7; border-radius: 24rpx; background: #FFF9FB; }
+.record-title, .subheading { display: block; color: #3E2D35; font-size: 28rpx; font-weight: 600; line-height: 1.45; margin-bottom: 12rpx; }
+.version-copy { display: block; margin-top: 12rpx; color: #705260; font-size: 24rpx; line-height: 1.6; }
+.queue-item { padding: 16rpx 0; border-bottom: 1rpx solid #F2DFE7; font-size: 26rpx; line-height: 1.6; }
+.queue-item > text { display: block; }
+.error-panel { padding: 8rpx 24rpx; margin-bottom: 24rpx; border: 1rpx solid #B94955; border-radius: 24rpx; background: #FFFFFF; }
+.edit-panel { margin-top: 24rpx; }
+.footer-copy { margin: 32rpx 0; }
+.lab-danger[disabled] { color: #705260; background: #F2DFE7; }
+.lab-primary:active, .lab-secondary:active, .lab-danger:active { transform: scale(.98); }
