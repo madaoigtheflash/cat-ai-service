@@ -1,0 +1,138 @@
+<view class="lab-page encounter-page">
+  <text class="lab-title">下一次见到它时</text>
+  <text class="lab-copy">记下粗略区域，留一个自己决定的回访时间。慢慢补充线索，不急着给它确定身份。</text>
+  <view class="lab-notice">纯本机实验 · 两张候选名片均为合成示例。不识别照片、不获取定位、不合并真实猫咪档案。回访仅在此列表展示，不会发送提醒。</view>
+
+  <view class="role-row">
+    <text class="lab-muted">角色权限仅作本机模拟，不代表真实账号隔离。</text>
+    <picker range="{{roles}}" value="{{roleIndex}}" bindchange="changeRole" disabled="{{busy}}">
+      <view class="picker-value">{{roles[roleIndex]}} · 切换</view>
+    </picker>
+  </view>
+  <view wx:if="{{!ready}}" class="card recovery">
+    <text class="lab-heading">先恢复读取，再继续记录</text>
+    <text class="lab-copy">读取或保存未获确认时会暂停写入，不用空列表覆盖原数据。重新载入后，请核对清单再继续。</text>
+    <button class="lab-secondary" bindtap="reload" disabled="{{busy}}">重新载入本机记录</button>
+  </view>
+  <view id="page-feedback">
+    <text wx:if="{{error}}" class="lab-error" role="alert">{{error}}</text>
+    <text wx:if="{{feedback}}" class="feedback">{{feedback}}</text>
+  </view>
+
+  <button wx:if="{{!form && !evidenceForm && !reviewForm}}" class="lab-primary" bindtap="openNew" disabled="{{!ready || busy || role !== 'observer'}}">记一次新目击</button>
+
+  <view wx:if="{{form}}" id="observation-editor" class="card lab-section">
+    <text class="lab-heading">{{form.isNew ? '新目击' : '编辑观察与回访'}}</text>
+    <text class="field-label">粗略区域</text>
+    <input class="lab-input" value="{{form.area}}" maxlength="60" placeholder="例如：公园北侧树荫一带" data-form="form" data-field="area" bindinput="inputField" disabled="{{busy}}" />
+    <text class="lab-muted">不填坐标、门牌或联系方式；也请勿在笔记里记录精确点位。</text>
+    <text class="field-label">目击时间</text>
+    <view class="time-fields">
+      <picker mode="date" start="2000-01-01" end="{{today}}" value="{{form.observedDate}}" data-form="form" data-field="observedDate" bindchange="inputField" disabled="{{busy}}"><view class="picker-value">{{form.observedDate || '选择目击日期'}}</view></picker>
+      <picker mode="time" value="{{form.observedTime}}" data-form="form" data-field="observedTime" bindchange="inputField" disabled="{{busy}}"><view class="picker-value">{{form.observedTime || '选择目击时间'}}</view></picker>
+    </view>
+    <text class="field-label">这次观察到什么</text>
+    <textarea class="lab-input note-input" auto-height value="{{form.note}}" maxlength="500" placeholder="写下可观察的毛色、动作或环境，不把猜测当事实。" data-form="form" data-field="note" bindinput="inputField" disabled="{{busy}}" />
+    <text class="field-label">我想再看一看的时间</text>
+    <view class="time-fields">
+      <picker mode="date" start="2000-01-01" end="2099-12-31" value="{{form.revisitDate}}" data-form="form" data-field="revisitDate" bindchange="inputField" disabled="{{busy}}"><view class="picker-value">{{form.revisitDate || '由你选择日期'}}</view></picker>
+      <picker mode="time" value="{{form.revisitTime}}" data-form="form" data-field="revisitTime" bindchange="inputField" disabled="{{busy}}"><view class="picker-value">{{form.revisitTime || '由你选择时间'}}</view></picker>
+    </view>
+    <text class="lab-muted">晚于目击即可。可以补记过去的回访计划，不会催促、打卡或扣分。</text>
+    <button class="lab-primary" bindtap="saveObservation" disabled="{{!ready || busy || role !== 'observer'}}">保存到本机清单</button>
+    <button class="lab-secondary" bindtap="cancelForm" disabled="{{busy}}">取消，不保存</button>
+  </view>
+
+  <view class="lab-section">
+    <text class="lab-heading">本机回访清单</text>
+    <text class="lab-muted">{{rows.length}} 条目击 · {{pendingCount}} 条待回访。每条目击有独立编号，不等于一只已确认身份的猫。</text>
+    <view wx:if="{{ready && !rows.length}}" class="card empty-note">
+      <text class="record-title">从一次偶遇开始</text>
+      <text class="lab-copy">现在还没有目击。记下你看到的事实，再按自己的节奏回来补充。</text>
+    </view>
+    <view wx:for="{{rows}}" wx:key="id" class="card record-card {{selectedId === item.id ? 'selected-card' : ''}}">
+      <text class="record-title">{{item.area}}</text>
+      <text class="status-text">{{item.status}}</text>
+      <text class="lab-copy">回访 {{item.revisitText}}</text>
+      <text class="lab-muted">目击 {{item.observedText}} · {{item.evidence.length}} 条补充证据</text>
+      <text class="lab-muted">{{item.candidateId ? item.candidateName + ' · 人工判断：' + item.conclusionText : '尚未选择候选猫'}}{{item.linkedCardId ? ' · 已关联模拟名片' : ' · 未关联名片'}}</text>
+      <button class="lab-secondary" data-id="{{item.id}}" bindtap="chooseRecord" disabled="{{busy || !!form || !!evidenceForm || !!reviewForm}}">{{selectedId === item.id ? '正在查看这条目击' : '查看、补充与回访'}}</button>
+    </view>
+  </view>
+
+  <view wx:if="{{selected}}" id="encounter-detail" class="lab-section">
+    <view class="card">
+      <text class="lab-heading">这条目击的观察</text>
+      <text class="lab-muted">目击 ID：{{selected.id}}</text>
+      <text class="lab-muted">本机版本 {{selected.version}} · {{selected.status}}</text>
+      <text class="record-title detail-area">{{selected.area}}</text>
+      <text class="lab-copy">{{selected.note}}</text>
+      <text class="lab-muted">目击 {{selected.observedText}}</text>
+      <text class="lab-muted">计划回访 {{selected.revisitText}}</text>
+      <text wx:if="{{selected.completedAt}}" class="lab-muted">记为完成 {{selected.completedText}}</text>
+      <view wx:if="{{!form && !evidenceForm && !reviewForm}}">
+        <button class="lab-secondary" bindtap="openEdit" disabled="{{!ready || busy || role !== 'observer'}}">编辑观察与回访时间</button>
+        <button class="lab-secondary" bindtap="recordAction" data-action="{{selected.completedAt ? 'reopen' : 'complete'}}" disabled="{{!ready || busy || role !== 'observer' || (!selected.completedAt && !selected.evidence.length)}}">{{selected.completedAt ? '撤销回访完成' : '将回访记为完成'}}</button>
+        <text wx:if="{{!selected.completedAt && !selected.evidence.length}}" class="lab-muted">先补充一条带时间的回访证据，再记为完成。</text>
+      </view>
+    </view>
+
+    <view class="card">
+      <text class="lab-heading">带时间的证据笔记</text>
+      <text class="lab-muted">补充可核对的细节，也可以如实写“这次没有遇见”。新证据不会自动改变身份假设。</text>
+      <view wx:for="{{selected.evidence}}" wx:key="id" class="evidence-note">
+        <text class="lab-muted">{{item.timeText}}</text>
+        <text class="lab-copy">{{item.note}}</text>
+      </view>
+      <text wx:if="{{!selected.evidence.length}}" class="lab-copy">还没有补充证据。</text>
+      <button wx:if="{{!form && !evidenceForm && !reviewForm}}" class="lab-secondary" bindtap="openEvidence" disabled="{{!ready || busy || role !== 'observer'}}">补充一次回访证据</button>
+      <view wx:if="{{evidenceForm}}" class="editor">
+        <text class="field-label">观察或回访发生的时间</text>
+        <view class="time-fields">
+          <picker mode="date" start="2000-01-01" end="{{today}}" value="{{evidenceForm.date}}" data-form="evidenceForm" data-field="date" bindchange="inputField" disabled="{{busy}}"><view class="picker-value">{{evidenceForm.date}}</view></picker>
+          <picker mode="time" value="{{evidenceForm.time}}" data-form="evidenceForm" data-field="time" bindchange="inputField" disabled="{{busy}}"><view class="picker-value">{{evidenceForm.time}}</view></picker>
+        </view>
+        <textarea class="lab-input note-input" auto-height value="{{evidenceForm.note}}" maxlength="800" placeholder="例如：再次看到尾尖白色；光线较暗，脸部花纹无法核对。" data-form="evidenceForm" data-field="note" bindinput="inputField" disabled="{{busy}}" />
+        <button class="lab-primary" bindtap="saveEvidence" disabled="{{!ready || busy || role !== 'observer'}}">保存证据笔记</button>
+        <button class="lab-secondary" bindtap="cancelForm" disabled="{{busy}}">取消，不保存</button>
+      </view>
+    </view>
+
+    <view class="card">
+      <text class="lab-heading">人工同猫假设</text>
+      <text class="lab-copy">候选：{{selected.candidateName}}</text>
+      <text class="lab-copy">你的判断：{{selected.conclusionText}}</text>
+      <text wx:if="{{selected.reason}}" class="lab-copy">判断说明：{{selected.reason}}</text>
+      <text class="lab-muted">“可能同一只”不是身份事实；“不同”也只是本次人工判断。没有模型识别、匹配概率或自动合并。</text>
+      <view class="candidate-preview" wx:for="{{candidates}}" wx:key="id">
+        <text class="record-title">合成示例 · {{item.name}}</text>
+        <text class="lab-muted">{{item.description}}</text>
+      </view>
+      <button wx:if="{{!form && !evidenceForm && !reviewForm}}" class="lab-secondary" bindtap="openReview" disabled="{{!ready || busy || role !== 'observer'}}">选择候选并记录人工判断</button>
+      <view wx:if="{{reviewForm}}" class="editor">
+        <text class="field-label">主动选择一张候选名片</text>
+        <picker range="{{candidateNames}}" value="{{reviewForm.candidateIndex}}" data-form="reviewForm" data-field="candidateIndex" bindchange="inputField" disabled="{{busy}}"><view class="picker-value">{{candidateNames[reviewForm.candidateIndex]}}</view></picker>
+        <text class="field-label">人工判断</text>
+        <picker range="{{conclusionNames}}" value="{{reviewForm.conclusionIndex}}" data-form="reviewForm" data-field="conclusionIndex" bindchange="inputField" disabled="{{busy}}"><view class="picker-value">{{conclusionNames[reviewForm.conclusionIndex]}}</view></picker>
+        <text class="field-label">判断依据与不确定之处</text>
+        <textarea class="lab-input note-input" auto-height value="{{reviewForm.reason}}" maxlength="500" placeholder="请写明依据；证据不足也可以保留。" data-form="reviewForm" data-field="reason" bindinput="inputField" disabled="{{busy}}" />
+        <text class="lab-muted">保存判断不会自动关联名片。已有名片关联时，请先撤销关联再改候选或结论。</text>
+        <button class="lab-primary" bindtap="saveReview" disabled="{{!ready || busy || role !== 'observer'}}">保存人工判断</button>
+        <button class="lab-secondary" bindtap="cancelForm" disabled="{{busy}}">取消，不保存</button>
+      </view>
+    </view>
+
+    <view class="card">
+      <text class="lab-heading">可撤销的模拟名片关联</text>
+      <text class="lab-copy">{{selected.linkedCardId ? '已关联：' + selected.linkedName : '这条目击尚未关联任何名片。'}}</text>
+      <text class="lab-muted">仅保存在本机实验中。撤销后保留目击、证据和人工判断；不会改变真实档案。</text>
+      <view wx:if="{{!form && !evidenceForm && !reviewForm}}">
+        <button wx:if="{{selected.canLink}}" class="lab-primary" bindtap="recordAction" data-action="link" disabled="{{!ready || busy || role !== 'observer'}}">确认关联这张模拟名片</button>
+        <button wx:if="{{selected.linkedCardId}}" class="lab-secondary" bindtap="recordAction" data-action="unlink" disabled="{{!ready || busy || role !== 'observer'}}">撤销名片关联</button>
+      </view>
+      <text wx:if="{{!selected.canLink && !selected.linkedCardId}}" class="lab-copy">补充证据、选定候选并记录“可能同一只”后，才会出现手动关联入口。</text>
+    </view>
+  </view>
+  <text class="lab-muted footer-note">记录只存在当前本机存储，清理缓存可能丢失；未备份，也不跨设备同步。</text>
+  <text class="lab-muted footer-note">观察与回访不能用于诊断。发现猫咪明显受伤或状态异常时，请联系当地救助人员或兽医。</text>
+</view>

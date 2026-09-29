@@ -1,0 +1,24 @@
+@import "../../styles/cato-lab.wxss";
+
+.encounter-page { min-height: 100vh; }
+.role-row { margin: 24rpx 0; }
+.role-row .picker-value { margin-top: 12rpx; }
+.field-label { display: block; margin: 24rpx 0 12rpx; font-size: 27rpx; font-weight: 600; line-height: 1.6; word-break: break-word; }
+.picker-value { display: flex; align-items: center; min-height: 88rpx; padding: 22rpx 24rpx; color: #6F5A64; white-space: normal; word-break: break-word; }
+.time-fields { display: flex; flex-wrap: wrap; gap: 16rpx; }
+.time-fields > picker { flex: 1 1 220rpx; min-width: 0; }
+.time-fields .picker-value { height: 100%; }
+.note-input { min-height: 176rpx; padding: 22rpx 24rpx; }
+.feedback { display: block; padding: 20rpx 24rpx; margin: 20rpx 0; background: #FFFFFF; border: 1rpx solid #F2DFE7; border-radius: 20rpx; font-size: 24rpx; color: #705260; line-height: 1.65; word-break: break-word; }
+.record-card, .empty-note { margin-top: 24rpx; }
+.selected-card { border-color: #B94768; }
+.record-title { display: block; font-size: 30rpx; font-weight: 600; line-height: 1.45; word-break: break-word; }
+.status-text { display: inline-block; margin-top: 16rpx; padding: 8rpx 16rpx; background: #FFF0F5; color: #705260; border-radius: 14rpx; font-size: 24rpx; line-height: 1.55; }
+.detail-area { margin-top: 24rpx; }
+.evidence-note { margin-top: 24rpx; padding: 24rpx; border-radius: 20rpx; background: #FFF7FA; }
+.evidence-note .lab-copy { margin-bottom: 0; white-space: pre-wrap; }
+.candidate-preview { padding: 24rpx; margin-top: 20rpx; background: #FFF7FA; border-radius: 20rpx; }
+.candidate-preview .lab-muted { margin-top: 12rpx; }
+.editor { margin-top: 24rpx; padding-top: 8rpx; border-top: 1rpx solid #F2DFE7; }
+.footer-note { margin: 40rpx 8rpx 0; }
+.lab-primary:active, .lab-secondary:active { transform: scale(.98); }
