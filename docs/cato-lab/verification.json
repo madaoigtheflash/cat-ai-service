@@ -1,0 +1,295 @@
+{
+  "verifiedAt": "2026-09-29T14:57:36.456Z",
+  "scope": "Offline unit/controller tests, route/bindings, native WXML compiler, branch SHA and clean worktree. Not cloud, device, typography or integration approval.",
+  "allPassed": true,
+  "rows": [
+    {
+      "variant": "capture",
+      "branch": "codex/cato-lab/capture",
+      "sha": "2aec50a42e5b49618ca17d9d1eaee2887f5eb7f7",
+      "clean": true,
+      "tests": 32,
+      "passed": 32,
+      "failed": 0,
+      "skipped": 0,
+      "structure": {
+        "variant": "capture",
+        "structuralPass": true,
+        "nativeWxmlCompiled": true,
+        "changedFiles": 10,
+        "errors": []
+      },
+      "fullRegression": {
+        "tests": 366,
+        "passed": 366,
+        "failed": 0,
+        "skipped": 0
+      },
+      "ok": true
+    },
+    {
+      "variant": "care-planner",
+      "branch": "codex/cato-lab/care-planner",
+      "sha": "9dfa9261f82296f8d8dd9f3918d8ed58302c0d41",
+      "clean": true,
+      "tests": 24,
+      "passed": 24,
+      "failed": 0,
+      "skipped": 0,
+      "structure": {
+        "variant": "care-planner",
+        "structuralPass": true,
+        "nativeWxmlCompiled": true,
+        "changedFiles": 10,
+        "errors": []
+      },
+      "fullRegression": {
+        "tests": 358,
+        "passed": 358,
+        "failed": 0,
+        "skipped": 0
+      },
+      "ok": true
+    },
+    {
+      "variant": "house-goals",
+      "branch": "codex/cato-lab/house-goals",
+      "sha": "12220adc39a9820a97137b696b8cd0b4e5c84fd7",
+      "clean": true,
+      "tests": 28,
+      "passed": 28,
+      "failed": 0,
+      "skipped": 0,
+      "structure": {
+        "variant": "house-goals",
+        "structuralPass": true,
+        "nativeWxmlCompiled": true,
+        "changedFiles": 10,
+        "errors": []
+      },
+      "fullRegression": {
+        "tests": 362,
+        "passed": 362,
+        "failed": 0,
+        "skipped": 0
+      },
+      "ok": true
+    },
+    {
+      "variant": "focus",
+      "branch": "codex/cato-lab/focus",
+      "sha": "5503b097fdd77636013e8fb72d37558e39495019",
+      "clean": true,
+      "tests": 36,
+      "passed": 36,
+      "failed": 0,
+      "skipped": 0,
+      "structure": {
+        "variant": "focus",
+        "structuralPass": true,
+        "nativeWxmlCompiled": true,
+        "changedFiles": 10,
+        "errors": []
+      },
+      "fullRegression": {
+        "tests": 370,
+        "passed": 370,
+        "failed": 0,
+        "skipped": 0
+      },
+      "ok": true
+    },
+    {
+      "variant": "expenses",
+      "branch": "codex/cato-lab/expenses",
+      "sha": "785a3ea319a962ec42fc52f8faf6353e0503dcb3",
+      "clean": true,
+      "tests": 49,
+      "passed": 49,
+      "failed": 0,
+      "skipped": 0,
+      "structure": {
+        "variant": "expenses",
+        "structuralPass": true,
+        "nativeWxmlCompiled": true,
+        "changedFiles": 10,
+        "errors": []
+      },
+      "fullRegression": {
+        "tests": 383,
+        "passed": 383,
+        "failed": 0,
+        "skipped": 0
+      },
+      "ok": true
+    },
+    {
+      "variant": "journal",
+      "branch": "codex/cato-lab/journal",
+      "sha": "67f68ed872093122f60e2008758df7dc58f2c8c2",
+      "clean": true,
+      "tests": 27,
+      "passed": 27,
+      "failed": 0,
+      "skipped": 0,
+      "structure": {
+        "variant": "journal",
+        "structuralPass": true,
+        "nativeWxmlCompiled": true,
+        "changedFiles": 10,
+        "errors": []
+      },
+      "fullRegression": {
+        "tests": 361,
+        "passed": 361,
+        "failed": 0,
+        "skipped": 0
+      },
+      "ok": true
+    },
+    {
+      "variant": "social-followup",
+      "branch": "codex/cato-lab/social-followup",
+      "sha": "78a7de212d8fec4cac0a4029e9223541e4327847",
+      "clean": true,
+      "tests": 27,
+      "passed": 27,
+      "failed": 0,
+      "skipped": 0,
+      "structure": {
+        "variant": "social-followup",
+        "structuralPass": true,
+        "nativeWxmlCompiled": true,
+        "changedFiles": 10,
+        "errors": []
+      },
+      "fullRegression": {
+        "tests": 361,
+        "passed": 361,
+        "failed": 0,
+        "skipped": 0
+      },
+      "ok": true
+    },
+    {
+      "variant": "companion",
+      "branch": "codex/cato-lab/companion",
+      "sha": "36b5eb1c2f2fe733b7c230188dbf13af99460aa3",
+      "clean": true,
+      "tests": 33,
+      "passed": 33,
+      "failed": 0,
+      "skipped": 0,
+      "structure": {
+        "variant": "companion",
+        "structuralPass": true,
+        "nativeWxmlCompiled": true,
+        "changedFiles": 10,
+        "errors": []
+      },
+      "fullRegression": {
+        "tests": 367,
+        "passed": 367,
+        "failed": 0,
+        "skipped": 0
+      },
+      "ok": true
+    },
+    {
+      "variant": "sync-contract",
+      "branch": "codex/cato-lab/sync-contract",
+      "sha": "a34b0326f7567888a666efcf3eb71f3db54fc726",
+      "clean": true,
+      "tests": 37,
+      "passed": 37,
+      "failed": 0,
+      "skipped": 0,
+      "structure": {
+        "variant": "sync-contract",
+        "structuralPass": true,
+        "nativeWxmlCompiled": true,
+        "changedFiles": 10,
+        "errors": []
+      },
+      "fullRegression": {
+        "tests": 371,
+        "passed": 371,
+        "failed": 0,
+        "skipped": 0
+      },
+      "ok": true
+    },
+    {
+      "variant": "encounter-review",
+      "branch": "codex/cato-lab/encounter-review",
+      "sha": "d8bd730556647fe1751a319fb3930aec4870300c",
+      "clean": true,
+      "tests": 30,
+      "passed": 30,
+      "failed": 0,
+      "skipped": 0,
+      "structure": {
+        "variant": "encounter-review",
+        "structuralPass": true,
+        "nativeWxmlCompiled": true,
+        "changedFiles": 10,
+        "errors": []
+      },
+      "fullRegression": {
+        "tests": 364,
+        "passed": 364,
+        "failed": 0,
+        "skipped": 0
+      },
+      "ok": true
+    },
+    {
+      "variant": "relationship-observe",
+      "branch": "codex/cato-lab/relationship-observe",
+      "sha": "5698676a0ef54454e5c363ada87d81af6bfe1d1c",
+      "clean": true,
+      "tests": 44,
+      "passed": 44,
+      "failed": 0,
+      "skipped": 0,
+      "structure": {
+        "variant": "relationship-observe",
+        "structuralPass": true,
+        "nativeWxmlCompiled": true,
+        "changedFiles": 10,
+        "errors": []
+      },
+      "fullRegression": {
+        "tests": 378,
+        "passed": 378,
+        "failed": 0,
+        "skipped": 0
+      },
+      "ok": true
+    },
+    {
+      "variant": "knowledge-action",
+      "branch": "codex/cato-lab/knowledge-action",
+      "sha": "d1bcdcfd0ee250e8054e6f4be77c05a80e4057e7",
+      "clean": true,
+      "tests": 33,
+      "passed": 33,
+      "failed": 0,
+      "skipped": 0,
+      "structure": {
+        "variant": "knowledge-action",
+        "structuralPass": true,
+        "nativeWxmlCompiled": true,
+        "changedFiles": 10,
+        "errors": []
+      },
+      "fullRegression": {
+        "tests": 367,
+        "passed": 367,
+        "failed": 0,
+        "skipped": 0
+      },
+      "ok": true
+    }
+  ]
+}

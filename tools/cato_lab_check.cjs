@@ -29,6 +29,7 @@ check('controller load', () => {
 })
 check('event handlers', () => {
   const wxml = fs.readFileSync(pageFile + '.wxml','utf8')
+  assert.ok(!/\{\{[^}]*&amp;/.test(wxml), 'WXML expressions must not XML-escape logical operators')
   const bindings = [...wxml.matchAll(/(?:bind|catch):?[\w-]+\s*=\s*["']([A-Za-z_$][\w$]*)["']/g)].map(m=>m[1])
   for (const handler of new Set(bindings)) assert.equal(typeof page[handler], 'function', 'missing handler ' + handler)
   assert.match(wxml, /模拟|实验|本地|离线/, 'visible experiment boundary missing')
@@ -41,6 +42,11 @@ check('review guide', () => assert.ok(fs.readFileSync(path.join(root,'docs/cato-
 const files = cp.execFileSync('git',['diff','--name-only','0dde597b04b946c66169709376c99be8d803effe','HEAD'],{cwd:root,encoding:'utf8'}).trim().split(/\r?\n/)
 for (const file of files.filter(f=> /\.(?:js|cjs)$/.test(f))) check('syntax ' + file, () => cp.execFileSync(process.execPath,['--check',path.join(root,file)],{stdio:'pipe'}))
 for (const file of files.filter(f=> /\.json$/.test(f))) check('json ' + file, () => JSON.parse(fs.readFileSync(path.join(root,file),'utf8')))
-const report = { variant:config.variant, structuralPass:errors.length===0, changedFiles:files.length, errors }
+let nativeWxmlCompiled = false
+if (process.env.WECHAT_WXML_COMPILER) check('native WXML compiler', () => {
+  cp.execFileSync(process.env.WECHAT_WXML_COMPILER,[path.relative(root,pageFile+'.wxml')],{cwd:root,stdio:'pipe'})
+  nativeWxmlCompiled = true
+})
+const report = { variant:config.variant, structuralPass:errors.length===0, nativeWxmlCompiled, changedFiles:files.length, errors }
 console.log(JSON.stringify(report,null,2))
 process.exitCode = errors.length ? 1 : 0

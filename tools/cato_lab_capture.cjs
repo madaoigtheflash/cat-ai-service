@@ -8,9 +8,22 @@ const [automatorDir, port, variant, output] = process.argv.slice(2)
 if (!automatorDir || !/^\d+$/.test(port || '') || !/^[a-z-]+$/.test(variant || '') || !output) throw Error('arguments required')
 async function main() {
   const Launcher = require(path.join(path.resolve(automatorDir),'out/Launcher')).default
-  const mini = await new Launcher().connectTool({wsEndpoint:'ws://127.0.0.1:'+port})
+  let mini
+  for (let attempt = 0; attempt < 12; attempt += 1) {
+    try { mini = await new Launcher().connectTool({wsEndpoint:'ws://127.0.0.1:'+port}); break }
+    catch (error) { if (attempt === 11) throw error; await new Promise(resolve => setTimeout(resolve, 500)) }
+  }
   try {
-    const state = await mini.evaluate(() => ({ offline:getApp().globalData.catoLabOffline, cloudReady:getApp().globalData.cloudReady }))
+    let state
+    for (let attempt = 0; attempt < 16; attempt += 1) {
+      state = await mini.evaluate(() => {
+        const app = getApp()
+        return app && app.globalData ? { offline:app.globalData.catoLabOffline, cloudReady:app.globalData.cloudReady } : null
+      })
+      if (state) break
+      await new Promise(resolve => setTimeout(resolve, 500))
+    }
+    assert.ok(state, 'app did not launch; inspect WeChat compile errors')
     assert.equal(state.offline,true,'not the offline lab'); assert.equal(state.cloudReady,false)
     const entry = variant==='baseline'?'/pages/cato-lab/index':'/pages/cato-'+variant+'/index'
     const page = await mini.reLaunch(entry)
