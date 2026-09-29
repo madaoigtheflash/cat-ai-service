@@ -1,0 +1,52 @@
+<view class="page compose-page">
+  <view wx:if="{{sent}}" class="compose-result">
+    <icon name="check" size="{{56}}" color="#B94768" />
+    <text class="compose-title">{{status === 'approved' ? '动态已公开' : status === 'rejected' ? '这次内容未通过审核' : '动态已提交，等待审核'}}</text>
+    <text class="compose-note">{{status === 'approved' ? '猫友可以在首页看到这次分享，和你接上话。' : status === 'rejected' ? '内容没有公开。请在社交页查看记录，检查隐私与不适宜内容后重新分享。' : '尚未出现在公开广场。你可以在社交页查看处理状态。'}}</text>
+    <button class="compose-primary" bindtap="viewPost">查看这条动态</button>
+    <button class="compose-secondary" bindtap="goSocial">回到社交</button>
+  </view>
+  <block wx:else>
+    <text class="compose-title">分享猫咪的这一刻</text>
+    <text class="compose-note">选 1–3 张照片，也可以只写故事。不必先有猫咪档案。</text>
+    <view class="compose-editor">
+      <textarea class="story-input" value="{{content}}" maxlength="1200" auto-height cursor-spacing="32" adjust-position="{{true}}" disabled="{{busy}}" placeholder="给照片配句话吧（选填），也可以只写猫咪故事……" bindinput="onInput" />
+      <text class="compose-counter">有照片时正文选填 · {{content.length}} / 1200 · {{saved ? '草稿保存在本机' : '仅本页编辑'}}</text>
+    </view>
+    <view class="compose-section">
+      <text class="compose-heading">这次想分享的照片</text>
+      <text class="compose-note">最多 3 张，第一张是封面。点击提交前不会上传。</text>
+      <view class="compose-photos">
+        <view class="compose-photo" wx:for="{{photos}}" wx:key="*this">
+          <view class="compose-photo-preview"><image src="{{item}}" mode="aspectFill" data-src="{{item}}" bindtap="previewPhoto" aria-role="button" aria-label="查看第 {{index + 1}} 张照片" /></view>
+          <button class="photo-cover {{index === 0 ? 'is-cover' : ''}}" disabled="{{busy || choosing || index === 0}}" data-index="{{index}}" bindtap="setCover">{{index === 0 ? '当前封面' : '设为封面'}}</button>
+          <button class="photo-remove" disabled="{{busy || choosing}}" data-index="{{index}}" bindtap="removePhoto">移除第 {{index + 1}} 张</button>
+        </view>
+      </view>
+      <button wx:if="{{photos.length < 3}}" class="compose-secondary" loading="{{choosing}}" disabled="{{busy || choosing}}" bindtap="choosePhotos">选择照片</button>
+      <button wx:if="{{offeredPhoto && photos.length < 3}}" class="compose-secondary" disabled="{{busy || choosing}}" bindtap="useArchivePhoto">选用这只猫的档案照片</button>
+    </view>
+    <view wx:if="{{cat}}" class="compose-section">
+      <checkbox-group bindchange="onCatChange"><label class="compose-check"><checkbox value="cat" checked="{{includeCat}}" disabled="{{busy}}" color="#B94768" /><text>附上 {{cat.name}} 的基础名片</text></label></checkbox-group>
+      <view wx:if="{{includeCat}}" class="compose-cat"><text>{{cat.name}}</text><text class="compose-note">{{cat.breed}}{{cat.coatColor ? ' · ' + cat.coatColor : ''}}</text></view>
+      <text class="compose-note">只分享名字、品种和毛色。不含健康记录、备注、识别原文或位置。</text>
+    </view>
+    <view wx:else class="compose-section"><button class="compose-secondary" disabled="{{busy}}" bindtap="goIdentify">先拍照识猫、登记档案</button><text class="compose-note">也可以跳过，直接分享照片或故事。</text></view>
+    <view class="compose-consent">
+      <text class="compose-heading">公开广场可见</text>
+      <text class="compose-note">审核通过后，所有用户都可以查看这次选定的故事、照片和名片。小屋内部内容不会自动同步。请勿分享人脸、门牌、联系方式或他人隐私。</text>
+      <checkbox-group bindchange="onConsent"><label class="compose-check"><checkbox value="public" checked="{{consent}}" disabled="{{busy}}" color="#B94768" /><text>我确认有权分享，并同意上述内容公开</text></label></checkbox-group>
+    </view>
+    <text wx:if="{{error}}" class="compose-error" role="alert">{{error}}</text>
+    <view wx:if="{{busy}}" class="compose-progress" aria-live="polite">
+      <text class="compose-heading">{{progressText}}</text>
+      <block wx:if="{{progressPhase === 'uploading'}}">
+        <text class="compose-note">已上传 {{progressCompleted}} / {{progressTotal}} 张{{progressPercent !== null ? ' · ' + progressPercent + '%' : ''}}</text>
+        <progress wx:if="{{progressPercent !== null}}" class="compose-progress-bar" percent="{{progressPercent}}" stroke-width="4" border-radius="4" activeColor="#B94768" backgroundColor="#F2DFE7" />
+      </block>
+      <text class="compose-note">上传完成不代表审核通过，请等待提交结果。</text>
+    </view>
+    <button class="compose-primary" loading="{{busy}}" disabled="{{busy || choosing}}" bindtap="publish">{{busy ? '正在提交，请稍候' : '确认并提交动态'}}</button>
+    <text class="compose-note compose-footer">提交失败会保留草稿；登记档案本身不会发布动态。</text>
+  </block>
+</view>

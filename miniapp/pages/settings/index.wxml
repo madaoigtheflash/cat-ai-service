@@ -1,5 +1,5 @@
 <view class="page settings-page">
-  <view class="settings-intro"><view class="settings-icon">☁</view><view><text class="settings-title">微信云开发</text><text class="muted settings-subtitle">云环境只处理你主动提交的照片和猫友小屋数据。</text></view></view>
+  <view class="settings-intro"><view class="settings-icon"><icon name="cloud" size="{{40}}" color="#D94F75" /></view><view><text class="settings-title">微信云开发</text><text class="muted settings-subtitle">云端提供精选猫片，并处理你主动提交的照片、小屋数据、意见反馈和喜欢记录。</text></view></view>
 
   <view class="card settings-card">
     <text class="group-title">云端配置</text>
@@ -13,12 +13,14 @@
 
   <view class="card architecture-card">
     <text class="group-title">当前数据路径</text>
-    <view class="path-row"><view class="path-icon local">本地</view><view><text class="path-title">猫咪档案与内置知识</text><text class="muted path-note">保存在当前设备的小程序存储中。</text></view></view>
+    <view class="path-row"><view class="path-icon local">本地</view><view><text class="path-title">猫咪档案与健康记录</text><text class="muted path-note">保存在当前设备的小程序存储中，不自动公开。</text></view></view>
+    <view class="path-row"><view class="path-icon shared">广场</view><view><text class="path-title">故事与评论</text><text class="muted path-note">只提交你明确确认的文字、所选照片和基础猫咪名片；审核通过的公开动态可供所有用户查看。不会迁移旧目击或健康记录。</text></view></view>
     <view class="path-row"><view class="path-icon cloud">云端</view><view><text class="path-title">照片特征观察</text><text class="muted path-note">仅在你主动选择照片并开始观察时处理；临时图片会在完成后删除。</text></view></view>
     <view class="path-row"><view class="path-icon shared">共享</view><view><text class="path-title">邀请小屋与同猫候选</text><text class="muted path-note">只同步你主动选择的基础身份和目击；健康档案不会整包上传，系统也不会自动合并猫咪。</text></view></view>
+    <view class="path-row"><view class="path-icon cloud">喜欢</view><view><text class="path-title">精选猫片与我的喜欢</text><text class="muted path-note">精选图片为独立授权素材，不属于用户猫咪档案。喜欢记录通过微信派生身份在云端保存，仅本人可查询；可在照片详情取消喜欢。</text></view></view>
   </view>
 
-  <view class="safe-tip">服务凭据和用户标识密钥只配置在云端。联机照片仅提交到邀请制小屋并先进入管理员审核；照片若含人脸、门牌或联系方式，请先不要上传。</view>
+  <view class="safe-tip">服务凭据和用户标识密钥只配置在云端。广场分享与小屋目击分开处理；照片若含人脸、门牌或联系方式，请先不要上传。</view>
 
   <view class="card about-card">
     <view class="about-row"><text>小程序 AppID</text><text class="muted">wx1112379224ace9f9</text></view>

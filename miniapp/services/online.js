@@ -119,6 +119,7 @@ function normalizeResult(response, fallback) {
 }
 
 function call(action, payload, options) {
+  try { require('./cato-lab-guard')() } catch (error) { return Promise.reject(error) }
   if (!wx.cloud) return Promise.reject(new Error('当前微信版本不支持云开发，请升级微信'))
   const opts = options || {}
   const requestId = opts.requestId || makeToken('request')
@@ -399,6 +400,8 @@ function health() {
 }
 
 module.exports = {
+  listShowcase: () => call('listShowcase', {}, { write: false }),
+  setShowcaseLike: (assetId, liked, expectedVersion) => call('setShowcaseLike', { assetId, liked, expectedVersion }, { write: true }),
   CLOUD_ENV,
   FUNCTION_NAME,
   bootstrap,

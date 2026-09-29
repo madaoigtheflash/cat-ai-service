@@ -16,6 +16,7 @@ function normalizeResult(response, fallback) {
 }
 
 function call(action, payload, options) {
+  try { require('./cato-lab-guard')() } catch (error) { return Promise.reject(error) }
   if (!wx.cloud) return Promise.reject(new Error('当前微信版本不支持云开发，请升级微信'))
   const opts = options || {}
   const data = Object.assign({

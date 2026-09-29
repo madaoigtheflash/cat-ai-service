@@ -1,0 +1,11 @@
+{
+  "name": "cat-community",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.js",
+  "dependencies": {
+    "@cloudbase/node-sdk": "3.17.2",
+    "sharp": "0.35.4",
+    "wx-server-sdk": "4.0.2"
+  }
+}

@@ -1,3 +1,6 @@
 {
-  "navigationBarTitleText": "照片识猫"
+  "navigationBarTitleText": "照片识猫",
+  "usingComponents": {
+    "icon": "/components/icon/index"
+  }
 }

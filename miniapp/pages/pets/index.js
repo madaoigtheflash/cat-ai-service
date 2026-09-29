@@ -4,7 +4,15 @@ Page({
   data: { pets: [] },
 
   onShow() {
+    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
+      this.getTabBar().setData({ selected: 1 })
+    }
     this.setData({ pets: storage.listPets() })
+  },
+
+  onPullDownRefresh() {
+    this.setData({ pets: storage.listPets() })
+    wx.stopPullDownRefresh()
   },
 
   addPet() { wx.navigateTo({ url: '/pages/pet-edit/index' }) },

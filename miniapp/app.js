@@ -1,4 +1,5 @@
 const storage = require('./utils/storage')
+const catoLab = require('./config/cato-lab')
 
 const CLOUD_ENV = 'cloud1-d6gpjpxunc74669d7'
 
@@ -14,6 +15,12 @@ App({
   },
 
   onLaunch() {
+    if (catoLab.enabled) {
+      this.globalData.catoLabOffline = true
+      this.globalData.cloudReady = false
+      this.globalData.cloudEnv = ''
+      return
+    }
     if (wx.cloud) {
       wx.cloud.init({ env: CLOUD_ENV, traceUser: true })
       this.globalData.cloudReady = true

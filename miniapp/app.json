@@ -1,5 +1,6 @@
 {
   "pages": [
+    "pages/cato-lab/index",
     "pages/home/index",
     "pages/identify/index",
     "pages/pets/index",
@@ -9,9 +10,13 @@
     "pages/online/index",
     "pages/community-insights/index",
     "pages/identity/index",
-    "pages/knowledge/index",
+    "pages/social/index",
+    "pages/social-compose/index",
+    "pages/social-post/index",
+    "pages/garden/index",
     "pages/feedback/index",
-    "pages/settings/index"
+    "pages/settings/index",
+    "pages/mine/index"
   ],
   "window": {
     "navigationBarBackgroundColor": "#FF6F91",
@@ -35,15 +40,32 @@
     "chooseLocation"
   ],
   "tabBar": {
-    "color": "#9A7B70",
+    "custom": true,
+    "color": "#6F5A64",
     "selectedColor": "#FF6F91",
     "backgroundColor": "#FFFFFF",
     "borderStyle": "white",
     "list": [
-      { "pagePath": "pages/home/index", "text": "首页" },
-      { "pagePath": "pages/identify/index", "text": "识猫" },
-      { "pagePath": "pages/pets/index", "text": "档案" },
-      { "pagePath": "pages/knowledge/index", "text": "知识" }
+      {
+        "pagePath": "pages/home/index",
+        "text": "首页",
+        "iconPath": "assets/tabbar/home.png",
+        "selectedIconPath": "assets/tabbar/home-selected.png"
+      },
+      {
+        "pagePath": "pages/pets/index",
+        "text": "档案",
+        "iconPath": "assets/tabbar/archive.png",
+        "selectedIconPath": "assets/tabbar/archive-selected.png"
+      },
+      {
+        "pagePath": "pages/social/index",
+        "text": "社交"
+      },
+      {
+        "pagePath": "pages/mine/index",
+        "text": "我的"
+      }
     ]
   },
   "style": "v2",

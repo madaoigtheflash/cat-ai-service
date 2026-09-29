@@ -1,0 +1,44 @@
+<view class="community-page">
+  <text class="community-heading">和猫友接上话</text>
+  <text class="community-description">分享的猫片与故事、收到的回应，都在这里。</text>
+  <button class="community-action primary social-compose" bindtap="goCompose"><icon name="edit" size="{{32}}" color="#FFFFFF" /><text>分享照片 / 故事</text></button>
+  <button class="house-entry" bindtap="goHouse">
+    <icon name="home" size="{{36}}" color="#B94768" />
+    <view class="house-copy"><text class="house-title">猫友小屋</text><text class="house-description">创建、加入或邀请猫友，保留熟悉的相遇</text></view>
+    <icon name="chevron" size="{{28}}" color="#80616F" />
+  </button>
+  <view class="social-tabs" role="tablist">
+    <button class="social-tab {{activeSection === 'mine' ? 'active' : ''}}" data-section="mine" bindtap="selectSection" aria-selected="{{activeSection === 'mine'}}">我的动态</button>
+    <button class="social-tab {{activeSection === 'replies' ? 'active' : ''}}" data-section="replies" bindtap="selectSection" aria-selected="{{activeSection === 'replies'}}">回应</button>
+  </view>
+  <view wx:if="{{activeSection === 'mine'}}" class="social-list">
+    <view wx:if="{{loadingPosts && !posts.length}}" class="community-state" aria-live="polite"><text class="community-state-title">正在加载你的故事…</text></view>
+    <view wx:if="{{error}}" class="community-error"><text>{{error}}</text><button class="community-action" bindtap="retryPosts" disabled="{{loadingPosts}}">重新加载</button></view>
+    <social-post-card wx:for="{{posts}}" wx:key="id" post="{{item}}" show-status="{{true}}" bind:open="openPost" bind:reply="replyPost" />
+    <view wx:if="{{mineLoaded && !loadingPosts && !error && !posts.length}}" class="community-state">
+      <text class="community-state-title">还没有分享过动态</text>
+      <text class="community-state-copy">选几张猫片就能开始，有想说的话也可以一起写下。不必先登记档案。</text>
+      <button class="community-action" bindtap="goCompose">分享猫咪照片</button>
+      <button class="community-action quiet" bindtap="goPets">去猫咪档案看看</button>
+    </view>
+    <button wx:if="{{posts.length && nextCursor}}" class="community-action quiet" bindtap="loadMore" loading="{{loadingPosts}}" disabled="{{loadingPosts}}">{{loadingPosts ? '正在加载…' : '查看更早的故事'}}</button>
+    <text wx:if="{{posts.length && !nextCursor && !loadingPosts && !error}}" class="community-end">你的故事都在这里了。</text>
+    <text class="community-note">只有你主动提交的故事才会进入审核；通过后在首页公开。原有档案仍保留在“档案”中。</text>
+  </view>
+  <view wx:else class="social-list">
+    <view wx:if="{{loadingNotifications && !notifications.length}}" class="community-state" aria-live="polite"><text class="community-state-title">正在加载收到的回应…</text></view>
+    <button wx:for="{{notifications}}" wx:key="id" class="notification-row" data-id="{{item.id}}" bindtap="openNotification">
+      <view class="notification-title"><text>{{item.authorName}} 的回应</text><text wx:if="{{!item.read}}" class="notification-unread">未读</text></view>
+      <text class="notification-content">{{item.content}}</text><text wx:if="{{item.timeLabel}}" class="notification-time">{{item.timeLabel}}</text>
+      <text class="notification-open">查看故事与回应</text>
+    </button>
+    <view wx:if="{{notificationError}}" class="community-error"><text>{{notificationError}}</text><button class="community-action" bindtap="retryNotifications" disabled="{{loadingNotifications}}">重新加载</button></view>
+    <button wx:if="{{notificationCursor}}" class="community-action quiet notification-more" bindtap="loadMoreNotifications" loading="{{loadingNotifications}}" disabled="{{loadingNotifications}}">{{loadingNotifications ? '正在加载回应…' : '查看更早的回应'}}</button>
+    <text wx:if="{{notifications.length && !notificationCursor && !loadingNotifications && !notificationError}}" class="community-end">目前可查看的回应都在这里了。</text>
+    <view wx:if="{{notificationsLoaded && !loadingNotifications && !notificationError && !notifications.length && !notificationCursor}}" class="community-state">
+      <text class="community-state-title">还没有新回应</text>
+      <text class="community-state-copy">有人回应你的故事或评论时，会在这里告诉你。</text>
+      <button class="community-action" bindtap="goHome">去看看大家的故事</button>
+    </view>
+  </view>
+</view>

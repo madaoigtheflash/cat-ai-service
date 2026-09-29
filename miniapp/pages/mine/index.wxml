@@ -1,0 +1,99 @@
+<view class="page mine-page">
+  <view class="mine-hero card">
+    <view class="mine-hero-main">
+      <view class="avatar-collage">
+        <image wx:for="{{avatars}}" wx:key="*this" class="collage-avatar" src="{{item}}" mode="aspectFill" />
+        <view wx:if="{{!avatars.length}}" class="collage-avatar collage-empty"><icon name="paw" size="{{40}}" color="#D94F75" /></view>
+      </view>
+      <view class="mine-hero-copy">
+        <text class="mine-title">已记录 {{petCount}} 只猫</text>
+        <text class="muted mine-subtitle">档案与健康记录只保存在本机；小屋协作由你主动发起</text>
+      </view>
+    </view>
+    <button class="secondary-button mine-manage" bindtap="goPets">管理猫咪档案</button>
+  </view>
+
+  <view class="section-heading mine-section">
+    <view><text class="section-title">我的资产</text><text class="section-note">喜欢的猫片、目击提交与档案都在这里</text></view>
+  </view>
+  <view class="asset-grid">
+    <view class="asset-card" bindtap="goGarden" aria-role="button">
+      <view class="asset-icon"><icon name="heart" size="{{36}}" color="#D94F75" /></view>
+      <text class="asset-value">{{favoriteCount >= 0 ? favoriteCount : '—'}}</text>
+      <text class="asset-label">喜欢的猫片</text>
+    </view>
+    <view class="asset-card" bindtap="goOnline" aria-role="button">
+      <view class="asset-icon"><icon name="pin" size="{{36}}" color="#D94F75" /></view>
+      <text class="asset-value">{{sightingTotal}}</text>
+      <text class="asset-label">我的目击{{sightingPending ? ' · ' + sightingPending + ' 待确认' : ''}}</text>
+    </view>
+    <view class="asset-card" bindtap="goPets" aria-role="button">
+      <view class="asset-icon"><icon name="archive" size="{{36}}" color="#D94F75" /></view>
+      <text class="asset-value">{{petCount}}</text>
+      <text class="asset-label">猫咪档案</text>
+    </view>
+  </view>
+
+  <view wx:if="{{errorMessage}}" class="inline-error" bindtap="retry">
+    <text class="inline-error-copy">{{errorMessage}}</text><text class="inline-error-action">重试</text>
+  </view>
+
+  <block wx:if="{{recentSightings.length}}">
+    <view class="section-heading mine-section">
+      <view><text class="section-title">我的目击提交</text><text class="section-note">含小屋审核状态，最多展示最近 3 条</text></view>
+      <view class="section-link" bindtap="goOnline">全部</view>
+    </view>
+    <view class="sighting-list card">
+      <view class="mine-sighting" wx:for="{{recentSightings}}" wx:key="id" bindtap="goOnline">
+        <view class="mine-sighting-copy">
+          <text class="mine-sighting-title">{{item.catName}}</text>
+          <text class="muted mine-sighting-meta">{{item.observedLabel}}{{item.areaText ? ' · ' + item.areaText : ''}}</text>
+        </view>
+        <text class="mine-status {{item.status}}">{{item.statusLabel}}</text>
+      </view>
+    </view>
+  </block>
+
+  <view class="section-heading mine-section">
+    <view><text class="section-title">消息与反馈</text><text class="section-note">审核进度与服务提醒</text></view>
+  </view>
+  <view class="card link-list">
+    <view class="link-row" bindtap="goSocial" aria-role="button">
+      <view class="link-icon"><icon name="message" size="{{34}}" color="#D94F75" /></view>
+      <view class="link-copy"><text class="link-title">我的动态与回应</text><text class="muted link-desc">查看分享状态，回到猫友的讨论</text></view>
+      <view class="link-chevron"><icon name="chevron" size="{{30}}" color="#C9ABB8" /></view>
+    </view>
+    <view class="link-row disabled" aria-disabled="true">
+      <view class="link-icon"><icon name="bell" size="{{34}}" color="#C9ABB8" /></view>
+      <view class="link-copy"><text class="link-title">订阅消息管理</text><text class="muted link-desc">消息模板审核中，开放后可在这里管理提醒开关</text></view>
+    </view>
+    <view class="link-row" bindtap="goFeedback" aria-role="button">
+      <view class="link-icon"><icon name="mail" size="{{34}}" color="#D94F75" /></view>
+      <view class="link-copy"><text class="link-title">意见反馈</text><text class="muted link-desc">故障、难用的地方或新想法都可以告诉我们</text></view>
+      <view class="link-chevron"><icon name="chevron" size="{{30}}" color="#C9ABB8" /></view>
+    </view>
+    <view class="link-row" bindtap="goOnline" aria-role="button">
+      <view class="link-icon"><icon name="cloud" size="{{34}}" color="#D94F75" /></view>
+      <view class="link-copy"><text class="link-title">上传与审核记录</text><text class="muted link-desc">在小屋动态中查看每条目击的确认进度</text></view>
+      <view class="link-chevron"><icon name="chevron" size="{{30}}" color="#C9ABB8" /></view>
+    </view>
+  </view>
+
+  <view class="section-heading mine-section">
+    <view><text class="section-title">关于</text><text class="section-note">服务配置与隐私口径</text></view>
+  </view>
+  <view class="card link-list">
+    <view class="link-row" bindtap="goSettings" aria-role="button">
+      <view class="link-icon"><icon name="settings" size="{{34}}" color="#D94F75" /></view>
+      <view class="link-copy"><text class="link-title">服务设置</text><text class="muted link-desc">云服务连接与功能状态</text></view>
+      <view class="link-chevron"><icon name="chevron" size="{{30}}" color="#C9ABB8" /></view>
+    </view>
+    <view class="link-row" bindtap="openPrivacy" aria-role="button">
+      <view class="link-icon"><icon name="info" size="{{34}}" color="#D94F75" /></view>
+      <view class="link-copy"><text class="link-title">隐私说明</text><text class="muted link-desc">什么数据保存在本机，什么会主动上传</text></view>
+      <view class="link-chevron"><icon name="chevron" size="{{30}}" color="#C9ABB8" /></view>
+    </view>
+  </view>
+
+  <view class="privacy-note">识别结果仅供特征观察与档案整理参考，不构成医疗判断；健康异常请及时咨询执业兽医。</view>
+</view>

@@ -8,6 +8,7 @@ function cloudResult(response, fallback) {
 }
 
 function callCloud(name, data) {
+  try { require('./cato-lab-guard')() } catch (error) { return Promise.reject(error) }
   if (!wx.cloud) return Promise.reject(new Error('当前微信版本不支持云开发，请升级微信'))
   return wx.cloud.callFunction({
     name,

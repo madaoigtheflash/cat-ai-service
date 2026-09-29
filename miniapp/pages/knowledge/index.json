@@ -1,3 +1,9 @@
 {
-  "navigationBarTitleText": "养猫知识"
+  "navigationBarTitleText": "养猫知识",
+  "enablePullDownRefresh": true,
+  "backgroundColor": "#FFF7FA",
+  "backgroundTextStyle": "dark",
+  "usingComponents": {
+    "icon": "/components/icon/index"
+  }
 }

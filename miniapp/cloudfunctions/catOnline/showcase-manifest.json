@@ -1,0 +1,301 @@
+{
+  "version": "cats-v1",
+  "assets": [
+    {
+      "id": "sunny-cuddle",
+      "group": 0,
+      "title": "阳光里依偎",
+      "caption": "把午后的空闲，留给一场并肩的小睡。",
+      "author": "Griffin Taylor",
+      "sourceUrl": "https://unsplash.com/photos/two-cats-cuddling-on-a-blanket-Ln72daSueik",
+      "downloadUrl": "https://images.unsplash.com/photo-1655776624623-2da32c271a48",
+      "focus": [
+        0.64,
+        0.52
+      ],
+      "license": "Unsplash License",
+      "licenseUrl": "https://unsplash.com/license",
+      "originalSize": [
+        1600,
+        1067
+      ],
+      "thumb": {
+        "fileName": "sunny-cuddle-thumb-0b37f62d9067ed90.jpg",
+        "cloudPath": "showcase/cats/v1/sunny-cuddle-thumb-0b37f62d9067ed90.jpg",
+        "sha256": "0b37f62d9067ed9000d11d5dc4900741bbcc9eecfe98875152bc5d332c907384",
+        "bytes": 47939,
+        "width": 520,
+        "height": 440,
+        "fileID": "cloud://cloud1-d6gpjpxunc74669d7.636c-cloud1-d6gpjpxunc74669d7-1473467388/showcase/cats/v1/sunny-cuddle-thumb-0b37f62d9067ed90.jpg"
+      },
+      "detail": {
+        "fileName": "sunny-cuddle-detail-22ddccbf7833c5b4.jpg",
+        "cloudPath": "showcase/cats/v1/sunny-cuddle-detail-22ddccbf7833c5b4.jpg",
+        "sha256": "22ddccbf7833c5b4c3ca336b85eabcfdff60c21dbc49aa111ad9390931d264fc",
+        "bytes": 173934,
+        "width": 1280,
+        "height": 854,
+        "fileID": "cloud://cloud1-d6gpjpxunc74669d7.636c-cloud1-d6gpjpxunc74669d7-1473467388/showcase/cats/v1/sunny-cuddle-detail-22ddccbf7833c5b4.jpg"
+      }
+    },
+    {
+      "id": "cozy-nap",
+      "group": 1,
+      "title": "一起窝着",
+      "caption": "毯子的一角，刚好够两只猫咪窝在一起。",
+      "author": "Brett Jordan",
+      "sourceUrl": "https://unsplash.com/photos/two-cats-cuddling-on-a-patterned-blanket-zo1-L1vgPbA",
+      "downloadUrl": "https://images.unsplash.com/photo-1756217777130-5618b5ee1e83",
+      "focus": [
+        0.5,
+        0.5
+      ],
+      "license": "Unsplash License",
+      "licenseUrl": "https://unsplash.com/license",
+      "originalSize": [
+        1600,
+        1200
+      ],
+      "thumb": {
+        "fileName": "cozy-nap-thumb-f200cbd8b3717b3b.jpg",
+        "cloudPath": "showcase/cats/v1/cozy-nap-thumb-f200cbd8b3717b3b.jpg",
+        "sha256": "f200cbd8b3717b3b976236f4d3e8a3897bbbed0393face17af0e403b71a28990",
+        "bytes": 67135,
+        "width": 520,
+        "height": 440,
+        "fileID": "cloud://cloud1-d6gpjpxunc74669d7.636c-cloud1-d6gpjpxunc74669d7-1473467388/showcase/cats/v1/cozy-nap-thumb-f200cbd8b3717b3b.jpg"
+      },
+      "detail": {
+        "fileName": "cozy-nap-detail-7ef043374663faa6.jpg",
+        "cloudPath": "showcase/cats/v1/cozy-nap-detail-7ef043374663faa6.jpg",
+        "sha256": "7ef043374663faa673360520e856d4e1d91048055d673ff2a723ad01cf10b632",
+        "bytes": 238636,
+        "width": 1280,
+        "height": 960,
+        "fileID": "cloud://cloud1-d6gpjpxunc74669d7.636c-cloud1-d6gpjpxunc74669d7-1473467388/showcase/cats/v1/cozy-nap-detail-7ef043374663faa6.jpg"
+      }
+    },
+    {
+      "id": "cat-gathering",
+      "group": 0,
+      "title": "猫咪小聚会",
+      "caption": "停下脚步，看看这场小小的猫咪聚会。",
+      "author": "Lina Zore",
+      "sourceUrl": "https://unsplash.com/photos/a-group-of-cats-playing-with-each-other-on-the-ground-SNE71bVPhZA",
+      "downloadUrl": "https://images.unsplash.com/photo-1723115891660-5c867d043b08",
+      "focus": [
+        0.52,
+        0.53
+      ],
+      "license": "Unsplash License",
+      "licenseUrl": "https://unsplash.com/license",
+      "originalSize": [
+        1600,
+        1066
+      ],
+      "thumb": {
+        "fileName": "cat-gathering-thumb-b0209686d86b7b58.jpg",
+        "cloudPath": "showcase/cats/v1/cat-gathering-thumb-b0209686d86b7b58.jpg",
+        "sha256": "b0209686d86b7b585e5d54d1fe0ca918a1eb012e995446f1ed202c7b8e445727",
+        "bytes": 68724,
+        "width": 520,
+        "height": 440,
+        "fileID": "cloud://cloud1-d6gpjpxunc74669d7.636c-cloud1-d6gpjpxunc74669d7-1473467388/showcase/cats/v1/cat-gathering-thumb-b0209686d86b7b58.jpg"
+      },
+      "detail": {
+        "fileName": "cat-gathering-detail-a39d2a19110ddfa8.jpg",
+        "cloudPath": "showcase/cats/v1/cat-gathering-detail-a39d2a19110ddfa8.jpg",
+        "sha256": "a39d2a19110ddfa849f06e2bbfbccf7ec08006beefb99b32e7a11e1f1e35a6ad",
+        "bytes": 237671,
+        "width": 1280,
+        "height": 853,
+        "fileID": "cloud://cloud1-d6gpjpxunc74669d7.636c-cloud1-d6gpjpxunc74669d7-1473467388/showcase/cats/v1/cat-gathering-detail-a39d2a19110ddfa8.jpg"
+      }
+    },
+    {
+      "id": "close-friends",
+      "group": 1,
+      "title": "靠近一点",
+      "caption": "两张凑在一起的脸，装进同一个画面。",
+      "author": "Shawn Rain",
+      "sourceUrl": "https://unsplash.com/photos/two-cats-are-cuddling-close-together-MUWUfvXpdag",
+      "downloadUrl": "https://images.unsplash.com/photo-1741062102965-21cf5420c112",
+      "focus": [
+        0.4,
+        0.5
+      ],
+      "license": "Unsplash License",
+      "licenseUrl": "https://unsplash.com/license",
+      "originalSize": [
+        1600,
+        1067
+      ],
+      "thumb": {
+        "fileName": "close-friends-thumb-c19603eeecfc2698.jpg",
+        "cloudPath": "showcase/cats/v1/close-friends-thumb-c19603eeecfc2698.jpg",
+        "sha256": "c19603eeecfc269871851d5beb9c030759e181768bf463b5a3e4d42aa80637b2",
+        "bytes": 51219,
+        "width": 520,
+        "height": 440,
+        "fileID": "cloud://cloud1-d6gpjpxunc74669d7.636c-cloud1-d6gpjpxunc74669d7-1473467388/showcase/cats/v1/close-friends-thumb-c19603eeecfc2698.jpg"
+      },
+      "detail": {
+        "fileName": "close-friends-detail-fc8fd274c1427671.jpg",
+        "cloudPath": "showcase/cats/v1/close-friends-detail-fc8fd274c1427671.jpg",
+        "sha256": "fc8fd274c14276711e99fe61cc671063cf58e4f06a96ae6e82550616ebadfd09",
+        "bytes": 183268,
+        "width": 1280,
+        "height": 854,
+        "fileID": "cloud://cloud1-d6gpjpxunc74669d7.636c-cloud1-d6gpjpxunc74669d7-1473467388/showcase/cats/v1/close-friends-detail-fc8fd274c1427671.jpg"
+      }
+    },
+    {
+      "id": "feather-play",
+      "group": 0,
+      "title": "追逗猫棒",
+      "caption": "羽毛轻轻一晃，小爪子就跟了过来。",
+      "author": "Tatyana Rubleva",
+      "sourceUrl": "https://unsplash.com/photos/the-cat-is-playing-with-a-toy-EbInppVCh8k",
+      "downloadUrl": "https://images.unsplash.com/photo-1744710835733-936ab49ee0b4",
+      "focus": [
+        0.5,
+        0.51
+      ],
+      "license": "Unsplash License",
+      "licenseUrl": "https://unsplash.com/license",
+      "originalSize": [
+        1600,
+        2400
+      ],
+      "thumb": {
+        "fileName": "feather-play-thumb-8a71cfbe98bfdc38.jpg",
+        "cloudPath": "showcase/cats/v1/feather-play-thumb-8a71cfbe98bfdc38.jpg",
+        "sha256": "8a71cfbe98bfdc38e168d82fe7d036cf4ed6e2166cce59000626a3bc2fad8eeb",
+        "bytes": 57274,
+        "width": 520,
+        "height": 440,
+        "fileID": "cloud://cloud1-d6gpjpxunc74669d7.636c-cloud1-d6gpjpxunc74669d7-1473467388/showcase/cats/v1/feather-play-thumb-8a71cfbe98bfdc38.jpg"
+      },
+      "detail": {
+        "fileName": "feather-play-detail-8c3854312578681f.jpg",
+        "cloudPath": "showcase/cats/v1/feather-play-detail-8c3854312578681f.jpg",
+        "sha256": "8c3854312578681f1a54ec8f5ac256dc0281a783bf8ea3bf603652f1ae561f1b",
+        "bytes": 198917,
+        "width": 853,
+        "height": 1280,
+        "fileID": "cloud://cloud1-d6gpjpxunc74669d7.636c-cloud1-d6gpjpxunc74669d7-1473467388/showcase/cats/v1/feather-play-detail-8c3854312578681f.jpg"
+      }
+    },
+    {
+      "id": "white-cat-play",
+      "group": 1,
+      "title": "白猫扑玩具",
+      "caption": "抬起爪子，够一够那颗红色的小玩具。",
+      "author": "ran liwen",
+      "sourceUrl": "https://unsplash.com/photos/a-fluffy-white-cat-playing-with-a-red-toy-K_YJqfAHtuk",
+      "downloadUrl": "https://images.unsplash.com/photo-1761360386534-8225a5e3acb0",
+      "focus": [
+        0.46,
+        0.32
+      ],
+      "license": "Unsplash License",
+      "licenseUrl": "https://unsplash.com/license",
+      "originalSize": [
+        1600,
+        2218
+      ],
+      "thumb": {
+        "fileName": "white-cat-play-thumb-0853416f62666269.jpg",
+        "cloudPath": "showcase/cats/v1/white-cat-play-thumb-0853416f62666269.jpg",
+        "sha256": "0853416f626662698f7d79ed3bebdd21e088eed5ce281a47554fec3271a6f416",
+        "bytes": 28998,
+        "width": 520,
+        "height": 440,
+        "fileID": "cloud://cloud1-d6gpjpxunc74669d7.636c-cloud1-d6gpjpxunc74669d7-1473467388/showcase/cats/v1/white-cat-play-thumb-0853416f62666269.jpg"
+      },
+      "detail": {
+        "fileName": "white-cat-play-detail-e320bf87c78af435.jpg",
+        "cloudPath": "showcase/cats/v1/white-cat-play-detail-e320bf87c78af435.jpg",
+        "sha256": "e320bf87c78af4357e147f52ba6a83ce05a4ad5b0a23f7f72f78d9533fd55b73",
+        "bytes": 105269,
+        "width": 923,
+        "height": 1280,
+        "fileID": "cloud://cloud1-d6gpjpxunc74669d7.636c-cloud1-d6gpjpxunc74669d7-1473467388/showcase/cats/v1/white-cat-play-detail-e320bf87c78af435.jpg"
+      }
+    },
+    {
+      "id": "rainbow-play",
+      "group": 0,
+      "title": "抓住彩色玩具",
+      "caption": "一根彩色玩具，也能让这一刻变得有趣。",
+      "author": "nader saremi",
+      "sourceUrl": "https://unsplash.com/photos/a-cat-playing-with-a-toy-on-the-floor-Oz92sBVFrCo",
+      "downloadUrl": "https://images.unsplash.com/photo-1708979346185-5f3235e1becd",
+      "focus": [
+        0.42,
+        0.5
+      ],
+      "license": "Unsplash License",
+      "licenseUrl": "https://unsplash.com/license",
+      "originalSize": [
+        1600,
+        1067
+      ],
+      "thumb": {
+        "fileName": "rainbow-play-thumb-a02a71047b0d1c57.jpg",
+        "cloudPath": "showcase/cats/v1/rainbow-play-thumb-a02a71047b0d1c57.jpg",
+        "sha256": "a02a71047b0d1c5728049e9366d8db6a651427d84d876e04125d36989c197f5a",
+        "bytes": 32428,
+        "width": 520,
+        "height": 440,
+        "fileID": "cloud://cloud1-d6gpjpxunc74669d7.636c-cloud1-d6gpjpxunc74669d7-1473467388/showcase/cats/v1/rainbow-play-thumb-a02a71047b0d1c57.jpg"
+      },
+      "detail": {
+        "fileName": "rainbow-play-detail-d7f86e0539bdc876.jpg",
+        "cloudPath": "showcase/cats/v1/rainbow-play-detail-d7f86e0539bdc876.jpg",
+        "sha256": "d7f86e0539bdc8766eeab14789b336abacdd6c5904b75314dfb4aa0302a2e668",
+        "bytes": 125074,
+        "width": 1280,
+        "height": 854,
+        "fileID": "cloud://cloud1-d6gpjpxunc74669d7.636c-cloud1-d6gpjpxunc74669d7-1473467388/showcase/cats/v1/rainbow-play-detail-d7f86e0539bdc876.jpg"
+      }
+    },
+    {
+      "id": "garden-ball",
+      "group": 1,
+      "title": "花园里玩球",
+      "caption": "草木之间，一只猫咪与一颗小球的相遇。",
+      "author": "Anastasiya D",
+      "sourceUrl": "https://unsplash.com/photos/a-cat-playing-with-a-toy-B8dvuSVbsHU",
+      "downloadUrl": "https://images.unsplash.com/photo-1669895968313-ea3eea70e09c",
+      "focus": [
+        0.46,
+        0.52
+      ],
+      "license": "Unsplash License",
+      "licenseUrl": "https://unsplash.com/license",
+      "originalSize": [
+        1600,
+        1067
+      ],
+      "thumb": {
+        "fileName": "garden-ball-thumb-98a77f9b1ae88d1c.jpg",
+        "cloudPath": "showcase/cats/v1/garden-ball-thumb-98a77f9b1ae88d1c.jpg",
+        "sha256": "98a77f9b1ae88d1c80771ff7f3a6e737a938d560a40689261078fe38abe9668b",
+        "bytes": 68641,
+        "width": 520,
+        "height": 440,
+        "fileID": "cloud://cloud1-d6gpjpxunc74669d7.636c-cloud1-d6gpjpxunc74669d7-1473467388/showcase/cats/v1/garden-ball-thumb-98a77f9b1ae88d1c.jpg"
+      },
+      "detail": {
+        "fileName": "garden-ball-detail-ef98afeff4ea4a05.jpg",
+        "cloudPath": "showcase/cats/v1/garden-ball-detail-ef98afeff4ea4a05.jpg",
+        "sha256": "ef98afeff4ea4a0519e53ee614527cd6208bb319ea2edbcdaa83ace4fd72bd0a",
+        "bytes": 235532,
+        "width": 1280,
+        "height": 854,
+        "fileID": "cloud://cloud1-d6gpjpxunc74669d7.636c-cloud1-d6gpjpxunc74669d7-1473467388/showcase/cats/v1/garden-ball-detail-ef98afeff4ea4a05.jpg"
+      }
+    }
+  ]
+}

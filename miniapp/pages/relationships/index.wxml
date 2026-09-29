@@ -10,12 +10,12 @@
   </view>
 
   <view class="trust-note">
-    <text class="trust-icon">♡</text>
+    <view class="trust-icon"><icon name="heart" size="{{34}}" color="#D94F75" /></view>
     <view><text class="trust-title">双方身份由你确认</text><text class="trust-copy">系统不会凭照片自动判断血缘、照护、亲密或冲突；旧版无方向记录也不会被自动猜成母子关系。</text></view>
   </view>
 
   <view wx:if="{{!pets.length}}" class="empty-card network-empty">
-    <text class="empty-icon">🐈‍⬛</text>
+    <view class="empty-icon"><icon name="cat" size="{{80}}" color="#D94F75" /></view>
     <text class="empty-title">先认识第一只猫咪</text>
     <text class="muted empty-copy">建立至少两份猫咪档案后，就能点亮它们之间的关系线。</text>
     <button class="primary-button compact" bindtap="addPet">新建档案</button>
@@ -28,7 +28,7 @@
         <text class="focus-pill">焦点</text>
       </view>
 
-      <view class="network-stage">
+      <view class="network-stage" style="height: {{stageHeight}}rpx">
         <view
           class="relation-line {{item.className}} {{item.directionClass}}"
           wx:for="{{lines}}"
@@ -41,11 +41,14 @@
           wx:key="id"
           data-id="{{item.id}}"
           bindtap="selectNode"
+          aria-role="button"
+          aria-label="{{item.accessibilityLabel}}"
+          hover-class="network-node-active"
           style="left: {{item.x}}rpx; top: {{item.y}}rpx;"
         >
           <view class="node-avatar-wrap">
             <image wx:if="{{item.imagePath}}" class="node-avatar" src="{{item.imagePath}}" mode="aspectFill" />
-            <view wx:else class="node-avatar node-placeholder">🐾</view>
+            <view wx:else class="node-avatar node-placeholder"><icon name="paw" size="{{40}}" color="#D94F75" /></view>
           </view>
           <text class="node-name">{{item.name}}</text>
           <text class="node-relation">{{item.relationLabel}}</text>
@@ -66,7 +69,7 @@
       <view class="relationship-card {{item.className}}" wx:for="{{relationshipRows}}" wx:key="petId">
         <view class="relationship-main">
           <image wx:if="{{item.pet.imagePath}}" class="relation-avatar" src="{{item.pet.imagePath}}" mode="aspectFill" />
-          <view wx:else class="relation-avatar relation-placeholder">🐾</view>
+          <view wx:else class="relation-avatar relation-placeholder"><icon name="paw" size="{{40}}" color="#D94F75" /></view>
           <view class="relation-copy">
             <view class="relation-title-row"><text class="relation-name">{{item.pet.name}}</text><text class="relation-tag">{{item.typeLabel}}</text></view>
             <view wx:if="{{item.relationship && !item.isLegacy}}" class="relation-role-row">
@@ -86,7 +89,7 @@
     </view>
 
     <view wx:else class="empty-card one-cat-empty">
-      <text class="empty-icon">🐾</text>
+      <view class="empty-icon"><icon name="paw" size="{{80}}" color="#D94F75" /></view>
       <text class="empty-title">还差一位猫伙伴</text>
       <text class="muted empty-copy">再建立一份档案，就能开始记录猫际关系。</text>
       <button class="secondary-button compact" bindtap="addPet">添加猫咪</button>

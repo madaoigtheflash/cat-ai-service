@@ -1,0 +1,31 @@
+<view wx:if="{{show}}" class="skeleton skeleton-{{type}}" aria-hidden="true">
+  <block wx:if="{{type === 'cards'}}">
+    <view class="sk-card" wx:for="{{rows}}" wx:key="sk">
+      <view class="sk-row">
+        <view class="sk-avatar shimmer"></view>
+        <view class="sk-lines">
+          <view class="sk-line w60 shimmer"></view>
+          <view class="sk-line w40 shimmer"></view>
+        </view>
+      </view>
+      <view class="sk-line w90 shimmer"></view>
+      <view class="sk-line w75 shimmer"></view>
+    </view>
+  </block>
+  <block wx:elif="{{type === 'list'}}">
+    <view class="sk-list-card">
+      <view class="sk-row sk-list-row" wx:for="{{rows}}" wx:key="sk">
+        <view class="sk-avatar shimmer"></view>
+        <view class="sk-lines">
+          <view class="sk-line w60 shimmer"></view>
+          <view class="sk-line w40 shimmer"></view>
+        </view>
+      </view>
+    </view>
+  </block>
+  <block wx:else>
+    <view class="sk-grid">
+      <view class="sk-cell shimmer" wx:for="{{rows}}" wx:key="sk"></view>
+    </view>
+  </block>
+</view>

@@ -1,0 +1,80 @@
+/* 通用骨架屏：占位块使用柔粉阶，shimmer 动画 1.4s 循环，尊重减少动态 */
+.skeleton { display: block; }
+
+.sk-card {
+  margin-bottom: 24rpx;
+  padding: 30rpx;
+  background: #FFFFFF;
+  border: 1rpx solid #F2DFE7;
+  border-radius: 28rpx;
+}
+
+.sk-list-card {
+  padding: 12rpx 30rpx;
+  background: #FFFFFF;
+  border: 1rpx solid #F2DFE7;
+  border-radius: 28rpx;
+}
+
+.sk-row {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.sk-list-row { padding: 18rpx 0; }
+
+.sk-avatar {
+  flex: none;
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 50%;
+}
+
+.sk-lines { flex: 1; min-width: 0; }
+
+.sk-line {
+  height: 26rpx;
+  margin-top: 14rpx;
+  border-radius: 13rpx;
+}
+
+.sk-lines .sk-line:first-child { margin-top: 0; }
+.sk-card .sk-row .sk-line { margin-top: 0; }
+.sk-card .sk-row .sk-line + .sk-line { margin-top: 14rpx; }
+
+.w40 { width: 40%; }
+.w60 { width: 60%; }
+.w75 { width: 75%; }
+.w90 { width: 90%; }
+
+.sk-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24rpx;
+}
+
+.sk-cell {
+  height: 220rpx;
+  border-radius: 50%;
+  background: #FFF0F5;
+}
+
+.sk-grid .sk-cell:nth-child(even) { border-radius: 40% 60% 55% 45% / 55% 45% 60% 40%; }
+
+.shimmer {
+  background: linear-gradient(90deg, #FFF0F5 25%, #FFE3EE 50%, #FFF0F5 75%);
+  background-size: 200% 100%;
+  animation: sk-shimmer 1.4s ease-in-out infinite;
+}
+
+.sk-avatar, .sk-line { background-color: #FFF0F5; }
+
+@keyframes sk-shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shimmer { animation: none; }
+}

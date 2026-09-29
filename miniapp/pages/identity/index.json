@@ -1,5 +1,8 @@
 {
   "navigationBarTitleText": "同猫候选",
   "enablePullDownRefresh": true,
-  "backgroundColor": "#FFF7FA"
+  "backgroundColor": "#FFF7FA",
+  "usingComponents": {
+    "icon": "/components/icon/index"
+  }
 }

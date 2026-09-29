@@ -1,5 +1,9 @@
 {
   "navigationBarTitleText": "云端猫站",
   "enablePullDownRefresh": true,
-  "backgroundColor": "#FFF7FA"
+  "backgroundColor": "#FFF7FA",
+  "usingComponents": {
+    "skeleton": "/components/skeleton/index",
+    "icon": "/components/icon/index"
+  }
 }

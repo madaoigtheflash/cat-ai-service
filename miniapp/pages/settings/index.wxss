@@ -5,8 +5,8 @@
 .settings-subtitle { display: block; margin-top: 7rpx; font-size: 22rpx; line-height: 1.6; word-break: break-word; }
 .settings-card { padding-bottom: 28rpx; }
 .group-title { display: block; margin-bottom: 28rpx; font-size: 30rpx; font-weight: 700; line-height: 1.45; }
-.settings-actions { display: flex; flex-wrap: wrap; gap: 18rpx; }
-.settings-button { flex: 1 1 260rpx; min-width: 0; margin-top: 0; }
+.settings-actions { display: flex; flex-wrap: wrap; gap: 18rpx; margin-top: 24rpx; }
+.settings-button { flex: 1 1 260rpx; min-width: 0; margin: 0; white-space: normal; word-break: break-word; }
 .test-result { margin-top: 20rpx; padding: 18rpx; border-radius: 18rpx; font-size: 23rpx; line-height: 1.65; word-break: break-word; }
 .test-result.success { color: #367f69; background: #e7f6f0; }
 .test-result.failed { color: #98404c; background: #ffe5eb; }

@@ -1,3 +1,9 @@
 {
-  "navigationBarTitleText": "猫际关系网"
+  "navigationBarTitleText": "猫际关系网",
+  "enablePullDownRefresh": true,
+  "backgroundColor": "#FFF7FA",
+  "backgroundTextStyle": "dark",
+  "usingComponents": {
+    "icon": "/components/icon/index"
+  }
 }

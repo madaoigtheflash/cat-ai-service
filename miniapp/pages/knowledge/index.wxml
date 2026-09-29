@@ -3,7 +3,7 @@
     <text class="knowledge-kicker">喵喵课堂 · 养猫经验</text>
     <text class="knowledge-title">今天想和猫咪一起学什么？</text>
     <text class="knowledge-subtitle">常用资料保存在小程序中，随时可以翻开这本养猫手账。</text>
-    <view class="search-box"><text class="search-icon">⌕</text><input value="{{query}}" placeholder="搜索食物、症状、品种…" bindinput="onSearchInput" /></view>
+    <view class="search-box"><view class="search-icon"><icon name="search" size="{{34}}" color="#D94F75" /></view><input value="{{query}}" placeholder="搜索食物、症状、品种…" bindinput="onSearchInput" /></view>
   </view>
 
   <scroll-view class="category-scroll" scroll-x enable-flex show-scrollbar="{{false}}">
@@ -16,7 +16,7 @@
   <view class="article-list">
     <view class="article-card" wx:for="{{articles}}" wx:key="id" data-id="{{item.id}}" bindtap="toggleArticle">
       <view class="article-top">
-        <view class="article-icon">{{item.icon}}</view>
+        <view class="article-icon"><icon name="{{item.icon}}" size="{{36}}" color="#D94F75" /></view>
         <view class="article-copy"><text class="article-category">{{item.category}}</text><text class="article-title">{{item.title}}</text></view>
         <text class="article-arrow">{{expandedId === item.id ? '−' : '+'}}</text>
       </view>
@@ -24,10 +24,10 @@
       <view wx:if="{{expandedId === item.id}}" class="article-content"><text>{{item.content}}</text><text class="reference-note">健康相关内容仅供科普，不能替代兽医诊断。</text></view>
     </view>
   </view>
-  <view wx:if="{{!articles.length}}" class="empty-card"><text class="empty-icon">⌕</text><text class="empty-title">没有找到匹配资料</text><text class="muted">换一个关键词，或切换资料分类。</text></view>
+  <view wx:if="{{!articles.length}}" class="empty-card"><view class="empty-icon"><icon name="search" size="{{80}}" color="#D94F75" /></view><text class="empty-title">没有找到匹配资料</text><text class="muted">换一个关键词，或切换资料分类。</text></view>
 
   <view class="local-info-card">
-    <view class="local-info-icon">📖</view>
+    <view class="local-info-icon"><icon name="book" size="{{34}}" color="#D94F75" /></view>
     <view class="local-info-copy">
       <text class="local-info-title">仅检索小程序内置资料</text>
       <text class="muted local-info-note">页面只做资料筛选。输入关键词后，会显示上方已经收录的养猫资料。</text>

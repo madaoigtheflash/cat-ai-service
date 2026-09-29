@@ -1,0 +1,11 @@
+{
+  "navigationBarTitleText": "猫咪花园",
+  "enablePullDownRefresh": true,
+  "backgroundColor": "#FFF7FA",
+  "backgroundTextStyle": "dark",
+  "usingComponents": {
+    "showcase-garden": "/components/showcase-garden/index",
+    "skeleton": "/components/skeleton/index",
+    "icon": "/components/icon/index"
+  }
+}

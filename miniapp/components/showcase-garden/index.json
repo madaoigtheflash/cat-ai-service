@@ -1,0 +1,7 @@
+{
+  "component": true,
+  "usingComponents": {
+    "skeleton": "/components/skeleton/index",
+    "icon": "/components/icon/index"
+  }
+}

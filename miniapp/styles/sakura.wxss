@@ -1,0 +1,24 @@
+/* Shared, opt-in palette: importing this file does not restyle other pages. */
+.sakura-theme {
+  --sakura-paper: #FFFBFC;
+  --sakura-wash: #FFF0F5;
+  --sakura-stroke: #EBC6D4;
+  --sakura-rim: #DFA1B6;
+  --sakura-ink: #47313D;
+  --sakura-body: #705260;
+  --sakura-muted: #80616F;
+  --sakura-accent: #B94768;
+  /* Mono-aware fade pink: desaturated petal color, decoration only, never for copy or CTA. */
+  --sakura-fade: #E8CFD9;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+  color: var(--sakura-ink);
+}
+
+/* Original five-petal mark. It has its own layout space, never covers copy. */
+.sakura-flower { position: relative; flex: none; width: 56rpx; height: 56rpx; pointer-events: none; }
+.sakura-petal { position: absolute; left: 21rpx; top: 5rpx; width: 14rpx; height: 24rpx; border: 1rpx solid #E9AFBF; border-radius: 70% 70% 45% 45%; background: #F8DCE5; transform-origin: 50% 23rpx; }
+.sakura-petal-1 { transform: rotate(72deg); }
+.sakura-petal-2 { transform: rotate(144deg); }
+.sakura-petal-3 { transform: rotate(216deg); }
+.sakura-petal-4 { transform: rotate(288deg); }
+.sakura-core { position: absolute; left: 24rpx; top: 24rpx; width: 8rpx; height: 8rpx; border-radius: 50%; background: #C67690; }

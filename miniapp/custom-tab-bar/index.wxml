@@ -1,0 +1,32 @@
+<view class="tab-bar" role="tablist" aria-label="底部导航">
+  <view
+    wx:for="{{leftTabs}}"
+    wx:key="key"
+    class="tab-item {{selected === item.index ? 'active' : ''}}"
+    data-index="{{item.index}}"
+    bindtap="onTab"
+    aria-role="tab"
+    aria-selected="{{selected === item.index}}"
+  >
+    <image class="tab-icon" src="{{selected === item.index ? item.activeIcon : item.icon}}" mode="aspectFit" aria-hidden="true" />
+    <text class="tab-text">{{item.text}}</text>
+  </view>
+
+  <view class="tab-mid" bindtap="onIdentify" aria-role="button" aria-label="拍照识猫">
+    <view class="mid-button"><image class="mid-icon" src="{{identifyIcon}}" mode="aspectFit" aria-hidden="true" /></view>
+    <text class="mid-label">识猫</text>
+  </view>
+
+  <view
+    wx:for="{{rightTabs}}"
+    wx:key="key"
+    class="tab-item {{selected === item.index ? 'active' : ''}}"
+    data-index="{{item.index}}"
+    bindtap="onTab"
+    aria-role="tab"
+    aria-selected="{{selected === item.index}}"
+  >
+    <image class="tab-icon" src="{{selected === item.index ? item.activeIcon : item.icon}}" mode="aspectFit" aria-hidden="true" />
+    <text class="tab-text">{{item.text}}</text>
+  </view>
+</view>

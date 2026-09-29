@@ -1,0 +1,54 @@
+<view class="community-page post-page {{replyTo ? 'has-reply' : ''}}" style="{{keyboardHeight ? 'padding-bottom:' + (keyboardHeight + 250) + 'px;' : ''}}">
+  <view wx:if="{{loading && !post}}" class="community-state" aria-live="polite"><text class="community-state-title">正在打开这段故事…</text></view>
+  <view wx:if="{{error}}" class="community-error"><text>{{error}}</text><button wx:if="{{postId}}" class="community-action" bindtap="retry" disabled="{{loading}}">重新加载</button><button wx:if="{{!post}}" class="community-action quiet" bindtap="goHome">回到首页</button></view>
+  <block wx:if="{{post}}">
+    <social-post-card id="story-detail-card" post="{{post}}" detail="{{true}}" show-status="{{true}}" />
+    <button wx:if="{{post.status === 'approved'}}" class="community-action quiet" open-type="share">分享给微信好友</button>
+    <view wx:if="{{post.status === 'pending' || post.status === 'rejected'}}" class="post-status-note">{{post.status === 'pending' ? '这条故事正在审核，暂未在首页公开。' : '这条故事未通过审核，未在首页公开。'}}</view>
+    <view wx:if="{{targetCommentId}}" id="notification-context" class="notification-context">
+      <text class="notification-context-title">通知里的那句话</text>
+      <block wx:if="{{targetComment}}">
+        <view wx:if="{{targetParent}}" class="notification-parent">
+          <text class="comment-reply-source">此前，{{targetParent.author.nickname}} 说</text>
+          <text class="comment-content" user-select="true">{{targetParent.content}}</text>
+        </view>
+        <text wx:elif="{{targetComment.parentId}}" class="comment-reply-source">原评论暂不可查看。</text>
+        <view class="comment-author"><text>{{targetComment.author.nickname}}</text><text wx:if="{{targetComment.timeLabel}}" class="comment-time">{{targetComment.timeLabel}}</text></view>
+        <text class="comment-content" user-select="true">{{targetComment.content}}</text>
+        <button wx:if="{{targetParent || !targetComment.parentId}}" class="comment-reply-action" bindtap="replyToNotification" disabled="{{sending}}">回应 {{targetParent ? targetParent.author.nickname : targetComment.author.nickname}}</button>
+      </block>
+      <text wx:elif="{{targetUnavailable}}" class="comment-content">这条回应暂不可查看，你仍可以阅读下面公开的讨论。</text>
+    </view>
+    <view class="comment-heading"><text>猫友的回应</text><button wx:if="{{post.status === 'approved'}}" bindtap="focusComment">接句话</button></view>
+    <view wx:if="{{!comments.length && !commentsCursor && !targetComment}}" class="comment-empty"><text>{{post.status === 'approved' ? '还没有回应。喜欢这段故事的话，可以从一句好奇开始。' : '故事公开后，猫友可以在这里回应。'}}</text></view>
+    <view wx:else class="comment-list">
+      <block wx:for="{{comments}}" wx:key="id">
+      <view wx:if="{{!targetComment || item.id !== targetComment.id}}" class="comment-item">
+        <view class="comment-author"><text>{{item.author.nickname}}</text><text wx:if="{{item.timeLabel}}" class="comment-time">{{item.timeLabel}}</text></view>
+        <text wx:if="{{item.replyToName}}" class="comment-reply-source">回应 {{item.replyToName}}</text>
+        <text class="comment-content" user-select="true">{{item.content}}</text>
+        <button wx:if="{{!item.parentId}}" class="comment-reply-action" data-id="{{item.id}}" bindtap="replyComment" disabled="{{sending}}">回应这句话</button>
+      </view>
+      </block>
+    </view>
+    <view wx:if="{{commentsError}}" class="community-error comments-error"><text>{{commentsError}}</text><button class="community-action" bindtap="loadMoreComments" disabled="{{loadingComments || loading}}">重试加载回应</button></view>
+    <button wx:if="{{commentsCursor}}" class="community-action quiet comments-more" bindtap="loadMoreComments" loading="{{loadingComments}}" disabled="{{loadingComments || loading}}">{{loadingComments ? '正在加载回应…' : '查看更早的回应'}}</button>
+    <text wx:if="{{comments.length && !commentsCursor && !loadingComments && !commentsError}}" class="community-end">目前公开的回应都在这里了。</text>
+    <view wx:if="{{post.status === 'approved'}}" class="comment-prompts">
+      <text class="prompt-label">没想好怎么开口？点一句，修改后再发。</text>
+      <button class="prompt-button" data-prompt="它平时也这么亲人吗？" bindtap="choosePrompt" disabled="{{sending}}">它平时也这么亲人吗？</button>
+      <button class="prompt-button" data-prompt="想听听你们是怎么认识的。" bindtap="choosePrompt" disabled="{{sending}}">想听听你们是怎么认识的。</button>
+    </view>
+    <text class="community-note">请友善交流，不透露他人的联系方式或精确位置。健康问题请咨询执业兽医。</text>
+  </block>
+  <view wx:if="{{post && post.status === 'approved'}}" class="comment-composer {{keyboardHeight ? 'keyboard-open' : ''}}" style="bottom: {{keyboardHeight}}px;">
+    <view wx:if="{{replyTo}}" class="composer-reply-target"><view class="composer-reply-copy"><text class="composer-reply-name">正在回应 {{replyTo.nickname}}</text><text class="composer-reply-quote">{{replyTo.content}}</text></view><button class="cancel-reply" bindtap="cancelReply" disabled="{{sending}}" aria-label="取消定向回应">取消</button></view>
+    <text wx:if="{{sendError}}" class="composer-error" aria-live="polite">{{sendError}}</text>
+    <text wx:if="{{feedback}}" class="composer-feedback" aria-live="polite">{{feedback}}</text>
+    <view class="composer-input-row">
+      <textarea class="comment-input" value="{{draft}}" placeholder="{{replyTo ? '回应 ' + replyTo.nickname : '接句话，说说你的想法…'}}" placeholder-class="comment-placeholder" maxlength="{{maxComment}}" focus="{{inputFocus}}" disabled="{{sending}}" adjust-position="{{false}}" show-confirm-bar="{{false}}" cursor-spacing="20" style="height: {{inputHeight}}px;" bindinput="onDraftInput" bindlinechange="onLineChange" bindkeyboardheightchange="onKeyboardChange" bindblur="onInputBlur" />
+      <button class="comment-send" bindtap="sendComment" loading="{{sending}}" disabled="{{sending || !draft}}">{{sending ? '发送中' : '发送'}}</button>
+    </view>
+    <text class="composer-count">{{draft.length}} / {{maxComment}}</text>
+  </view>
+</view>

@@ -1,0 +1,42 @@
+<view class="garden sakura-theme {{reducedMotion ? 'reduced' : ''}} {{!visible || detail ? 'paused' : ''}}">
+  <view class="garden-heading">
+    <view class="heading-copy"><view class="heading-line"><text class="garden-eyebrow">精选猫片</text><text class="garden-title">和猫咪待一会儿</text></view><text class="garden-subtitle {{lineFading ? 'fading' : ''}}" aria-live="polite">{{valueLine}}</text></view>
+    <view class="sakura-flower" aria-hidden="true"><view class="sakura-petal" /><view class="sakura-petal sakura-petal-1" /><view class="sakura-petal sakura-petal-2" /><view class="sakura-petal sakura-petal-3" /><view class="sakura-petal sakura-petal-4" /><view class="sakura-core" /></view>
+  </view>
+  <view class="garden-toolbar">
+    <view class="filter-tabs">
+      <button class="garden-control filter {{!favorites ? 'chosen' : ''}}" bindtap="showAll" aria-pressed="{{!favorites}}">全部</button>
+      <button class="garden-control filter {{favorites ? 'chosen' : ''}}" bindtap="showFavorites" aria-pressed="{{favorites}}">我喜欢</button>
+    </view>
+    <button class="garden-control next-group {{pages < 2 ? 'disabled' : ''}}" bindtap="nextGroup" disabled="{{pages < 2}}"><icon name="refresh" size="{{26}}" color="#B94768" /><text>换一组</text></button>
+  </view>
+  <skeleton type="grid" count="{{4}}" show="{{loading && !bubbles.length}}" />
+  <view wx:if="{{bubbles.length}}" class="spiral-stage" aria-label="精选猫片螺旋花园">
+    <view class="fallen-petal" aria-hidden="true" />
+    <view wx:for="{{[rotorEpoch]}}" wx:key="*this" class="spiral-rotor">
+      <view wx:for="{{bubbles}}" wx:key="id" class="spiral-slot" style="{{item.spiralStyle}}">
+        <view class="spiral-counter">
+          <button class="garden-control bubble bubble-{{index}}" data-id="{{item.id}}" bindtap="openPhoto" aria-label="查看精选照片：{{item.title}}">
+            <view class="bubble-stage"><view class="bubble-frame"><image class="bubble-photo" src="{{item.thumbUrl || item.fallback}}" mode="aspectFill" data-id="{{item.id}}" data-kind="thumb" binderror="imageError" /></view><view wx:if="{{item.liked}}" class="like-mark" aria-label="已喜欢"><icon name="heart" size="{{26}}" color="#B94768" filled /></view></view>
+            <view wx:if="{{pollenFor === item.id}}" class="pollen-burst" aria-hidden="true"><view class="pollen" /><view class="pollen" /><view class="pollen" /></view>
+            <text class="bubble-title">{{item.title}}</text>
+          </button>
+        </view>
+      </view>
+    </view>
+  </view>
+  <view wx:else class="garden-empty"><text class="empty-copy">{{synced ? '还没有喜欢的猫片' : '连接后查看你的云端喜欢'}}</text><text class="empty-copy">喜欢一张照片，就把这份可爱留在这里。</text><button class="garden-control empty-action" bindtap="showAll">去看看精选猫片</button></view>
+  <view class="garden-footer"><text>{{favorites ? '只记录你自己的喜欢' : '精选照片 · ' + (page + 1) + '/' + pages}}</text><label class="motion-label"><text>减少动态</text><switch checked="{{reducedMotion}}" color="#FF6F91" bindchange="toggleMotion" aria-label="减少动态" /></label></view>
+  <view wx:if="{{error || loading}}" class="garden-message"><text class="message-copy">{{loading ? '正在连接精选图库…' : error}}</text><button wx:if="{{error}}" class="garden-control retry-button" bindtap="refresh">重试</button></view>
+</view>
+
+<view wx:if="{{detail}}" class="sheet-mask" bindtap="closePhoto" catchtouchmove="stopTap">
+  <view class="photo-sheet sakura-theme" catchtap="stopTap">
+    <view class="sheet-heading"><text class="sheet-heading-copy">精选猫片</text><button class="garden-control sheet-close" bindtap="closePhoto" aria-label="关闭照片详情">关闭 ×</button></view>
+    <scroll-view class="sheet-scroll" scroll-y enhanced show-scrollbar="{{false}}">
+      <view class="detail-mat"><image class="detail-photo" src="{{detail.detailUrl || detail.fallback}}" mode="widthFix" data-id="{{detail.id}}" data-kind="detail" binderror="imageError" /></view>
+      <view class="detail-copy"><text class="detail-title">{{detail.title}}</text><text class="detail-caption">{{detail.caption}}</text><text class="detail-source">摄影：{{detail.author}} · Unsplash</text><text class="detail-license">图片版权 Unsplash License</text><text wx:if="{{!detail.detailUrl}}" class="detail-license">正在加载完整照片…</text><button class="garden-control source-link" bindtap="copySource">复制照片来源链接 ↗</button></view>
+    </scroll-view>
+    <view class="sheet-bottom"><text wx:if="{{notice}}" class="like-notice" aria-live="polite">{{notice}}</text><view wx:if="{{heart}}" class="floating-heart" aria-hidden="true"><icon name="heart" size="{{56}}" color="#B94768" filled /></view><view class="sheet-actions"><button class="garden-control share-button" open-type="share" data-share-title="{{detail.title}} · 精选猫片" data-share-image="{{detail.detailUrl || detail.thumbUrl || detail.fallback}}" aria-label="分享这张猫片"><icon name="share" size="{{30}}" color="#B94768" /></button><button wx:if="{{!synced}}" class="garden-control like-button secondary {{loading ? 'disabled' : ''}}" bindtap="refresh" loading="{{loading}}" disabled="{{loading}}">连接云端，确认喜欢状态</button><button wx:else class="garden-control like-button {{detail.liked ? 'secondary' : ''}} {{busy || loading ? 'disabled' : ''}}" bindtap="likePhoto" loading="{{busy}}" disabled="{{busy || loading}}">{{busy ? '正在同步…' : (detail.liked ? '已喜欢' : '喜欢这张猫片')}}</button></view></view>
+  </view>
+</view>

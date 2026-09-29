@@ -1,3 +1,9 @@
 {
-  "navigationBarTitleText": "猫咪详情"
+  "navigationBarTitleText": "猫咪详情",
+  "enablePullDownRefresh": true,
+  "backgroundColor": "#FFF7FA",
+  "backgroundTextStyle": "dark",
+  "usingComponents": {
+    "icon": "/components/icon/index"
+  }
 }

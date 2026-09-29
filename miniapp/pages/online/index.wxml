@@ -5,96 +5,192 @@
       <text class="online-title">一起记录熟悉的猫咪</text>
       <text class="online-subtitle">照片、时间和地点备注只在你加入的猫友小屋中流转。健康档案不会自动上传。</text>
     </view>
-    <view class="online-mascot">☁🐾</view>
+    <view class="online-mascot"><icon name="paw" size="{{72}}" color="#B94768" /></view>
   </view>
 
   <view wx:if="{{errorMessage}}" class="feedback error">{{errorMessage}}</view>
   <view wx:if="{{feedbackMessage}}" class="feedback success">{{feedbackMessage}}</view>
 
-  <view wx:if="{{loading}}" class="card loading-card">
-    <view class="loading-paw">🐾</view>
-    <text>正在连接猫友小屋…</text>
+  <view wx:if="{{loading}}" class="loading-wrap">
+    <skeleton type="cards" count="{{2}}" show="{{loading}}" />
+    <text class="loading-hint">正在连接猫友小屋…</text>
   </view>
 
   <block wx:else>
-    <view class="section-heading">
-      <view><text class="section-title">我的猫友小屋</text><text class="section-note">只有持邀请口令的成员可以加入</text></view>
+    <view class="online-section-tabs" aria-role="tablist" aria-label="猫友小屋页面分区">
+      <button
+        class="section-tab {{activeSection === 'home' ? 'is-active' : ''}}"
+        data-section="home"
+        bindtap="onSectionChange"
+        aria-label="查看小屋和档案连接"
+        aria-selected="{{activeSection === 'home'}}"
+      >
+        <text class="section-tab-label">小屋</text>
+        <text class="section-tab-meta">{{communities.length ? communities.length + ' 个' : '创建或加入'}}</text>
+      </button>
+      <button
+        class="section-tab {{activeSection === 'upload' ? 'is-active' : ''}}"
+        data-section="upload"
+        bindtap="onSectionChange"
+        aria-label="记录一次猫咪目击"
+        aria-selected="{{activeSection === 'upload'}}"
+      >
+        <text class="section-tab-label">记录目击</text>
+        <text class="section-tab-meta">照片与时间</text>
+      </button>
+      <button
+        class="section-tab {{activeSection === 'feed' ? 'is-active' : ''}}"
+        data-section="feed"
+        bindtap="onSectionChange"
+        aria-label="查看小屋动态"
+        aria-selected="{{activeSection === 'feed'}}"
+      >
+        <text class="section-tab-label">动态</text>
+        <text class="section-tab-meta">{{currentCommunity ? sightings.length + ' 条' : '加入后查看'}}</text>
+      </button>
     </view>
 
-    <view wx:if="{{communities.length}}" class="card community-card">
-      <text class="form-label">当前小屋</text>
-      <picker range="{{communityNames}}" value="{{selectedCommunityIndex}}" bindchange="onCommunityChange">
-        <view class="picker-row"><text>{{currentCommunity.name || communityNames[selectedCommunityIndex]}}</text><text class="picker-arrow">⌄</text></view>
-      </picker>
-      <view class="community-meta">
-        <text class="role-pill">{{role === 'owner' ? '小屋主人' : (role === 'admin' || role === 'reviewer') ? '协助管理' : '小屋成员'}}</text>
-        <text class="muted">邀请制共享 · 我已同步 {{cloudCats.length}} 只猫咪</text>
+    <view wx:if="{{activeSection === 'home'}}" class="section-panel">
+      <view class="section-heading section-panel-heading">
+        <view><text class="section-title">我的猫友小屋</text><text class="section-note">只有持邀请口令的成员可以加入</text></view>
       </view>
-      <view wx:if="{{currentCommunity.inviteCode}}" class="invite-row" bindtap="copyInviteCode">
-        <view><text class="invite-label">邀请口令</text><text class="invite-code">{{currentCommunity.inviteCode}}</text></view>
-        <text class="copy-text">复制</text>
-      </view>
-      <view class="insights-entry" hover-class="insights-entry-active" bindtap="openCommunityInsights">
-        <view class="insights-icon">♡</view>
-        <view class="insights-copy">
-          <text class="insights-title">小屋关系与猫咪地图</text>
-          <text class="insights-desc">参与猫际关系投票，查看粗粒度活动热区</text>
-        </view>
-        <text class="insights-arrow">›</text>
-      </view>
-    </view>
 
-    <view class="join-grid">
-      <view class="card join-card">
-        <text class="join-title">创建小屋</text>
-        <text class="join-desc">适合家庭、救助团队或固定社区。</text>
+      <view class="house-action-grid" aria-role="tablist" aria-label="小屋管理操作">
+        <button
+          class="house-action {{houseAction === 'create' ? 'is-active' : ''}}"
+          data-action="create"
+          aria-selected="{{houseAction === 'create'}}"
+          bindtap="onHouseAction"
+        ><text class="house-action-icon">＋</text><text>新增小屋</text></button>
+        <button
+          class="house-action {{houseAction === 'join' ? 'is-active' : ''}}"
+          data-action="join"
+          aria-selected="{{houseAction === 'join'}}"
+          bindtap="onHouseAction"
+        ><text class="house-action-icon">入</text><text>加入小屋</text></button>
+        <button
+          class="house-action {{houseAction === 'invite' ? 'is-active' : ''}}"
+          data-action="invite"
+          aria-selected="{{houseAction === 'invite'}}"
+          bindtap="onHouseAction"
+        ><text class="house-action-icon">邀</text><text>邀请猫友</text></button>
+      </view>
+
+      <view wx:if="{{houseAction === 'create'}}" class="card house-form-card">
+        <text class="house-form-title">新增一间邀请制小屋</text>
+        <text class="house-form-desc">适合家庭、救助团队或固定社区；创建后会立即生成邀请口令。</text>
         <input class="compact-input" maxlength="30" placeholder="例如：樱花路猫友会" value="{{newCommunityName}}" bindinput="onNewCommunityName" />
-        <button class="secondary-button join-button" loading="{{actionLoading === 'create'}}" disabled="{{actionLoading}}" bindtap="createCommunity">创建</button>
+        <button class="primary-button house-submit" loading="{{actionLoading === 'create'}}" disabled="{{actionLoading}}" bindtap="createCommunity">确认新增小屋</button>
       </view>
-      <view class="card join-card">
-        <text class="join-title">加入小屋</text>
-        <text class="join-desc">输入朋友分享的邀请口令。</text>
-        <input class="compact-input code-input" maxlength="12" placeholder="邀请口令" value="{{inviteCode}}" bindinput="onInviteCode" />
-        <button class="secondary-button join-button" loading="{{actionLoading === 'join'}}" disabled="{{actionLoading}}" bindtap="joinCommunity">加入</button>
+
+      <view wx:elif="{{houseAction === 'join'}}" class="card house-form-card">
+        <text class="house-form-title">使用邀请口令加入</text>
+        <text class="house-form-desc">口令由小屋创建者复制或通过微信分享给你。</text>
+        <input class="compact-input code-input" maxlength="12" placeholder="例如：ABCDE-23456" value="{{inviteCode}}" bindinput="onInviteCode" />
+        <button class="primary-button house-submit" loading="{{actionLoading === 'join'}}" disabled="{{actionLoading}}" bindtap="joinCommunity">确认加入小屋</button>
       </view>
+
+      <block wx:elif="{{houseAction === 'invite'}}">
+        <view wx:if="{{currentCommunity && currentCommunity.inviteCode}}" class="card invite-card">
+          <text class="house-form-title">邀请猫友加入{{currentCommunity.name}}</text>
+          <text class="house-form-desc">只发送给认识这只猫、愿意共同确认目击的人。对方打开分享后，口令会自动填入。</text>
+          <view class="invite-code-panel">
+            <text class="invite-label">当前邀请口令</text>
+            <text class="invite-code large">{{currentCommunity.inviteCode}}</text>
+          </view>
+          <view class="invite-actions">
+            <button class="invite-button copy" bindtap="copyInviteCode">复制口令</button>
+            <button
+              class="invite-button share"
+              open-type="share"
+              data-code="{{currentCommunity.inviteCode}}"
+              data-name="{{currentCommunity.name}}"
+            >微信邀请</button>
+          </view>
+          <text class="invite-safety">邀请口令相当于小屋通行证，请勿发布到公开群或公开平台。</text>
+        </view>
+        <view wx:elif="{{currentCommunity}}" class="section-intro invite-unavailable">
+          <text class="section-intro-title">当前设备没有保存邀请口令</text>
+          <text class="section-intro-copy">口令只在新增小屋成功时返回给创建者并保存在其设备。请让创建者从原设备复制或微信转发；普通成员不会看到口令。</text>
+        </view>
+        <view wx:else class="section-intro invite-unavailable">
+          <text class="section-intro-title">先新增一间小屋</text>
+          <text class="section-intro-copy">创建成功后会直接进入邀请步骤；也可以先使用朋友的口令加入已有小屋。</text>
+        </view>
+      </block>
+
+      <view wx:else class="house-action-guide">选择“新增小屋”“加入小屋”或“邀请猫友”继续。</view>
+
+      <view wx:if="{{communities.length}}" class="card community-card">
+        <text class="form-label">当前小屋</text>
+        <picker range="{{communityNames}}" value="{{selectedCommunityIndex}}" bindchange="onCommunityChange">
+          <view class="picker-row"><text>{{currentCommunity.name || communityNames[selectedCommunityIndex]}}</text><text class="picker-arrow">⌄</text></view>
+        </picker>
+        <view class="community-meta">
+          <text class="role-pill">{{role === 'owner' ? '小屋主人' : (role === 'admin' || role === 'reviewer') ? '协助管理' : '小屋成员'}}</text>
+          <text class="muted">邀请制共享 · 我已同步 {{cloudCats.length}} 只猫咪</text>
+        </view>
+        <view wx:if="{{currentCommunity.inviteCode}}" class="invite-row" bindtap="copyInviteCode" aria-role="button" aria-label="复制当前小屋邀请口令">
+          <view><text class="invite-label">邀请口令</text><text class="invite-code">{{currentCommunity.inviteCode}}</text></view>
+          <text class="copy-text">复制</text>
+        </view>
+        <view class="insights-entry" hover-class="insights-entry-active" bindtap="openCommunityInsights" aria-role="button" aria-label="打开小屋关系投票和猫咪地图">
+          <view class="insights-icon"><icon name="heart" size="{{40}}" color="#D94F75" /></view>
+          <view class="insights-copy">
+            <text class="insights-title">小屋关系与猫咪地图</text>
+            <text class="insights-desc">参与猫际关系投票，查看粗粒度活动热区</text>
+          </view>
+          <text class="insights-arrow">›</text>
+        </view>
+      </view>
+      <view wx:elif="{{!houseAction}}" class="section-intro">
+        <text class="section-intro-title">先找到一起记录的猫友</text>
+        <text class="section-intro-copy">你可以创建一个邀请制小屋，或使用朋友分享的邀请口令加入。没有加入前不会上传本地档案。</text>
+      </view>
+
+      <block wx:if="{{currentCommunity}}">
+        <view class="section-heading">
+          <view><text class="section-title">同步基础身份</text><text class="section-note">只同步姓名和外观，不上传健康记录</text></view>
+        </view>
+        <view class="card sync-card">
+          <block wx:if="{{localPets.length}}">
+            <view class="sync-list">
+              <view class="sync-row" wx:for="{{localPetRows}}" wx:key="id">
+                <image wx:if="{{item.pet.imagePath}}" class="sync-avatar" src="{{item.pet.imagePath}}" mode="aspectFill" />
+                <view wx:else class="sync-avatar sync-avatar-placeholder"><icon name="paw" size="{{40}}" color="#D94F75" /></view>
+                <view class="sync-copy">
+                  <text class="sync-name">{{item.pet.name || '未命名猫咪'}}</text>
+                  <text class="sync-desc">{{item.status === 'synced' ? '基础身份与当前小屋一致' : item.status === 'needs_sync' ? '本机基础信息有更新，可再次同步' : '尚未连接到当前小屋'}}</text>
+                </view>
+                <text class="sync-status {{item.status}}">{{item.statusLabel}}</text>
+              </view>
+            </view>
+            <picker range="{{localPetNames}}" value="{{localPetIndex}}" bindchange="onLocalPetChange">
+              <view class="picker-row"><text>{{localPetNames[localPetIndex]}}</text><text class="picker-arrow">⌄</text></view>
+            </picker>
+            <view class="sync-actions">
+              <button class="secondary-button sync-button" loading="{{actionLoading === 'sync'}}" disabled="{{actionLoading}}" bindtap="syncLocalPet">同步所选档案</button>
+              <button class="secondary-button sync-button sync-all-button" loading="{{actionLoading === 'sync_all'}}" disabled="{{actionLoading}}" bindtap="syncAllLocalPets">同步全部有更新的档案</button>
+            </view>
+            <text class="sync-privacy">只同步昵称与外观基础字段；体重、疫苗、驱虫和就医记录继续留在本机。</text>
+          </block>
+          <view wx:else class="mini-empty"><text>还没有本地猫咪档案</text><text class="muted">可先在“档案”页创建，原有健康数据仍留在本机。</text></view>
+        </view>
+      </block>
     </view>
 
-    <block wx:if="{{currentCommunity}}">
-      <view class="section-heading">
-        <view><text class="section-title">同步基础身份</text><text class="section-note">只同步姓名和外观，不上传健康记录</text></view>
-      </view>
-      <view class="card sync-card">
-        <block wx:if="{{localPets.length}}">
-          <view class="sync-list">
-            <view class="sync-row" wx:for="{{localPetRows}}" wx:key="id">
-              <image wx:if="{{item.pet.imagePath}}" class="sync-avatar" src="{{item.pet.imagePath}}" mode="aspectFill" />
-              <view wx:else class="sync-avatar sync-avatar-placeholder">🐾</view>
-              <view class="sync-copy">
-                <text class="sync-name">{{item.pet.name || '未命名猫咪'}}</text>
-                <text class="sync-desc">{{item.status === 'synced' ? '基础身份与当前小屋一致' : item.status === 'needs_sync' ? '本机基础信息有更新，可再次同步' : '尚未连接到当前小屋'}}</text>
-              </view>
-              <text class="sync-status {{item.status}}">{{item.statusLabel}}</text>
-            </view>
-          </view>
-          <picker range="{{localPetNames}}" value="{{localPetIndex}}" bindchange="onLocalPetChange">
-            <view class="picker-row"><text>{{localPetNames[localPetIndex]}}</text><text class="picker-arrow">⌄</text></view>
-          </picker>
-          <view class="sync-actions">
-            <button class="secondary-button sync-button" loading="{{actionLoading === 'sync'}}" disabled="{{actionLoading}}" bindtap="syncLocalPet">同步所选档案</button>
-            <button class="secondary-button sync-button sync-all-button" loading="{{actionLoading === 'sync_all'}}" disabled="{{actionLoading}}" bindtap="syncAllLocalPets">同步全部有更新的档案</button>
-          </view>
-          <text class="sync-privacy">只同步昵称与外观基础字段；体重、疫苗、驱虫和就医记录继续留在本机。</text>
-        </block>
-        <view wx:else class="mini-empty"><text>还没有本地猫咪档案</text><text class="muted">可先在“档案”页创建，原有健康数据仍留在本机。</text></view>
-      </view>
-
-      <view class="section-heading">
+    <view wx:elif="{{activeSection === 'upload'}}" class="section-panel">
+      <view class="section-heading section-panel-heading">
         <view><text class="section-title">上传一次目击</text><text class="section-note">先人工确认，之后再进入同猫候选识别</text></view>
       </view>
-      <view class="card sighting-form">
-        <view class="photo-picker" bindtap="chooseImage">
+      <view wx:if="{{currentCommunity}}" class="section-context">
+        <text class="section-context-label">提交到</text>
+        <text class="section-context-value">{{currentCommunity.name || '当前猫友小屋'}}</text>
+      </view>
+      <view wx:if="{{currentCommunity}}" class="card sighting-form">
+        <view class="photo-picker" bindtap="chooseImage" aria-role="button" aria-label="选择或拍摄猫咪照片">
           <image wx:if="{{draft.imagePath}}" class="photo-preview" src="{{draft.imagePath}}" mode="aspectFill" />
-          <view wx:else class="photo-empty"><text class="photo-icon">📷</text><text class="photo-title">选择或拍摄猫咪照片</text><text class="muted">尽量清晰、完整，一张图只确认一只猫</text></view>
+          <view wx:else class="photo-empty"><view class="photo-icon"><icon name="camera" size="{{56}}" color="#D94F75" /></view><text class="photo-title">选择或拍摄猫咪照片</text><text class="muted">尽量清晰、完整，一张图只确认一只猫</text></view>
         </view>
         <button wx:if="{{draft.imagePath}}" class="clear-photo" bindtap="clearImage">重新选择照片</button>
 
@@ -134,40 +230,60 @@
         <view class="privacy-tip">联机目击会先进入管理员待审核状态。照片中若有人脸、门牌或联系方式，请先不要上传。</view>
         <button class="primary-button upload-button" loading="{{actionLoading === 'upload'}}" disabled="{{actionLoading}}" bindtap="submitSighting">提交目击</button>
       </view>
+      <view wx:else class="empty-card section-empty">
+        <view class="empty-icon"><icon name="home" size="{{80}}" color="#D94F75" /></view>
+        <text class="empty-title">需要先加入猫友小屋</text>
+        <text class="muted">回到“小屋”分区创建或加入后，才能把目击提交给熟悉这只猫的成员共同确认。</text>
+        <button class="secondary-button compact section-empty-action" data-section="home" bindtap="onSectionChange">前往小屋</button>
+      </view>
+    </view>
 
-      <view class="section-heading feed-heading">
+    <view wx:else class="section-panel">
+      <view class="section-heading section-panel-heading feed-heading">
         <view><text class="section-title">小屋动态</text><text class="section-note">下拉页面可以刷新</text></view>
       </view>
-      <view wx:if="{{sightings.length}}" class="feed-list">
-        <view class="sighting-card" wx:for="{{sightings}}" wx:key="id">
-          <image wx:if="{{item.thumbnail.url}}" class="sighting-photo" src="{{item.thumbnail.url}}" mode="aspectFill" />
-          <view wx:else class="sighting-photo photo-placeholder">🐈</view>
-          <view class="sighting-body">
-            <view class="sighting-title-row"><text class="sighting-title">{{item.catName || '身份待确认的猫咪'}}</text><text class="status-pill {{item.status}}">{{item.statusLabel}}</text></view>
-            <text class="sighting-meta">{{item.observedLabel}}{{item.areaText ? ' · ' + item.areaText : ''}}</text>
-            <text wx:if="{{item.caption}}" class="sighting-caption">{{item.caption}}</text>
-            <text class="sighting-owner">{{item.isMine ? '由我上传' : '由小屋成员上传'}}</text>
-          </view>
-          <view class="sighting-actions">
-            <button wx:if="{{identityEnabled && item.status === 'approved' && item.canMatch}}" class="match-button" data-id="{{item.id}}" bindtap="openIdentity">寻找同一只猫</button>
-            <button
-              wx:if="{{identityEnabled && item.status === 'approved' && item.canEnroll}}"
-              class="match-button enroll-button"
-              data-id="{{item.id}}"
-              loading="{{actionLoading === 'enroll_' + item.id}}"
-              disabled="{{actionLoading}}"
-              bindtap="enrollLinkedSighting"
-            >加入识别图库</button>
-            <view wx:if="{{identityEnabled && item.status === 'approved' && item.identityTemplateReady}}" class="template-ready"><text>✓</text><text>已作为该猫的识别样本</text></view>
-            <block wx:if="{{item.status === 'pending_review' && item.canReview}}">
-              <button class="review-button approve" data-id="{{item.id}}" data-version="{{item.version}}" data-decision="approve" bindtap="reviewSighting">确认展示</button>
-              <button class="review-button reject" data-id="{{item.id}}" data-version="{{item.version}}" data-decision="reject" bindtap="reviewSighting">不展示</button>
-            </block>
+      <view wx:if="{{currentCommunity}}" class="section-context">
+        <text class="section-context-label">正在查看</text>
+        <text class="section-context-value">{{currentCommunity.name || '当前猫友小屋'}}</text>
+      </view>
+      <block wx:if="{{currentCommunity}}">
+        <view wx:if="{{sightings.length}}" class="feed-list">
+          <view class="sighting-card" wx:for="{{sightings}}" wx:key="id">
+            <image wx:if="{{item.thumbnail.url}}" class="sighting-photo" src="{{item.thumbnail.url}}" mode="aspectFill" />
+            <view wx:else class="sighting-photo photo-placeholder"><icon name="cat" size="{{56}}" color="#D94F75" /></view>
+            <view class="sighting-body">
+              <view class="sighting-title-row"><text class="sighting-title">{{item.catName || '身份待确认的猫咪'}}</text><text class="status-pill {{item.status}}">{{item.statusLabel}}</text></view>
+              <text class="sighting-meta">{{item.observedLabel}}{{item.areaText ? ' · ' + item.areaText : ''}}</text>
+              <text wx:if="{{item.caption}}" class="sighting-caption">{{item.caption}}</text>
+              <text class="sighting-owner">{{item.isMine ? '由我上传' : '由小屋成员上传'}}</text>
+            </view>
+            <view class="sighting-actions">
+              <button wx:if="{{identityEnabled && item.status === 'approved' && item.canMatch}}" class="match-button" data-id="{{item.id}}" bindtap="openIdentity">寻找同一只猫</button>
+              <button
+                wx:if="{{identityEnabled && item.status === 'approved' && item.canEnroll}}"
+                class="match-button enroll-button"
+                data-id="{{item.id}}"
+                loading="{{actionLoading === 'enroll_' + item.id}}"
+                disabled="{{actionLoading}}"
+                bindtap="enrollLinkedSighting"
+              >加入识别图库</button>
+              <view wx:if="{{identityEnabled && item.status === 'approved' && item.identityTemplateReady}}" class="template-ready"><icon name="check" size="{{26}}" color="#3F8E75" /><text>已作为该猫的识别样本</text></view>
+              <block wx:if="{{item.status === 'pending_review' && item.canReview}}">
+                <button class="review-button approve" data-id="{{item.id}}" data-version="{{item.version}}" data-decision="approve" bindtap="reviewSighting">确认展示</button>
+                <button class="review-button reject" data-id="{{item.id}}" data-version="{{item.version}}" data-decision="reject" bindtap="reviewSighting">不展示</button>
+              </block>
+            </view>
           </view>
         </view>
+        <view wx:else class="empty-card feed-empty"><view class="empty-icon"><icon name="cloud" size="{{80}}" color="#D94F75" /></view><text class="empty-title">小屋里还没有目击</text><text class="muted">到“记录目击”上传第一张照片，邀请熟悉这只猫的人一起确认。</text><button class="secondary-button compact section-empty-action" data-section="upload" bindtap="onSectionChange">记录第一条目击</button></view>
+      </block>
+      <view wx:else class="empty-card section-empty">
+        <view class="empty-icon"><icon name="home" size="{{80}}" color="#D94F75" /></view>
+        <text class="empty-title">加入小屋后查看动态</text>
+        <text class="muted">小屋动态只展示你有权访问的目击记录。</text>
+        <button class="secondary-button compact section-empty-action" data-section="home" bindtap="onSectionChange">前往小屋</button>
       </view>
-      <view wx:else class="empty-card feed-empty"><text class="empty-icon">☁</text><text class="empty-title">小屋里还没有目击</text><text class="muted">上传第一张照片，邀请熟悉这只猫的人一起确认。</text></view>
-    </block>
+    </view>
 
     <view class="safety-note">同猫结果只会作为候选，不会自动合并档案。持续受伤、消瘦或异常行为需要联系执业兽医或专业救助人员。</view>
   </block>

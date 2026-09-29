@@ -110,7 +110,7 @@ assert.equal(values.get('catai_mini_relationships_v1')[0].schemaVersion, 2, 'mig
 values.clear()
 const fixturePets = [
   ['focus', '奶糖公主'],
-  ['partner_1', '草莓牛奶小圆子'],
+  ['partner_1', '草莓牛奶小圆子和它不会被省略的完整名字'],
   ['partner_2', '团子'],
   ['partner_3', '小花🌸'],
   ['partner_4', '中华田园猫小橘'],
@@ -153,8 +153,19 @@ assert.equal(pageState.hiddenPetCount, 0)
 assert.equal(pageState.lines.filter(line => line.directionClass === 'mutual').length, 5)
 assert.equal(pageState.lines.filter(line => line.directionClass === 'forward').length, 1)
 assert.equal(pageState.relationshipRows.find(row => row.relationship.type === 'family').roleSummary, '母亲 → 孩子')
-assert(pageState.nodes.every(node => node.x >= 0 && node.x <= 530), 'node x coordinates stay inside the stage')
-assert(pageState.nodes.every(node => node.y >= 0 && node.y <= 400), 'node y coordinates stay inside the stage')
+assert.equal(pageState.nodes.find(node => node.id === 'partner_1').name, '草莓牛奶小圆子和它不会被省略的完整名字')
+assert(pageState.nodes.every(node => node.x >= 0 && node.x + 176 <= 650), 'node boxes stay inside the fixed 650rpx stage')
+assert(pageState.nodes.every(node => node.y >= 0 && node.y + node.visualHeight <= pageState.stageHeight), 'complete node labels fit the adaptive stage height')
+const nodesByRow = Map.groupBy
+  ? Map.groupBy(pageState.nodes, node => node.y)
+  : pageState.nodes.reduce((rows, node) => rows.set(node.y, (rows.get(node.y) || []).concat(node)), new Map())
+nodesByRow.forEach(rowNodes => {
+  const sorted = rowNodes.slice().sort((left, right) => left.x - right.x)
+  sorted.slice(1).forEach((node, index) => {
+    assert(sorted[index].x + 176 < node.x, 'nodes in the same row do not overlap')
+  })
+})
+assert(pageState.stageHeight > 700, 'six partners and a long name expand the network stage')
 
 relationshipPage.loadNetwork.call(pageContext, fixturePets[6].id)
 const reverseFamilyRow = pageState.relationshipRows.find(row => row.pet.id === fixturePets[0].id)

@@ -1,0 +1,16 @@
+<view class="lab-page">
+  <text class="lab-title">{{title}}</text>
+  <text class="lab-copy">把一种结合方式做成可以亲手体验的小实验。</text>
+  <view class="lab-notice">本地审计版：不连接生产云端，不发送真实消息。示例身份、协作与回复均为模拟。</view>
+  <view class="lab-section">
+    <text class="lab-heading">这次只看一个方向</text>
+    <text class="lab-copy">分支：{{variant}}。请走完主要流程，再检查失败、取消和隐私边界。</text>
+    <button class="lab-primary" disabled="{{!entry}}" bindtap="openExperiment">{{entry ? '打开本分支实验' : '请切换到一个功能分支'}}</button>
+  </view>
+  <view class="lab-section">
+    <text class="lab-heading">可以放心重新开始</text>
+    <text class="lab-copy">实验使用单独的存储空间。不会自动读取照片、健康档案或上传私人记录。</text>
+    <button class="lab-secondary" bindtap="resetExperiment">重置本实验数据</button>
+  </view>
+  <text wx:if="{{error}}" class="lab-error">{{error}}</text>
+</view>

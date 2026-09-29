@@ -16,7 +16,7 @@ button::after {
 
 .page {
   min-height: 100vh;
-  padding: 32rpx 32rpx calc(72rpx + env(safe-area-inset-bottom));
+  padding: 32rpx 32rpx calc(112rpx + env(safe-area-inset-bottom));
 }
 
 .card {
@@ -107,10 +107,11 @@ button::after {
 }
 
 .empty-title {
-  margin-bottom: 10rpx;
-  font-size: 30rpx;
+  display: block;
+  margin-bottom: 9rpx;
+  font-size: 29rpx;
   font-weight: 700;
-  line-height: 1.4;
+  line-height: 1.45;
 }
 
 .empty-desc {
@@ -163,13 +164,12 @@ button::after {
 .section-heading > view { min-width: 0; }
 .section-heading .section-title { display: block; margin: 0; font-size: 34rpx; font-weight: 700; line-height: 1.4; }
 .section-note { display: block; margin-top: 6rpx; color: #9d8490; font-size: 23rpx; line-height: 1.5; }
-.section-link { flex: none; padding: 10rpx 0; color: #d94f75; font-size: 24rpx; font-weight: 600; line-height: 1.45; }
+.section-link { display: flex; flex: none; align-items: center; justify-content: flex-end; min-width: 88rpx; min-height: 88rpx; padding: 18rpx 0 18rpx 16rpx; color: #d94f75; font-size: 24rpx; font-weight: 600; line-height: 1.45; }
 .primary-button, .secondary-button { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 88rpx; padding: 20rpx 28rpx; border: 0; border-radius: 44rpx; font-size: 28rpx; font-weight: 600; line-height: 1.4; }
 .primary-button { margin-top: 24rpx; color: #fff; background: linear-gradient(135deg, #ff6f91, #ff91aa); box-shadow: 0 12rpx 26rpx rgba(255,111,145,.2); }
 .primary-button:active, .secondary-button:active { transform: scale(.98); }
 .primary-button[disabled] { color: rgba(255,255,255,.86); background: #e5acbb; }
 .secondary-button { color: #d94f75; background: #fff0f5; }
-.compact { width: 240rpx; min-height: 88rpx; margin-top: 24rpx; padding: 18rpx 24rpx; }
+.compact { width: auto; min-width: 240rpx; max-width: 100%; min-height: 88rpx; margin-top: 24rpx; padding: 18rpx 24rpx; white-space: normal; }
 .empty-card { display: flex; flex-direction: column; align-items: center; padding: 48rpx 26rpx; border-radius: 28rpx; background: #fff; text-align: center; }
-.empty-title { display: block; margin-bottom: 9rpx; font-size: 29rpx; font-weight: 700; line-height: 1.45; }
 .privacy-note { margin: 36rpx 12rpx 0; color: #9d8490; font-size: 22rpx; line-height: 1.65; text-align: center; }

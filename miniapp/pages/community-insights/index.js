@@ -25,6 +25,10 @@ function directionKey(fromCatId, toCatId) {
   return `${String(fromCatId || '')}::${String(toCatId || '')}`
 }
 
+function normalizeInsightTab(value) {
+  return value === 'map' ? 'map' : 'relationship'
+}
+
 function timeBucketLabel(value) {
   const text = String(value || '')
   const match = text.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2})/)
@@ -207,6 +211,7 @@ Page({
   data: {
     loading: true,
     actionLoading: '',
+    activeInsightTab: 'relationship',
     errorMessage: '',
     feedbackMessage: '',
     communityId: '',
@@ -221,6 +226,7 @@ Page({
     selectedChoice: '',
     selectedRelationship: null,
     selectedPairLabel: '',
+    reversePairLabel: '',
     selectedRoleSummary: '',
     distributionRows: [],
     relationships: [],
@@ -236,9 +242,11 @@ Page({
   },
 
   onLoad(options) {
-    const communityId = safeDecode(options.communityId)
-    const communityName = safeDecode(options.name) || '猫友小屋'
-    this.setData({ communityId, communityName })
+    const pageOptions = options || {}
+    const communityId = safeDecode(pageOptions.communityId)
+    const communityName = safeDecode(pageOptions.name) || '猫友小屋'
+    const activeInsightTab = normalizeInsightTab(pageOptions.tab)
+    this.setData({ communityId, communityName, activeInsightTab })
     wx.setNavigationBarTitle({ title: '小屋关系与地图' })
     if (!communityId) {
       this.setData({ loading: false, errorMessage: '缺少小屋信息，请从“猫友小屋”重新进入。' })
@@ -249,6 +257,12 @@ Page({
 
   onPullDownRefresh() {
     this.loadInsights(true).finally(() => wx.stopPullDownRefresh())
+  },
+
+  switchInsightTab(event) {
+    const nextTab = event && event.currentTarget && event.currentTarget.dataset.tab
+    if ((nextTab !== 'relationship' && nextTab !== 'map') || nextTab === this.data.activeInsightTab) return
+    this.setData({ activeInsightTab: nextTab })
   },
 
   async loadInsights(fromRefresh) {
@@ -303,6 +317,14 @@ Page({
     this.setData({ catBIndex: Number(event.detail.value) || 0 }, () => this.refreshSelectedPair())
   },
 
+  reverseDirection() {
+    if (this.data.actionLoading || this.data.pairInvalid) return
+    this.setData({
+      catAIndex: this.data.catBIndex,
+      catBIndex: this.data.catAIndex
+    }, () => this.refreshSelectedPair())
+  },
+
   selectRelationship(event) {
     if (event.currentTarget.dataset.state !== 'directed') {
       wx.showToast({ title: '旧关系需要重新选择方向', icon: 'none' })
@@ -330,6 +352,7 @@ Page({
       pairInvalid,
       selectedRelationship,
       selectedPairLabel: pairInvalid ? '' : `${catA.displayName} → ${catB.displayName}`,
+      reversePairLabel: pairInvalid ? '' : `${catB.displayName} → ${catA.displayName}`,
       selectedChoice,
       selectedRoleSummary: pairInvalid ? '' : roleSentence(selectedChoice, catA, catB),
       distributionRows: selectedRelationship && selectedRelationship.canSeeDistribution

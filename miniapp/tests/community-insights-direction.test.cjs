@@ -5,6 +5,8 @@ const path = require('node:path')
 const vm = require('node:vm')
 
 const PAGE_PATH = path.join(__dirname, '..', 'pages', 'community-insights', 'index.js')
+const WXML_PATH = path.join(__dirname, '..', 'pages', 'community-insights', 'index.wxml')
+const WXSS_PATH = path.join(__dirname, '..', 'pages', 'community-insights', 'index.wxss')
 
 function clone(value) {
   return value == null ? value : JSON.parse(JSON.stringify(value))
@@ -143,6 +145,36 @@ test('A to B, B to A, and a legacy pair stay separate in page state', () => {
   assert.equal(page.data.selectedRelationship.totalVotes, 1)
 })
 
+test('relationship is the default insight tab and the map can be opened explicitly', () => {
+  const { page } = makePage()
+
+  assert.equal(page.data.activeInsightTab, 'relationship')
+  page.switchInsightTab({ currentTarget: { dataset: { tab: 'map' } } })
+  assert.equal(page.data.activeInsightTab, 'map')
+
+  page.switchInsightTab({ currentTarget: { dataset: { tab: 'unknown' } } })
+  assert.equal(page.data.activeInsightTab, 'map')
+
+  page.onLoad({ tab: 'map' })
+  assert.equal(page.data.activeInsightTab, 'map')
+  page.onLoad({ tab: 'unexpected' })
+  assert.equal(page.data.activeInsightTab, 'relationship')
+})
+
+test('one-tap direction reversal loads the independent reverse edge', () => {
+  const { page } = makePage()
+  page.applyInsights(insightsFixture())
+
+  assert.equal(page.data.selectedPairLabel, '奶糖 → 豆包')
+  assert.equal(page.data.reversePairLabel, '豆包 → 奶糖')
+  page.reverseDirection()
+
+  assert.equal(page.data.selectedPairLabel, '豆包 → 奶糖')
+  assert.equal(page.data.reversePairLabel, '奶糖 → 豆包')
+  assert.equal(page.data.selectedRelationship.id, 'drel_ba')
+  assert.equal(page.data.selectedChoice, 'playmate')
+})
+
 test('legacy cards cannot select a direction and new votes submit explicit endpoints', async () => {
   const { page, getToastTitle, getSubmitted } = makePage()
   page.data.communityId = 'com_1'
@@ -194,4 +226,21 @@ test('equal leading counts are reported as a tie instead of a false winner', () 
 
   assert.equal(page.data.selectedRelationship.leadingLabel, '意见并列 · 各 1 票')
   assert.match(page.data.selectedRelationship.roleSummary, /没有单一主导观察/)
+})
+
+test('insight layout separates relationship and map panels without dropping safety contracts', () => {
+  const wxml = fs.readFileSync(WXML_PATH, 'utf8')
+  const wxss = fs.readFileSync(WXSS_PATH, 'utf8')
+
+  assert.match(wxml, /data-tab="relationship"[\s\S]*data-tab="map"/)
+  assert.match(wxml, /wx:if="\{\{activeInsightTab === 'relationship'\}\}"/)
+  assert.match(wxml, /bindtap="reverseDirection"/)
+  assert.match(wxml, /投票前保持盲看/)
+  assert.match(wxml, /A → B 与 B → A 分开统计/)
+  assert.match(wxml, /show-location="\{\{false\}\}"/)
+  assert.match(wxml, /热区文字列表/)
+  assert.match(wxml, /联系执业兽医或专业救助人员/)
+  assert.match(wxss, /\.insight-tab\s*\{[^}]*min-height:\s*104rpx/)
+  assert.match(wxss, /\.insight-tab\s*\{[^}]*width:\s*100%[^}]*min-width:\s*0[^}]*max-width:\s*100%/s)
+  assert.match(wxss, /\.swap-direction\s*\{[^}]*min-height:\s*88rpx/)
 })

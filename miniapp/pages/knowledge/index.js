@@ -26,5 +26,30 @@ Page({
   toggleArticle(event) {
     const id = event.currentTarget.dataset.id
     this.setData({ expandedId: this.data.expandedId === id ? '' : id })
+  },
+
+  onPullDownRefresh() {
+    this.filter()
+    wx.stopPullDownRefresh()
+  },
+
+  onShow() {
+    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
+      this.getTabBar().setData({ selected: 2 })
+    }
+  },
+
+  onShareAppMessage() {
+    return {
+      title: '养猫知识库：品种、健康、饮食一查就有',
+      path: '/pages/knowledge/index?from=share'
+    }
+  },
+
+  onShareTimeline() {
+    return {
+      title: '养猫知识库：品种、健康、饮食一查就有',
+      query: 'from=timeline'
+    }
   }
 })

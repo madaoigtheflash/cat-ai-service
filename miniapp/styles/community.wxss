@@ -1,0 +1,19 @@
+.community-page { min-height: 100vh; padding: 24rpx 32rpx calc(184rpx + env(safe-area-inset-bottom)); background: #FFF7FA; }
+.community-heading { margin: 0; color: #3E2D35; font-size: 42rpx; font-weight: 700; line-height: 1.35; word-break: break-word; }
+.community-description { display: block; margin-top: 12rpx; color: #6F5A64; font-size: 25rpx; line-height: 1.65; word-break: break-word; }
+.community-action { display: flex; align-items: center; justify-content: center; gap: 12rpx; min-height: 88rpx; min-width: 0; margin: 0; padding: 20rpx 24rpx; border: 0; border-radius: 24rpx; color: #B94768; background: #FFF0F5; font-size: 28rpx; font-weight: 600; line-height: 1.5; white-space: normal; word-break: break-word; }
+.community-action.primary { color: #FFFFFF; background: #B94768; }
+.community-action.quiet { color: #6F5A64; background: #FFFFFF; border: 1rpx solid #F2DFE7; }
+.community-action[disabled] { color: #80616F; background: #F2DFE7; }
+.community-action:active { transform: scale(.98); }
+.community-actions { display: flex; flex-wrap: wrap; gap: 16rpx; margin-top: 24rpx; }
+.community-actions > button { flex: 1; min-width: 240rpx; }
+.community-feed { display: flex; flex-direction: column; gap: 24rpx; margin-top: 32rpx; }
+.community-state { padding: 48rpx 28rpx; border: 1rpx solid #F2DFE7; border-radius: 28rpx; background: #FFFFFF; text-align: center; }
+.community-state-title { display: block; color: #3E2D35; font-size: 30rpx; font-weight: 600; line-height: 1.5; word-break: break-word; }
+.community-state-copy { display: block; margin-top: 12rpx; color: #6F5A64; font-size: 26rpx; line-height: 1.7; word-break: break-word; }
+.community-state .community-action { margin-top: 24rpx; }
+.community-error { padding: 24rpx; border-radius: 24rpx; background: #FFFFFF; border: 1rpx solid #F2DFE7; color: #B94955; font-size: 25rpx; line-height: 1.65; word-break: break-word; }
+.community-error .community-action { margin-top: 16rpx; }
+.community-end { display: block; padding: 20rpx 12rpx; color: #80616F; text-align: center; font-size: 24rpx; line-height: 1.65; word-break: break-word; }
+.community-note { margin: 32rpx 0 0; color: #80616F; font-size: 23rpx; line-height: 1.65; word-break: break-word; }

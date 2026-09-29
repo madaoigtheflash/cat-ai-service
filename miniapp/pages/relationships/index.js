@@ -38,6 +38,93 @@ const ROLE_PROFILES = [
   { value: 'needs_space', label: '需要空间 ↔ 需要空间', type: 'needs_space', fromRole: 'needs_space', toRole: 'needs_space', directionMode: 'mutual' }
 ]
 
+const STAGE_WIDTH = 650
+const NODE_WIDTH = 176
+const NODE_CENTER_OFFSET = NODE_WIDTH / 2
+const NODE_AVATAR_CENTER_Y = 52
+const NODE_AVATAR_RADIUS = 58
+const STAGE_TOP_PADDING = 30
+const STAGE_BOTTOM_PADDING = 30
+const NODE_ROW_GAP = 52
+const NODE_COLUMN_X = Object.freeze({ left: 14, center: 237, right: 460 })
+
+function textUnits(value) {
+  return Array.from(String(value || '')).reduce((total, character) => {
+    return total + (/^[\u0000-\u00ff]$/.test(character) ? 0.58 : 1)
+  }, 0)
+}
+
+function estimatedNodeHeight(name, relationLabel) {
+  // The estimate intentionally leaves room for the WeChat large-font setting.
+  // Absolute children do not contribute to their parent's height, so the stage
+  // uses this conservative value to keep complete labels inside its bounds.
+  const nameLines = Math.max(1, Math.ceil(textUnits(name) / 5.5))
+  const relationLines = Math.max(1, Math.ceil(textUnits(relationLabel) / 5.5))
+  return 126 + nameLines * 42 + relationLines * 41
+}
+
+function slotPlan(otherCount) {
+  if (otherCount <= 0) {
+    return { focus: { row: 0, column: 'center' }, others: [] }
+  }
+  if (otherCount === 1) {
+    return {
+      focus: { row: 0, column: 'left' },
+      others: [{ row: 0, column: 'right' }]
+    }
+  }
+  if (otherCount === 2) {
+    return {
+      focus: { row: 0, column: 'center' },
+      others: [{ row: 1, column: 'left' }, { row: 1, column: 'right' }]
+    }
+  }
+  if (otherCount === 3) {
+    return {
+      focus: { row: 1, column: 'center' },
+      others: [
+        { row: 0, column: 'center' },
+        { row: 1, column: 'left' },
+        { row: 1, column: 'right' }
+      ]
+    }
+  }
+  if (otherCount === 4) {
+    return {
+      focus: { row: 1, column: 'center' },
+      others: [
+        { row: 0, column: 'left' },
+        { row: 0, column: 'right' },
+        { row: 2, column: 'left' },
+        { row: 2, column: 'right' }
+      ]
+    }
+  }
+  if (otherCount === 5) {
+    return {
+      focus: { row: 1, column: 'center' },
+      others: [
+        { row: 0, column: 'left' },
+        { row: 0, column: 'right' },
+        { row: 1, column: 'left' },
+        { row: 1, column: 'right' },
+        { row: 2, column: 'center' }
+      ]
+    }
+  }
+  return {
+    focus: { row: 1, column: 'center' },
+    others: [
+      { row: 0, column: 'left' },
+      { row: 0, column: 'right' },
+      { row: 1, column: 'left' },
+      { row: 1, column: 'right' },
+      { row: 2, column: 'left' },
+      { row: 2, column: 'right' }
+    ]
+  }
+}
+
 const RELATION_ACTIONS = [
   { label: '朋友 ↔ 朋友', profile: 'friends' },
   { label: '玩伴 ↔ 玩伴', profile: 'playmates' },
@@ -97,6 +184,7 @@ Page({
     relationshipRows: [],
     relationCount: 0,
     hiddenPetCount: 0,
+    stageHeight: 300,
     relationTypes: RELATION_TYPES
   },
 
@@ -108,6 +196,27 @@ Page({
     this.loadNetwork(this.data.focusedPetId || this.initialPetId)
   },
 
+  onPullDownRefresh() {
+    this.loadNetwork(this.data.focusedPetId || this.initialPetId)
+    wx.stopPullDownRefresh()
+  },
+
+  onShareAppMessage() {
+    const focused = this.data.focusedPet
+    return {
+      title: focused ? `${focused.name || '这只猫'} 的猫际关系网` : '记录猫咪之间的相处关系',
+      path: `/pages/relationships/index${this.data.focusedPetId ? `?id=${this.data.focusedPetId}` : ''}`
+    }
+  },
+
+  onShareTimeline() {
+    const focused = this.data.focusedPet
+    return {
+      title: focused ? `${focused.name || '这只猫'} 的猫际关系网` : '记录猫咪之间的相处关系',
+      query: this.data.focusedPetId ? `id=${this.data.focusedPetId}` : ''
+    }
+  },
+
   loadNetwork(preferredId) {
     const pets = storage.listPets()
     const relationships = storage.listRelationships()
@@ -116,7 +225,7 @@ Page({
     const focusedPet = pets.find(pet => pet.id === preferredId) || pets[0] || null
 
     if (!focusedPet) {
-      this.setData({ pets: [], focusedPetId: '', focusedPet: null, nodes: [], lines: [], relationshipRows: [], relationCount: 0, hiddenPetCount: 0 })
+      this.setData({ pets: [], focusedPetId: '', focusedPet: null, nodes: [], lines: [], relationshipRows: [], relationCount: 0, hiddenPetCount: 0, stageHeight: 300 })
       return
     }
 
@@ -160,64 +269,96 @@ Page({
       lines: layout.lines,
       relationshipRows,
       relationCount: validRelationships.length,
-      hiddenPetCount: Math.max(0, otherPets.length - visibleOthers.length)
+      hiddenPetCount: Math.max(0, otherPets.length - visibleOthers.length),
+      stageHeight: layout.stageHeight
     })
   },
 
   buildLayout(focusedPet, otherPets, relationshipFor) {
-    const centerX = 325
-    const centerY = 268
-    const radiusX = 226
-    const radiusY = 184
-    const nodeHalf = 60
-    const nodes = [{
+    const plan = slotPlan(otherPets.length)
+    const focusName = focusedPet.name || '未命名猫咪'
+    const nodeDescriptors = [{
       id: focusedPet.id,
-      name: focusedPet.name || '未命名猫咪',
+      name: focusName,
       imagePath: focusedPet.imagePath || '',
-      x: centerX - nodeHalf,
-      y: centerY - nodeHalf,
       current: true,
       relationLabel: '当前焦点',
-      className: 'current'
+      className: 'current',
+      accessibilityLabel: `当前焦点，${focusName}`,
+      slot: plan.focus,
+      visualHeight: estimatedNodeHeight(focusName, '当前焦点')
     }]
-    const lines = []
 
     otherPets.forEach((pet, index) => {
-      const count = otherPets.length
-      const angle = count === 1 ? 0 : (-Math.PI / 2) + (Math.PI * 2 * index / count)
-      const petCenterX = centerX + Math.cos(angle) * radiusX
-      const petCenterY = centerY + Math.sin(angle) * radiusY
       const relationship = relationshipFor(pet.id)
       const type = relationship ? relationType(relationship.type) : null
       const presentation = relationship
         ? relationshipPresentation(relationship, focusedPet.id, pet.id)
         : null
-      nodes.push({
+      const name = pet.name || '未命名猫咪'
+      const relationLabel = presentation ? presentation.roleSummary : '待记录'
+      nodeDescriptors.push({
         id: pet.id,
-        name: pet.name || '未命名猫咪',
+        name,
         imagePath: pet.imagePath || '',
-        x: Math.round(petCenterX - nodeHalf),
-        y: Math.round(petCenterY - nodeHalf),
         current: false,
-        relationLabel: presentation ? presentation.roleSummary : '待记录',
-        className: type ? type.className : 'unlinked'
-      })
-      if (relationship) {
-        const startOffset = 62
-        const endOffset = 62
-        const distance = Math.sqrt(Math.pow(petCenterX - centerX, 2) + Math.pow(petCenterY - centerY, 2))
-        lines.push({
+        relationLabel,
+        className: type ? type.className : 'unlinked',
+        accessibilityLabel: `${name}，${relationLabel}，点击切换视角`,
+        slot: plan.others[index],
+        visualHeight: estimatedNodeHeight(name, relationLabel),
+        line: relationship ? {
           id: relationship.id,
-          x: Math.round(centerX + Math.cos(angle) * startOffset),
-          y: Math.round(centerY + Math.sin(angle) * startOffset),
-          width: Math.max(0, Math.round(distance - startOffset - endOffset)),
-          angle: Math.round(angle * 180 / Math.PI),
           className: type.className,
           directionClass: presentation.directionClass
-        })
+        } : null
+      })
+    })
+
+    const rowHeights = []
+    nodeDescriptors.forEach(node => {
+      const row = node.slot.row
+      rowHeights[row] = Math.max(rowHeights[row] || 0, node.visualHeight)
+    })
+    const rowTops = []
+    let cursorY = STAGE_TOP_PADDING
+    rowHeights.forEach((height, row) => {
+      rowTops[row] = cursorY
+      cursorY += height + NODE_ROW_GAP
+    })
+    const stageHeight = Math.max(300, cursorY - NODE_ROW_GAP + STAGE_BOTTOM_PADDING)
+    const nodes = nodeDescriptors.map(node => Object.assign({}, node, {
+      x: NODE_COLUMN_X[node.slot.column],
+      y: rowTops[node.slot.row]
+    }))
+    const focusNode = nodes[0]
+    const focusCenterX = focusNode.x + NODE_CENTER_OFFSET
+    const focusCenterY = focusNode.y + NODE_AVATAR_CENTER_Y
+    const lines = nodes.slice(1).filter(node => node.line).map(node => {
+      const targetCenterX = node.x + NODE_CENTER_OFFSET
+      const targetCenterY = node.y + NODE_AVATAR_CENTER_Y
+      const deltaX = targetCenterX - focusCenterX
+      const deltaY = targetCenterY - focusCenterY
+      const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
+      const unitX = distance ? deltaX / distance : 0
+      const unitY = distance ? deltaY / distance : 0
+      return {
+        id: node.line.id,
+        x: Math.round(focusCenterX + unitX * NODE_AVATAR_RADIUS),
+        y: Math.round(focusCenterY + unitY * NODE_AVATAR_RADIUS),
+        width: Math.max(0, Math.round(distance - NODE_AVATAR_RADIUS * 2)),
+        angle: Math.round(Math.atan2(deltaY, deltaX) * 180 / Math.PI),
+        className: node.line.className,
+        directionClass: node.line.directionClass
       }
     })
-    return { nodes, lines }
+    const cleanNodes = nodes.map(node => {
+      const cleanNode = Object.assign({}, node)
+      delete cleanNode.line
+      delete cleanNode.slot
+      return cleanNode
+    })
+    return { stageWidth: STAGE_WIDTH, stageHeight, nodes: cleanNodes, lines }
   },
 
   selectNode(event) {

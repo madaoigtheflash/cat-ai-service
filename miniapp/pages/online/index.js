@@ -4,6 +4,12 @@ const storage = require('../../utils/storage')
 
 const COMMUNITY_KEY = 'catai_mini_online_community_v1'
 const INVITE_CODES_KEY = 'catai_mini_online_invites_v1'
+const SECTION_KEYS = ['home', 'upload', 'feed']
+const HOUSE_ACTIONS = ['create', 'join', 'invite']
+
+function defaultSection(communities) {
+  return communities && communities.length ? 'feed' : 'home'
+}
 
 function pad(value) {
   return String(value).padStart(2, '0')
@@ -155,6 +161,8 @@ Page({
     actionLoading: '',
     errorMessage: '',
     feedbackMessage: '',
+    activeSection: 'home',
+    houseAction: '',
     communities: [],
     communityNames: [],
     selectedCommunityIndex: 0,
@@ -174,8 +182,28 @@ Page({
     draft: currentDraft()
   },
 
-  onLoad() {
+  onLoad(options) {
+    const sharedInviteCode = String(options && options.inviteCode || '').trim().toUpperCase().slice(0, 12)
+    const requestedAction = sharedInviteCode
+      ? 'join'
+      : options && HOUSE_ACTIONS.includes(options.mode)
+        ? options.mode
+        : ''
+    const requestedSection = requestedAction
+      ? 'home'
+      : options && SECTION_KEYS.includes(options.section)
+        ? options.section
+        : ''
     this._onlineLoaded = false
+    this._sectionDefaultResolved = Boolean(requestedSection)
+    this._sectionUserSelected = Boolean(requestedSection)
+    if (requestedSection || requestedAction || sharedInviteCode) {
+      this.setData({
+        activeSection: requestedSection || 'home',
+        houseAction: requestedAction,
+        inviteCode: sharedInviteCode
+      })
+    }
     this.loadOnline().finally(() => {
       this._onlineLoaded = true
     })
@@ -227,6 +255,7 @@ Page({
       const nextDraft = communityChanged
         ? Object.assign({}, this.data.draft, { catIndex: 0, localPetId: '', remotePetId: '' })
         : this.data.draft
+      const shouldResolveDefault = !this._sectionDefaultResolved && !this._sectionUserSelected
       this.setData({
         communities,
         communityNames: communities.map(item => item.name),
@@ -243,7 +272,8 @@ Page({
         cloudCatNames: communityChanged ? ['暂不确认身份'] : this.data.cloudCatNames,
         sightings: communityChanged ? [] : this.data.sightings,
         role: communityChanged ? '' : this.data.role,
-        canReview: communityChanged ? false : this.data.canReview
+        canReview: communityChanged ? false : this.data.canReview,
+        activeSection: shouldResolveDefault ? defaultSection(communities) : this.data.activeSection
       })
       if (communities.length) await this.loadWorkspace(communities[selectedCommunityIndex].id)
       else {
@@ -261,6 +291,7 @@ Page({
           'draft.remotePetId': ''
         })
       }
+      this._sectionDefaultResolved = true
       return true
     } catch (error) {
       if (loadToken !== this._onlineLoadToken) return false
@@ -357,6 +388,19 @@ Page({
     })
   },
 
+  onSectionChange(event) {
+    const section = String(event.currentTarget.dataset.section || '')
+    if (!SECTION_KEYS.includes(section) || section === this.data.activeSection) return
+    this._sectionUserSelected = true
+    this.setData({ activeSection: section })
+  },
+
+  onHouseAction(event) {
+    const action = String(event.currentTarget.dataset.action || '')
+    if (!HOUSE_ACTIONS.includes(action)) return
+    this.setData({ houseAction: action, errorMessage: '' })
+  },
+
   onNewCommunityName(event) { this.setData({ newCommunityName: event.detail.value }) },
   onInviteCode(event) { this.setData({ inviteCode: event.detail.value }) },
   onLocalPetChange(event) {
@@ -395,7 +439,11 @@ Page({
         wx.setStorageSync(INVITE_CODES_KEY, inviteCodes)
         wx.setStorageSync(COMMUNITY_KEY, communityId)
       }
-      this.setData({ newCommunityName: '', feedbackMessage: '猫友小屋创建成功，可以邀请熟悉的猫友加入。' })
+      this.setData({
+        newCommunityName: '',
+        houseAction: 'invite',
+        feedbackMessage: '猫友小屋创建成功，现在可以复制口令或通过微信邀请猫友。'
+      })
       await this.loadOnline()
     } catch (error) {
       this.setData({ errorMessage: error.message || '创建失败，请稍后重试' })
@@ -409,8 +457,24 @@ Page({
     if (!inviteCode) return wx.showToast({ title: '请输入邀请口令', icon: 'none' })
     this.setData({ actionLoading: 'join', errorMessage: '', feedbackMessage: '' })
     try {
-      await online.joinCommunity(inviteCode)
-      this.setData({ inviteCode: '', feedbackMessage: '已经加入猫友小屋。' })
+      const joined = await online.joinCommunity(inviteCode)
+      const community = joined && joined.community || {}
+      const communityId = community.communityId || community.id
+      const claimedAsOwner = community.role === 'owner'
+      if (claimedAsOwner && communityId) {
+        const normalizedCode = inviteCode.toUpperCase()
+        const inviteCodes = wx.getStorageSync(INVITE_CODES_KEY) || {}
+        inviteCodes[communityId] = normalizedCode
+        wx.setStorageSync(INVITE_CODES_KEY, inviteCodes)
+        wx.setStorageSync(COMMUNITY_KEY, communityId)
+      }
+      this.setData({
+        inviteCode: '',
+        houseAction: claimedAsOwner ? 'invite' : '',
+        feedbackMessage: claimedAsOwner
+          ? '小屋已认领，你可以继续复制口令邀请猫友。'
+          : '已经加入猫友小屋。'
+      })
       await this.loadOnline()
     } catch (error) {
       this.setData({ errorMessage: error.message || '加入失败，请检查邀请口令' })
@@ -533,8 +597,10 @@ Page({
       })
       this.setData({
         draft: currentDraft(),
-        feedbackMessage: '目击照片已安全提交，等待小屋管理员确认后展示。'
+        feedbackMessage: '目击照片已安全提交，等待小屋管理员确认后展示。',
+        activeSection: 'feed'
       })
+      this._sectionUserSelected = true
       await this.loadWorkspace(community.id)
     } catch (error) {
       this.setData({ errorMessage: error.message || '上传失败，请稍后重试' })
@@ -621,6 +687,32 @@ Page({
   copyInviteCode() {
     const code = this.data.currentCommunity && this.data.currentCommunity.inviteCode
     if (!code) return
-    wx.setClipboardData({ data: code })
+    wx.setClipboardData({
+      data: code,
+      success: () => this.setData({ feedbackMessage: '邀请口令已复制，可以发给熟悉这只猫的朋友。' })
+    })
+  },
+
+  onShareAppMessage(event) {
+    const dataset = event && event.target && event.target.dataset || {}
+    const community = this.data.currentCommunity || {}
+    const code = String(dataset.code || community.inviteCode || '').trim().toUpperCase()
+    const name = String(dataset.name || community.name || '猫友小屋').trim()
+    return {
+      title: code ? `${name}邀请你一起记录熟悉的猫咪` : '来猫猫小屋一起记录熟悉的猫咪',
+      path: code
+        ? `/pages/online/index?section=home&inviteCode=${encodeURIComponent(code)}`
+        : '/pages/online/index?section=home'
+    }
+  },
+
+  onShareTimeline() {
+    const community = this.data.currentCommunity || {}
+    const code = String(community.inviteCode || '').trim().toUpperCase()
+    const name = String(community.name || '猫友小屋').trim()
+    return {
+      title: code ? `${name}邀请你一起记录熟悉的猫咪` : '来猫猫小屋一起记录熟悉的猫咪',
+      query: code ? `section=home&inviteCode=${encodeURIComponent(code)}` : 'section=home'
+    }
   }
 })

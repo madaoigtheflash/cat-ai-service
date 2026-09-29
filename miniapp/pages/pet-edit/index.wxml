@@ -1,7 +1,7 @@
 <view class="page edit-page">
   <view class="avatar-editor" bindtap="chooseImage">
     <image wx:if="{{form.imagePath}}" class="edit-avatar" src="{{form.imagePath}}" mode="aspectFill" />
-    <view wx:else class="edit-avatar avatar-placeholder">🐱</view>
+    <view wx:else class="edit-avatar avatar-placeholder"><icon name="cat" size="{{88}}" color="#D94F75" /></view>
     <text class="avatar-action">{{form.imagePath ? '更换照片' : '添加照片'}}</text>
   </view>
 
@@ -25,5 +25,8 @@
     <view class="form-item"><text class="form-label">健康状态</text><input class="form-input" value="{{form.healthStatus}}" placeholder="例如：状态良好" data-field="healthStatus" bindinput="onInput" /></view>
     <view class="form-item"><text class="form-label">备注</text><textarea class="form-textarea" value="{{form.notes}}" placeholder="性格、饮食偏好、需要留意的事项…" data-field="notes" bindinput="onInput" maxlength="500" /></view>
   </view>
-  <button class="primary-button save-button" bindtap="save">保存档案</button>
+  <text class="archive-privacy-note">档案仅保存在本机。写动态时只带入名字、品种和毛色；健康、备注等私密信息不会带入，照片需另行确认。</text>
+  <view wx:if="{{error}}" class="save-error">{{error}}</view>
+  <button class="primary-button save-button" loading="{{saving}}" disabled="{{saving}}" bindtap="save">{{saving ? '正在保存…' : '只保存档案'}}</button>
+  <button wx:if="{{shareAllowed}}" class="secondary-button share-button" disabled="{{saving}}" bindtap="saveAndShare">保存并写动态</button>
 </view>

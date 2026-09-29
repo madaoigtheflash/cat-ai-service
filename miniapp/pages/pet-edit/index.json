@@ -1,3 +1,6 @@
 {
-  "navigationBarTitleText": "编辑猫咪档案"
+  "navigationBarTitleText": "编辑猫咪档案",
+  "usingComponents": {
+    "icon": "/components/icon/index"
+  }
 }

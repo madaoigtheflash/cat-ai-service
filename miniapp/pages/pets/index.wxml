@@ -1,16 +1,16 @@
 <view class="page pets-page">
   <view class="pets-header">
-    <view><text class="pets-title">我的猫咪</text><text class="muted pets-count">{{pets.length}} 份本地档案</text></view>
+    <view class="pets-heading"><text class="pets-title">我的猫咪</text><text class="muted pets-count">{{pets.length}} 份本地档案</text></view>
     <view class="header-actions">
       <button class="network-button" bindtap="openRelationships">猫际图</button>
-      <button class="add-button" bindtap="addPet">＋ 新建</button>
+      <button class="add-button" bindtap="addPet"><icon name="plus" size="{{28}}" color="#fff" /><text>新建</text></button>
     </view>
   </view>
 
   <view wx:if="{{pets.length}}" class="pet-list">
     <view class="pet-card" wx:for="{{pets}}" wx:key="id" data-id="{{item.id}}" bindtap="openPet">
       <image wx:if="{{item.imagePath}}" class="pet-avatar" src="{{item.imagePath}}" mode="aspectFill" />
-      <view wx:else class="pet-avatar avatar-empty">🐾</view>
+      <view wx:else class="pet-avatar avatar-empty"><icon name="paw" size="{{52}}" color="#D94F75" /></view>
       <view class="pet-copy">
         <view class="pet-title-row"><text class="pet-name">{{item.name}}</text><text class="gender-pill">{{item.gender || '未知'}}</text></view>
         <text class="pet-breed">{{item.breed || '品种待补充'}}</text>
@@ -20,16 +20,16 @@
           <text wx:if="{{!item.estimatedAge && !item.weight}}">点击完善健康信息</text>
         </view>
       </view>
-      <view class="more" catchtap="deletePet" data-id="{{item.id}}" data-name="{{item.name}}">···</view>
+      <view class="more" aria-role="button" aria-label="删除{{item.name}}的档案" catchtap="deletePet" data-id="{{item.id}}" data-name="{{item.name}}">···</view>
     </view>
   </view>
 
   <view wx:else class="empty-card pets-empty">
-    <text class="empty-icon">🐈</text>
+    <view class="empty-icon"><icon name="cat" size="{{80}}" color="#D94F75" /></view>
     <text class="empty-title">还没有猫咪档案</text>
     <text class="muted empty-copy">为猫咪记录基本特征、体重、疫苗与驱虫信息。</text>
     <button class="primary-button compact" bindtap="addPet">新建档案</button>
   </view>
 
-  <view class="local-banner"><text class="local-icon">⌂</text><view><text class="local-title">隐私优先</text><text class="muted">当前档案仅保存在本机微信存储中，不会自动上传。</text></view></view>
+  <view class="local-banner"><view class="local-icon"><icon name="home" size="{{36}}" color="#B94768" /></view><view><text class="local-title">隐私优先</text><text class="muted">当前档案仅保存在本机微信存储中，不会自动上传。</text></view></view>
 </view>

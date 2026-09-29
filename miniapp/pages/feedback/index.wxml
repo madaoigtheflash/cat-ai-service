@@ -2,10 +2,10 @@
   <view class="feedback-hero">
     <view class="feedback-hero-copy">
       <text class="feedback-eyebrow">猫猫小屋 · 意见信箱</text>
-      <text class="feedback-title">一起把猫咪管家变得更好</text>
+      <text class="feedback-title">一起把猫猫小屋变得更好</text>
       <text class="feedback-subtitle">故障、难用的地方或新想法都可以告诉我们。请不要填写手机号、住址、门牌、OpenID 或 API Key。</text>
     </view>
-    <view class="feedback-mascot">💌</view>
+    <view class="feedback-mascot"><icon name="mail" size="{{56}}" color="#D94F75" /></view>
   </view>
 
   <view wx:if="{{errorMessage}}" class="message error" role="alert">{{errorMessage}}</view>
@@ -21,7 +21,7 @@
     </view>
     <view class="form-item">
       <text class="form-label">一句话标题</text>
-      <input class="form-input" maxlength="60" value="{{form.title}}" placeholder="例如：知识页提交按钮看不到" bindinput="onTitleInput" />
+      <input class="form-input" maxlength="60" value="{{form.title}}" placeholder="例如：动态详情的发送按钮看不到" bindinput="onTitleInput" />
       <text class="counter">{{form.title.length}} / 60</text>
     </view>
     <view class="form-item">
@@ -31,7 +31,7 @@
     </view>
     <view class="form-item">
       <text class="form-label">复现步骤（选填）</text>
-      <textarea class="steps-textarea" maxlength="500" value="{{form.steps}}" placeholder="例如：首页 → 知识 → 输入问题 → 提交" bindinput="onStepsInput"></textarea>
+      <textarea class="steps-textarea" maxlength="500" value="{{form.steps}}" placeholder="例如：首页 → 动态详情 → 接句话 → 发送" bindinput="onStepsInput"></textarea>
       <text class="counter">{{form.steps.length}} / 500</text>
     </view>
     <button class="primary-button" loading="{{sending}}" disabled="{{sending}}" bindtap="submit">{{sending ? '正在投递…' : '提交反馈'}}</button>
@@ -56,5 +56,5 @@
       <text class="feedback-time">提交于 {{item.createdLabel}} · 阶段更新于 {{item.stageUpdatedLabel}}</text>
     </view>
   </view>
-  <view wx:elif="{{!loading}}" class="empty-card"><text class="empty-icon">🐾</text><text class="empty-title">还没有提交反馈</text><text class="muted">第一封意见会显示在这里。</text></view>
+  <view wx:elif="{{!loading}}" class="empty-card"><view class="empty-icon"><icon name="paw" size="{{80}}" color="#D94F75" /></view><text class="empty-title">还没有提交反馈</text><text class="muted">第一封意见会显示在这里。</text></view>
 </view>

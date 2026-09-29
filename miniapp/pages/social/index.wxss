@@ -1,0 +1,24 @@
+@import "../../styles/community.wxss";
+/* style:v2 gives native non-mini buttons a fixed width. Keep story-sized
+   controls fluid without changing the original app's other button variants. */
+.community-page .community-action,
+.community-page .house-entry,
+.community-page .notification-row { width: 100%; max-width: 100%; margin-left: 0; margin-right: 0; }
+.community-page .social-tab { width: auto; }
+.social-compose { margin-top: 24rpx; }
+.house-entry { display: flex; align-items: center; gap: 16rpx; width: 100%; min-height: 88rpx; padding: 24rpx 0; margin: 16rpx 0 0; border: 0; border-bottom: 1rpx solid #F2DFE7; border-radius: 0; background: transparent; text-align: left; }
+.house-entry icon { flex: none; }
+.house-copy { flex: 1; min-width: 0; }
+.house-title { display: block; color: #3E2D35; font-size: 28rpx; font-weight: 600; line-height: 1.5; word-break: break-word; }
+.house-description { display: block; margin-top: 4rpx; color: #80616F; font-size: 24rpx; line-height: 1.6; word-break: break-word; }
+.social-tabs { display: flex; margin-top: 24rpx; gap: 24rpx; border-bottom: 1rpx solid #F2DFE7; }
+.social-tab { display: flex; align-items: center; justify-content: center; min-height: 88rpx; flex: 1; min-width: 0; padding: 20rpx 12rpx; margin: 0; border: 0; border-bottom: 4rpx solid transparent; border-radius: 0; color: #6F5A64; background: transparent; font-size: 29rpx; line-height: 1.5; font-weight: 500; word-break: break-word; }
+.social-tab.active { color: #B94768; border-bottom-color: #FF6F91; font-weight: 600; }
+.social-list { display: flex; flex-direction: column; gap: 24rpx; margin-top: 24rpx; }
+.notification-row { display: block; width: 100%; min-height: 88rpx; margin: 0; padding: 28rpx; border: 1rpx solid #F2DFE7; border-radius: 28rpx; background: #FFFFFF; text-align: left; }
+.notification-title { display: flex; align-items: baseline; gap: 16rpx; color: #3E2D35; font-size: 28rpx; font-weight: 600; line-height: 1.5; }
+.notification-title > text:first-child { flex: 1; min-width: 0; word-break: break-word; }
+.notification-unread { flex: none; color: #B94768; font-size: 23rpx; }
+.notification-content { display: block; margin-top: 12rpx; color: #6F5A64; font-size: 27rpx; line-height: 1.65; white-space: pre-wrap; word-break: break-word; }
+.notification-time { display: block; margin-top: 12rpx; color: #80616F; font-size: 23rpx; line-height: 1.55; }
+.notification-open { display: block; margin-top: 16rpx; color: #B94768; font-size: 24rpx; line-height: 1.55; }

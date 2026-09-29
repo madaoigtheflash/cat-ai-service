@@ -1,14 +1,37 @@
 const storage = require('../../utils/storage')
+const socialHandoff = require('../../utils/social-handoff')
 
 Page({
-  data: { id: '', pet: null, records: [] },
+  data: { id: '', pet: null, records: [], shareAllowed: false, openingShare: false },
 
   onLoad(options) { this.setData({ id: options.id || '' }) },
   onShow() { this.loadPet() },
 
+  onPullDownRefresh() {
+    this.loadPet()
+    wx.stopPullDownRefresh()
+  },
+
+  onShareAppMessage() {
+    return {
+      title: '来猫猫小屋，聊聊猫咪的日常',
+      path: '/pages/home/index',
+      imageUrl: '/assets/showcase/cozy-nap.jpg'
+    }
+  },
+
+  onShareTimeline() {
+    return {
+      title: '来猫猫小屋，聊聊猫咪的日常',
+      query: 'from=share',
+      imageUrl: '/assets/showcase/cozy-nap.jpg'
+    }
+  },
+
   loadPet() {
     const pet = storage.getPet(this.data.id)
     if (!pet) {
+      this.setData({ pet: null, records: [], shareAllowed: false })
       wx.showToast({ title: '档案不存在', icon: 'none' })
       return
     }
@@ -17,11 +40,34 @@ Page({
       ;(pet[type] || []).forEach(item => records.push(Object.assign({ type }, item)))
     })
     records.sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')))
-    this.setData({ pet, records })
+    this.setData({ pet, records, shareAllowed: socialHandoff.canSharePet(pet) })
     wx.setNavigationBarTitle({ title: pet.name || '猫咪详情' })
   },
 
   edit() { wx.navigateTo({ url: `/pages/pet-edit/index?id=${this.data.id}` }) },
+
+  sharePet() {
+    if (this._openingShare) return
+    let pet
+    try { pet = storage.getPet(this.data.id) } catch (error) {
+      wx.showToast({ title: '档案暂时无法读取，请重试', icon: 'none' })
+      return
+    }
+    if (!socialHandoff.canSharePet(pet)) {
+      wx.showToast({ title: '当前档案不可分享', icon: 'none' })
+      return
+    }
+    this._openingShare = true
+    this.setData({ openingShare: true })
+    wx.navigateTo({
+      url: socialHandoff.composeUrl(pet.id),
+      fail: () => wx.showToast({ title: '发布页未能打开，请重试', icon: 'none' }),
+      complete: () => {
+        this._openingShare = false
+        this.setData({ openingShare: false })
+      }
+    })
+  },
 
   openRelationships() {
     wx.navigateTo({ url: `/pages/relationships/index?id=${this.data.id}` })

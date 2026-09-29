@@ -5,6 +5,8 @@ const path = require('node:path')
 const vm = require('node:vm')
 
 const PAGE_PATH = path.join(__dirname, '..', 'pages', 'online', 'index.js')
+const WXML_PATH = path.join(__dirname, '..', 'pages', 'online', 'index.wxml')
+const WXSS_PATH = path.join(__dirname, '..', 'pages', 'online', 'index.wxss')
 
 function clone(value) {
   return value == null ? value : JSON.parse(JSON.stringify(value))
@@ -80,6 +82,141 @@ function workspace(communityId, cats = []) {
   }
 }
 
+function minimumHeightRpx(styles, selector) {
+  const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const rule = styles.match(new RegExp(`${escaped}\\s*\\{([^}]*)\\}`, 's'))
+  assert.ok(rule, `missing ${selector} style`)
+  const declaration = rule[1].match(/min-height:\s*(\d+)rpx/)
+  assert.ok(declaration, `${selector} must declare min-height in rpx`)
+  return Number(declaration[1])
+}
+
+test('online page exposes three safe section targets instead of one continuous workflow', () => {
+  const wxml = fs.readFileSync(WXML_PATH, 'utf8')
+  const wxss = fs.readFileSync(WXSS_PATH, 'utf8')
+
+  for (const section of ['home', 'upload', 'feed']) {
+    assert.match(wxml, new RegExp(`data-section="${section}"`))
+  }
+  assert.match(wxml, /activeSection === 'home'/)
+  assert.match(wxml, /activeSection === 'upload'/)
+  assert.match(wxml, /class="section-tab \{\{activeSection/)
+  assert.match(wxss, /\.section-tab\s*\{[^}]*min-height:\s*(?:9[6-9]|[1-9]\d{2,})rpx/s)
+  assert.match(wxss, /\.section-tab\s*\{[^}]*width:\s*100%[^}]*min-width:\s*0[^}]*max-width:\s*100%/s)
+  assert.match(wxss, /\.section-context-value\s*\{[^}]*min-width:\s*0[^}]*word-break:\s*break-word/s)
+})
+
+test('online house panel exposes create, join, and invite controls with 88rpx touch targets', () => {
+  const wxml = fs.readFileSync(WXML_PATH, 'utf8')
+  const wxss = fs.readFileSync(WXSS_PATH, 'utf8')
+
+  for (const [action, label] of [
+    ['create', '新增小屋'],
+    ['join', '加入小屋'],
+    ['invite', '邀请猫友']
+  ]) {
+    assert.match(wxml, new RegExp(`data-action="${action}"`))
+    assert.match(wxml, new RegExp(`<text>${label}</text>`))
+  }
+  assert.match(wxml, /open-type="share"/)
+  assert.match(wxml, /data-code="\{\{currentCommunity\.inviteCode\}\}"/)
+  assert.ok(minimumHeightRpx(wxss, '.house-action') >= 88)
+  assert.ok(minimumHeightRpx(wxss, '.invite-button') >= 88)
+})
+
+test('create, join, and invite deep links open the matching house action', async () => {
+  for (const mode of ['create', 'join', 'invite']) {
+    const { page } = makePage()
+    page.onLoad({ section: 'home', mode })
+    await new Promise(resolve => setImmediate(resolve))
+
+    assert.equal(page.data.activeSection, 'home')
+    assert.equal(page.data.houseAction, mode)
+  }
+})
+
+test('shared invite code opens join mode and is normalized into the input', async () => {
+  const { page } = makePage()
+  page.onLoad({ inviteCode: '  abcde-23456  ' })
+  await new Promise(resolve => setImmediate(resolve))
+
+  assert.equal(page.data.activeSection, 'home')
+  assert.equal(page.data.houseAction, 'join')
+  assert.equal(page.data.inviteCode, 'ABCDE-23456')
+})
+
+test('wechat invite share carries only the selected house name and join code path', () => {
+  const { page } = makePage()
+  page.data.currentCommunity = {
+    id: 'house-a',
+    name: '樱花小屋',
+    inviteCode: 'ABCDE-23456'
+  }
+
+  const share = page.onShareAppMessage({ target: { dataset: {} } })
+
+  assert.equal(share.title, '樱花小屋邀请你一起记录熟悉的猫咪')
+  assert.equal(share.path, '/pages/online/index?section=home&inviteCode=ABCDE-23456')
+  assert.doesNotMatch(JSON.stringify(share), /ownerKey|inviteHash|medical|vaccines|deworming/)
+})
+
+test('creating a house keeps its one-time invite code on this device and opens invite mode', async () => {
+  const community = { communityId: 'house-new', name: '新小屋', role: 'owner' }
+  const { page, persisted } = makePage({
+    onlineOverrides: {
+      createCommunity: async () => ({ community, inviteCode: 'QWERT-23456' }),
+      bootstrap: async () => ({ communities: [community] }),
+      listWorkspace: async () => ({
+        community,
+        myPets: [],
+        pendingReview: [],
+        approvedSightings: []
+      })
+    }
+  })
+  page.data.newCommunityName = '新小屋'
+
+  await page.createCommunity()
+
+  assert.equal(persisted.catai_mini_online_community_v1, 'house-new')
+  assert.equal(persisted.catai_mini_online_invites_v1['house-new'], 'QWERT-23456')
+  assert.equal(page.data.houseAction, 'invite')
+  assert.equal(page.data.currentCommunity.inviteCode, 'QWERT-23456')
+})
+
+test('claiming an owner-pending house caches the entered code without exposing it to members', async () => {
+  const ownerCommunity = { communityId: 'house-managed', name: '管理台小屋', role: 'owner' }
+  const { page, persisted } = makePage({
+    onlineOverrides: {
+      joinCommunity: async () => ({ community: ownerCommunity }),
+      bootstrap: async () => ({ communities: [ownerCommunity] }),
+      listWorkspace: async () => ({
+        community: ownerCommunity,
+        myPets: [],
+        pendingReview: [],
+        approvedSightings: []
+      })
+    }
+  })
+  page.data.inviteCode = 'owner-23456'
+
+  await page.joinCommunity()
+
+  assert.equal(persisted.catai_mini_online_community_v1, 'house-managed')
+  assert.equal(persisted.catai_mini_online_invites_v1['house-managed'], 'OWNER-23456')
+  assert.equal(page.data.houseAction, 'invite')
+  assert.equal(page.data.currentCommunity.inviteCode, 'OWNER-23456')
+
+  const memberPage = makePage({
+    onlineOverrides: {
+      joinCommunity: async () => ({ community: { communityId: 'house-member', role: 'member' } })
+    }
+  })
+  memberPage.page.data.inviteCode = 'member-2345'
+  await memberPage.page.joinCommunity()
+  assert.equal(memberPage.persisted.catai_mini_online_invites_v1, undefined)
+})
+
 test('a stale workspace response cannot overwrite a newer community switch', async () => {
   const requests = { a: deferred(), b: deferred() }
   const { page, persisted } = makePage({
@@ -111,6 +248,39 @@ test('a stale workspace response cannot overwrite a newer community switch', asy
   assert.equal(page.data.currentCommunity.id, 'b')
   assert.equal(page.data.cloudCats[0].remotePetId, 'b-cat')
   assert.equal(persisted.catai_mini_online_community_v1, 'b')
+})
+
+test('online sections open on the useful state and preserve an explicit user choice', async () => {
+  const emptyPage = makePage().page
+  await emptyPage.loadOnline()
+  assert.equal(emptyPage.data.activeSection, 'home')
+
+  const { page } = makePage({
+    onlineOverrides: {
+      bootstrap: async () => ({ communities: [{ communityId: 'home', name: '熟悉的小屋' }] }),
+      listWorkspace: async () => workspace('home')
+    }
+  })
+  await page.loadOnline()
+  assert.equal(page.data.activeSection, 'feed')
+
+  page.onSectionChange({ currentTarget: { dataset: { section: 'upload' } } })
+  assert.equal(page.data.activeSection, 'upload')
+  await page.loadOnline(true)
+  assert.equal(page.data.activeSection, 'upload')
+
+  page.onSectionChange({ currentTarget: { dataset: { section: 'unknown' } } })
+  assert.equal(page.data.activeSection, 'upload')
+
+  const explicitPage = makePage({
+    onlineOverrides: {
+      bootstrap: async () => ({ communities: [{ communityId: 'home', name: '熟悉的小屋' }] }),
+      listWorkspace: async () => workspace('home')
+    }
+  }).page
+  explicitPage.onLoad({ section: 'upload' })
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(explicitPage.data.activeSection, 'upload')
 })
 
 test('refresh preserves picker choices by stable IDs and clears a missing cloud cat', async () => {
@@ -170,6 +340,7 @@ test('sighting submission resolves the linked cat by stable ID instead of picker
 
   await page.submitSighting()
   assert.equal(submitted.localPetId, 'local-2')
+  assert.equal(page.data.activeSection, 'feed')
 })
 
 test('map selection keeps the returned POI local and never copies it into the shared area note', () => {

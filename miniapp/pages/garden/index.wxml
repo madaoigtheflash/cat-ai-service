@@ -1,0 +1,123 @@
+<view class="page home-page garden-home sakura-theme">
+  <view wx:if="{{!calmMode}}" class="petal-field" aria-hidden="true"><view class="petal petal-near" /><view class="petal petal-mid" /><view class="petal petal-far" /><view class="petal petal-near" /><view class="petal petal-mid" /><view class="petal petal-far" /></view>
+  <skeleton type="cards" count="{{1}}" show="{{initialLoading}}" />
+
+  <block wx:if="{{!initialLoading}}">
+  <view class="compact-context card" data-section="current-context">
+    <view class="compact-cat-row">
+      <view class="compact-avatar-orbit">
+        <view class="avatar-orbit-ring" aria-hidden="true"><view class="orbit-dot" /><view class="orbit-dot" /><view class="orbit-dot" /><view class="orbit-dot" /><view class="orbit-dot" /><view class="orbit-dot" /><view class="orbit-dot" /><view class="orbit-dot" /></view>
+        <view class="compact-avatar-button" bindtap="handleHeroPet" aria-role="button" aria-label="{{activePet ? '查看当前猫咪档案' : '识别或建立猫咪档案'}}">
+          <image wx:if="{{activePet && activePet.imagePath}}" class="compact-avatar" src="{{activePet.imagePath}}" mode="aspectFill" />
+          <view wx:else class="compact-avatar placeholder">
+            <icon name="paw" size="{{44}}" color="#B53B5D" />
+          </view>
+        </view>
+      </view>
+      <view class="compact-cat-copy"><text class="compact-label">当前猫咪 · {{greeting}}</text><text class="compact-cat-name">{{activePet ? activePet.name : '今天，从认识一只猫开始'}}</text></view>
+      <picker wx:if="{{pets.length}}" class="compact-picker" mode="selector" range="{{petNames}}" value="{{selectedPetIndex}}" bindchange="onPetChange"><view class="compact-switch">切换⌄</view></picker>
+      <button wx:else class="compact-switch" bindtap="goIdentify">识猫 ›</button>
+    </view>
+    <view class="compact-house-row">
+      <text class="compact-house-label">小屋</text>
+      <picker wx:if="{{communities.length}}" class="compact-house-picker" mode="selector" range="{{communityNames}}" value="{{selectedCommunityIndex}}" bindchange="onCommunityChange"><view class="compact-house-value">{{currentCommunity.name || '选择小屋'}} ⌄</view></picker>
+      <view wx:else class="compact-house-value" bindtap="goOnline" aria-role="button">{{onlineLoading ? '小屋连接中…' : '还未加入猫友小屋'}} ›</view>
+    </view>
+    <view wx:if="{{currentCommunity}}" class="house-quick-grid" aria-label="小屋快捷操作">
+      <view class="house-quick-action" aria-role="button" bindtap="goSighting"><icon name="pin" size="{{30}}" color="#D94F75" /><text>记录目击</text></view>
+      <view class="house-quick-action invite" aria-role="button" bindtap="goInviteHouse"><icon name="gift" size="{{30}}" color="#B94768" /><text>邀请猫友</text></view>
+      <view class="house-quick-action" aria-role="button" bindtap="goInsights"><icon name="chart" size="{{30}}" color="#D94F75" /><text>小屋看板</text></view>
+    </view>
+    <view wx:else class="house-quick-grid two" aria-label="小屋快捷操作">
+      <view class="house-quick-action" aria-role="button" bindtap="goCreateHouse"><icon name="plus" size="{{30}}" color="#D94F75" /><text>新增小屋</text></view>
+      <view class="house-quick-action" aria-role="button" bindtap="goJoinHouse"><icon name="users" size="{{30}}" color="#D94F75" /><text>加入小屋</text></view>
+    </view>
+    <view wx:if="{{onlineError}}" class="inline-warning" bindtap="retryOnline"><text>{{onlineError}}</text><text class="warning-action">重试</text></view>
+    <view wx:if="{{feedbackMessage}}" class="feedback-toast" aria-live="polite">{{feedbackMessage}}</view>
+  </view>
+  </block>
+
+  <view data-section="bubble-garden"><showcase-garden id="showcase-garden" /></view>
+
+  <view class="section-heading" data-section="today-status">
+    <view class="section-heading-copy">
+      <text class="section-title">今日状态</text>
+      <text class="section-note">{{activePet ? activePet.name + '的当前资料快照' : '建立档案后显示真实数据'}}</text>
+    </view>
+  </view>
+  <view class="status-grid">
+    <view class="status-card {{item.tone}}" wx:for="{{todayCards}}" wx:key="id">
+      <text class="status-label">{{item.label}}</text>
+      <text class="status-value">{{item.value}}</text>
+      <text class="status-detail">{{item.detail}}</text>
+      <view wx:if="{{item.id === 'profile'}}" class="status-progress" aria-label="档案资料填写进度 {{item.progress}}%">
+        <view class="status-progress-bar" style="{{item.progressStyle}}"></view>
+      </view>
+    </view>
+  </view>
+
+  <view class="section-heading" data-section="primary-actions">
+    <view class="section-heading-copy">
+      <text class="section-title">主要操作</text>
+      <text class="section-note">围绕当前猫咪继续记录</text>
+    </view>
+  </view>
+  <view class="action-grid">
+    <view class="action-card coral" bindtap="goIdentify">
+      <view class="action-icon"><icon name="camera" size="{{34}}" color="#D94F75" /></view>
+      <text class="action-title">识别猫咪</text>
+      <text class="action-desc">观察照片中的品种与外观特征</text>
+      <text class="action-link">开始识别 ›</text>
+    </view>
+    <view class="action-card blush" bindtap="goCare">
+      <view class="action-icon"><icon name="edit" size="{{34}}" color="#D94F75" /></view>
+      <text class="action-title">记录照护</text>
+      <text class="action-desc">补充体重、疫苗、驱虫或就医记录</text>
+      <text class="action-link">{{activePet ? '打开档案' : '创建档案'}} ›</text>
+    </view>
+    <view class="action-card cream" bindtap="goSighting">
+      <view class="action-icon"><icon name="pin" size="{{34}}" color="#D94F75" /></view>
+      <text class="action-title">记录目击</text>
+      <text class="action-desc">向邀请制小屋提交时间、照片与模糊位置</text>
+      <text class="action-link">进入小屋 ›</text>
+    </view>
+    <view class="action-card lilac" bindtap="goRelationships">
+      <view class="action-icon"><icon name="users" size="{{34}}" color="#D94F75" /></view>
+      <text class="action-title">猫际关系</text>
+      <text class="action-desc">记录有方向的关系和双方具体身份</text>
+      <text class="action-link">查看关系 ›</text>
+    </view>
+  </view>
+
+  <view class="section-heading" data-section="recent-activity">
+    <view class="section-heading-copy">
+      <text class="section-title">最近动态</text>
+      <text class="section-note">本地记录与当前小屋的最新变化</text>
+    </view>
+  </view>
+  <view wx:if="{{recentActivity.length}}" class="activity-card card">
+    <view
+      class="activity-row"
+      wx:for="{{recentActivity}}"
+      wx:key="id"
+      data-kind="{{item.kind}}"
+      bindtap="openActivity"
+    >
+      <view class="activity-dot {{item.tone}}"></view>
+      <view class="activity-copy">
+        <text class="activity-title">{{item.title}}</text>
+        <text class="activity-detail">{{item.detail}}</text>
+      </view>
+      <text class="activity-time">{{item.timeLabel}}</text>
+    </view>
+  </view>
+  <view wx:else class="activity-empty card">
+    <view class="activity-empty-icon"><icon name="paw" size="{{36}}" color="#B94768" /></view>
+    <view class="activity-empty-copy">
+      <text class="activity-empty-title">还没有最近动态</text>
+      <text class="activity-empty-note">识别、建档或记录目击后会显示在这里。</text>
+    </view>
+  </view>
+
+  <view class="privacy-note">识别结果仅供特征观察与档案整理参考，不构成医疗判断；健康异常请及时咨询执业兽医。</view>
+</view>

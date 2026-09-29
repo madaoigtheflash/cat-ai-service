@@ -12,6 +12,8 @@ const {
   RELATION_DIRECTION_VERSION
 } = require('./core')
 const { sanitizeApprovedImage } = require('./sanitize')
+const { resolveLike } = require('./showcase')
+const showcaseCatalog = require('./showcase-manifest.json')
 
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 
@@ -20,6 +22,7 @@ const _ = db.command
 
 const COLLECTIONS = Object.freeze({
   users: 'ci_users_private',
+  showcaseLikes: 'ci_showcase_likes',
   communities: 'ci_communities',
   members: 'ci_members',
   pets: 'ci_user_pet_links',
@@ -128,6 +131,25 @@ async function updateDocument(collection, id, patch, transaction) {
 }
 
 class CloudRepository {
+  async listShowcaseLikes(ids) {
+    return Promise.all(ids.map(id => getDocument(COLLECTIONS.showcaseLikes, id)))
+  }
+
+  async setShowcaseLike(input) {
+    return db.runTransaction(async transaction => {
+      const current = await getDocument(COLLECTIONS.showcaseLikes, input.id, transaction)
+      const next = resolveLike(current, input.liked, input.expectedVersion)
+      if (next.changed) {
+        await setDocument(COLLECTIONS.showcaseLikes, {
+          id: input.id, ownerKey: input.ownerKey, assetId: input.assetId,
+          liked: next.liked, version: next.version,
+          createdAt: current ? current.createdAt : input.now, updatedAt: input.now
+        }, transaction)
+      }
+      return next
+    })
+  }
+
   async ensureUser(user) {
     const existing = await getDocument(COLLECTIONS.users, user.id)
     if (existing) {
@@ -711,6 +733,7 @@ const media = {
 }
 
 const core = createCatOnlineCore({
+  showcaseCatalog,
   repository: new CloudRepository(),
   media,
   ownerSecret: process.env.CAT_ONLINE_OWNER_SECRET || '',

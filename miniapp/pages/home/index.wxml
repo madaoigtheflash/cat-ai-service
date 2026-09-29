@@ -1,72 +1,24 @@
-<view class="page home-page">
-  <view class="hero">
-    <view class="hero-copy">
-      <text class="eyebrow">今日陪伴 · 猫猫小屋</text>
-      <text class="hero-title">{{greeting}}，一起更懂猫咪</text>
-      <text class="hero-subtitle">拍张照片、记下成长，让每次互动都成为猫咪的小日记。</text>
-      <button class="hero-button" bindtap="goIdentify">和猫咪互动</button>
-    </view>
-    <view class="cat-orbit">
-      <view class="cat-face">🐱</view>
-      <text class="cat-mood">心情很好</text>
+<view class="community-page">
+  <view class="home-intro">
+    <text class="community-heading">猫咪的新故事</text>
+    <text class="community-description">看看大家主动分享的猫片和日常，也留下你的相遇。</text>
+    <view class="community-actions">
+      <button class="community-action primary" bindtap="goIdentify"><icon name="camera" size="{{32}}" color="#FFFFFF" /><text>拍照识猫</text></button>
+      <button class="community-action quiet" bindtap="goCompose"><icon name="edit" size="{{30}}" color="#B94768" /><text>分享照片 / 故事</text></button>
     </view>
   </view>
-
-  <view class="service-status {{configured ? 'status-ok' : 'status-warn'}}" bindtap="goSettings">
-    <view class="status-dot"></view>
-    <view class="status-copy">
-      <text>{{configured ? '微信云开发已连接' : '微信云开发未就绪'}}</text>
-      <text class="muted">{{configured ? '照片观察与邀请小屋按需使用云服务' : '点击检查云开发环境，本地档案仍可使用'}}</text>
+  <view class="community-feed">
+    <view wx:if="{{loading && !posts.length}}" class="community-state" aria-live="polite"><text class="community-state-title">正在寻找新故事…</text><text class="community-state-copy">正在加载大家公开分享的内容。</text></view>
+    <view wx:if="{{error}}" class="community-error" aria-live="polite"><text>{{error}}</text><button class="community-action" bindtap="retry" disabled="{{loading}}">重新加载</button></view>
+    <text wx:if="{{refreshing}}" class="community-end">正在更新故事…</text>
+    <social-post-card wx:for="{{posts}}" wx:key="id" post="{{item}}" bind:open="openPost" bind:reply="replyPost" />
+    <view wx:if="{{loaded && !loading && !error && !posts.length}}" class="community-state">
+      <text class="community-state-title">这里还没有公开故事</text>
+      <text class="community-state-copy">可以直接选照片分享，也可以识猫、建档后再发布。档案不会自动公开。</text>
+      <button class="community-action" bindtap="goCompose">分享第一张猫片</button>
     </view>
-    <text class="chevron">›</text>
+    <button wx:if="{{posts.length && nextCursor}}" class="community-action quiet" bindtap="loadMore" loading="{{loading && !refreshing}}" disabled="{{loading}}">{{loading ? '正在加载…' : '看看更多故事'}}</button>
+    <text wx:if="{{posts.length && !nextCursor && !loading && !error}}" class="community-end">暂时看到这里，有新故事再来看看。</text>
   </view>
-
-  <view class="online-entry" bindtap="goOnline">
-    <view class="online-entry-icon">☁</view>
-    <view class="online-entry-copy">
-      <text class="online-entry-title">云端猫站 · 猫友协作</text>
-      <text class="online-entry-desc">创建邀请制猫友小屋，共同上传和确认猫咪目击。</text>
-    </view>
-    <text class="online-entry-action">进入 ›</text>
-  </view>
-
-  <view class="online-entry feedback-entry" bindtap="goFeedback">
-    <view class="online-entry-icon">💌</view>
-    <view class="online-entry-copy">
-      <text class="online-entry-title">意见信箱 · 一起改进</text>
-      <text class="online-entry-desc">反馈故障与建议，查看审阅和修改提案状态。</text>
-    </view>
-    <text class="online-entry-action">去反馈 ›</text>
-  </view>
-
-  <view class="section-heading">
-    <view><text class="section-title">常用功能</text><text class="section-note">快速开始</text></view>
-  </view>
-  <view class="action-grid">
-    <view class="action-card coral" bindtap="goIdentify"><text class="action-icon">📷</text><text class="action-title">认识猫咪</text><text class="action-desc">拍照发现品种与特征</text><text class="action-reward">＋新发现</text></view>
-    <view class="action-card blush" bindtap="goPets"><text class="action-icon">♡</text><text class="action-title">成长手账</text><text class="action-desc">记录健康与日常变化</text><text class="action-reward">＋陪伴值</text></view>
-    <view class="action-card lilac" bindtap="goKnowledge"><text class="action-icon">✦</text><text class="action-title">喵喵课堂</text><text class="action-desc">检索内置养猫资料</text><text class="action-reward">＋养猫经验</text></view>
-    <view class="action-card cream" bindtap="goRelationships"><text class="action-icon">🐾</text><text class="action-title">猫际关系</text><text class="action-desc">看见猫咪之间的相处线索</text><text class="action-reward">＋关系卡</text></view>
-  </view>
-
-  <view class="section-heading">
-    <view><text class="section-title">我的猫咪</text><text class="section-note">{{pets.length ? '最近档案' : '还没有档案'}}</text></view>
-    <text class="section-link" bindtap="goPets">查看全部</text>
-  </view>
-  <view wx:if="{{pets.length}}" class="pet-strip">
-    <view class="pet-mini-card" wx:for="{{pets}}" wx:key="id" data-id="{{item.id}}" bindtap="openPet">
-      <image wx:if="{{item.imagePath}}" class="pet-mini-avatar" src="{{item.imagePath}}" mode="aspectFill" />
-      <view wx:else class="pet-mini-avatar placeholder">🐾</view>
-      <text class="pet-mini-name">{{item.name}}</text>
-      <text class="muted one-line">{{item.breed || '等待补充品种'}}</text>
-    </view>
-  </view>
-  <view wx:else class="empty-card">
-    <text class="empty-icon">🐈</text>
-    <text class="empty-title">为第一只猫建立档案</text>
-    <text class="muted">识别后可一键保存，也可以手动创建。</text>
-    <button class="secondary-button compact" bindtap="goPets">去创建</button>
-  </view>
-
-  <view class="privacy-note">识别结论仅供辅助参考，健康异常请及时咨询执业兽医。</view>
+  <text class="community-note">这里仅展示主动公开的故事，不包含私密档案、健康记录或精确位置。健康异常请及时咨询执业兽医。</text>
 </view>

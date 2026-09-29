@@ -1,0 +1,94 @@
+@import "../../styles/sakura.wxss";
+
+:host { display: block; min-width: 0; }
+.garden, .garden-control, .bubble-frame, .photo-sheet, .detail-mat, .detail-copy, .sheet-bottom { box-sizing: border-box; }
+.garden-control::after { border: none; }
+.garden-control { min-width: 0; max-width: 100%; min-height: 88rpx; margin: 0; padding: 16rpx; font-family: inherit; font-size: 26rpx; font-weight: 500; line-height: 1.5; white-space: normal; word-break: break-word; display: flex; align-items: center; justify-content: center; border: 0; transition: transform 240ms ease; }
+.garden-control:active { transform: scale(.98); }
+.garden { position: relative; margin-top: 12rpx; padding: 16rpx 24rpx 12rpx; border: 1rpx solid var(--sakura-stroke); border-radius: 36rpx; background: linear-gradient(150deg, #FFF0F5 0%, #FFFBFC 58%, #FFF4F8 100%); box-shadow: 0 8rpx 24rpx #A5677D0A; }
+.garden-heading { display: flex; gap: 16rpx; align-items: center; padding: 0 4rpx; }
+.heading-copy { flex: 1; min-width: 0; }
+.heading-line { display: flex; align-items: center; gap: 12rpx; min-width: 0; }
+.garden-eyebrow { display: inline-flex; flex: none; max-width: 100%; padding: 2rpx 12rpx; border: 1rpx solid var(--sakura-stroke); border-radius: 16rpx; color: var(--sakura-accent); background: var(--sakura-paper); font-size: 23rpx; font-weight: 500; line-height: 1.55; }
+.garden-title { display: block; min-width: 0; font-size: 34rpx; font-weight: 700; line-height: 1.4; word-break: break-word; }
+.garden-subtitle { display: block; margin-top: 6rpx; color: var(--sakura-body); font-size: 24rpx; font-weight: 400; line-height: 1.5; word-break: break-word; transition: opacity 280ms ease; }
+.garden-subtitle.fading { opacity: 0; }
+.garden-toolbar { display: flex; align-items: center; gap: 12rpx; margin-top: 8rpx; }
+.filter-tabs { display: flex; flex: 1; min-width: 0; padding: 2rpx; border: 1rpx solid var(--sakura-stroke); border-radius: 48rpx; background: var(--sakura-paper); }
+.filter-tabs .filter { flex: 1 1 0; width: 0; border-radius: 44rpx; color: var(--sakura-body); background: transparent; font-weight: 500; }
+.filter-tabs .filter.chosen { background: #FBE2EB; color: var(--sakura-accent); font-weight: 600; }
+.garden .next-group { width: auto; min-width: 88rpx; flex: none; padding: 16rpx 8rpx; color: var(--sakura-accent); background: transparent; }
+.next-group.disabled { opacity: .45; }
+/* Golden-angle spiral stage: the rotor turns slowly while each counter view
+   spins back on explicit -360deg keyframes, keeping every photo upright. */
+.spiral-stage { position: relative; width: 100%; height: 0; padding-top: 70%; margin-top: 0; }
+.spiral-rotor { position: absolute; inset: 0; animation: spiral-spin 96s linear infinite; }
+.spiral-slot { position: absolute; width: 22%; transform: translate(-50%, -50%); }
+.spiral-counter { animation: spiral-spin-back 96s linear infinite; }
+@keyframes spiral-spin { to { transform: rotate(360deg); } }
+@keyframes spiral-spin-back { to { transform: rotate(-360deg); } }
+/* A single petal that has already fallen at the center of the stage — the
+   mono-aware counterpoint to the living, orbiting cat photos around it. */
+.fallen-petal { position: absolute; left: 50%; top: 50%; width: 96rpx; height: 124rpx; margin: -62rpx 0 0 -48rpx; border-radius: 90% 8rpx 90% 8rpx; background: linear-gradient(135deg, var(--sakura-rim), var(--sakura-fade)); opacity: .08; transform: rotate(24deg); pointer-events: none; }
+/* Pollen shimmer answers a bubble tap: three motes scatter and vanish within
+   400ms — a warm response that dissolves as soon as it appears. */
+.pollen-burst { position: absolute; left: 50%; top: 42%; z-index: 2; pointer-events: none; }
+.pollen { position: absolute; width: 8rpx; height: 8rpx; margin: -4rpx 0 0 -4rpx; border-radius: 50%; background: var(--sakura-rim); animation: pollen-scatter 400ms ease-out both; }
+.pollen:nth-child(2) { background: var(--sakura-fade); animation-name: pollen-scatter-left; }
+.pollen:nth-child(3) { background: var(--sakura-accent); opacity: .8; animation-name: pollen-scatter-up; }
+@keyframes pollen-scatter { from { opacity: .9; transform: translate(0, 0) scale(1); } to { opacity: 0; transform: translate(30rpx, 14rpx) scale(.4); } }
+@keyframes pollen-scatter-left { from { opacity: .9; transform: translate(0, 0) scale(1); } to { opacity: 0; transform: translate(-26rpx, 10rpx) scale(.4); } }
+@keyframes pollen-scatter-up { from { opacity: .8; transform: translate(0, 0) scale(.9); } to { opacity: 0; transform: translate(4rpx, -30rpx) scale(.3); } }
+.garden .bubble { width: 100%; display: flex; flex-direction: column; align-items: center; padding: 4rpx 0; background: transparent; border-radius: 24rpx; overflow: visible; }
+/* Percentage padding reserves the ratio before loading; no fixed image height. */
+.bubble-stage { position: relative; width: 100%; height: 0; padding-top: 75%; border-radius: 48% 52% 49% 51%; }
+.bubble-frame { position: absolute; inset: 0; padding: 6rpx; border: 2rpx solid var(--sakura-rim); border-radius: inherit; background: var(--sakura-paper); box-shadow: 0 6rpx 16rpx #A5677D14; animation: gentle-float 5s ease-in-out infinite; }
+.bubble-photo { display: block; width: 100%; height: 100%; border-radius: inherit; background: var(--sakura-wash); }
+.bubble-1 .bubble-stage, .bubble-2 .bubble-stage { width: 86%; padding-top: 86%; border-radius: 50%; }
+.bubble-1 .bubble-frame { border-color: #D8BECE; animation-delay: -1.2s; }
+.bubble-2 .bubble-frame { border-color: #E6B8C9; animation-delay: -2.5s; }
+.bubble-3 .bubble-stage { border-radius: 52% 48% 51% 49%; }
+.bubble-3 .bubble-frame { animation-delay: -3.6s; }
+.bubble-title { display: block; align-self: stretch; min-width: 0; margin-top: 10rpx; padding: 0 4rpx; font-size: 24rpx; font-weight: 500; color: var(--sakura-ink); line-height: 1.5; text-align: center; word-break: break-word; }
+.like-mark { position: absolute; bottom: 0; right: 4rpx; display: flex; align-items: center; justify-content: center; width: 44rpx; height: 44rpx; border: 1rpx solid var(--sakura-stroke); border-radius: 50%; color: var(--sakura-accent); background: #FFF; font-size: 24rpx; pointer-events: none; }
+.garden-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8rpx 16rpx; padding-top: 2rpx; border-top: 1rpx dashed var(--sakura-stroke); font-size: 23rpx; color: var(--sakura-muted); line-height: 1.55; }
+.motion-label { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8rpx; min-height: 88rpx; }
+.sheet-actions { display: flex; align-items: center; gap: 16rpx; }
+.sheet-actions .like-button { flex: 1; }
+.share-button { display: flex; flex: none; align-items: center; justify-content: center; width: 88rpx; min-height: 88rpx; margin: 0; padding: 0; border: 1rpx solid var(--sakura-stroke); border-radius: 44rpx; background: var(--sakura-wash); }
+.share-button:active { transform: scale(.97); }
+.garden-disclaimer { display: none; }
+.garden-message { display: flex; gap: 12rpx; align-items: center; color: #875D27; font-size: 24rpx; line-height: 1.65; padding: 12rpx 0; }
+.message-copy { flex: 1; min-width: 0; word-break: break-word; }
+.garden-message .retry-button { width: auto; min-width: 88rpx; color: var(--sakura-accent); background: #FFF; border-radius: 24rpx; }
+.garden-empty { padding: 40rpx 12rpx; color: var(--sakura-body); text-align: center; }
+.empty-copy { display: block; font-size: 26rpx; line-height: 1.65; margin-bottom: 12rpx; }
+.garden .empty-action { width: 100%; color: var(--sakura-accent); background: #FFF; border: 1rpx solid var(--sakura-stroke); border-radius: 44rpx; margin-top: 24rpx; }
+.sheet-mask { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: flex-end; background: #47313D66; }
+.photo-sheet { display: flex; flex-direction: column; width: 100%; max-height: 88vh; background: var(--sakura-paper); border: 1rpx solid var(--sakura-stroke); border-bottom: 0; border-radius: 36rpx 36rpx 0 0; padding: 12rpx 28rpx 0; }
+.sheet-heading { display: flex; align-items: center; justify-content: space-between; gap: 16rpx; min-height: 96rpx; font-size: 28rpx; font-weight: 600; }
+.sheet-heading-copy { min-width: 0; word-break: break-word; }
+.photo-sheet .sheet-close { flex: none; width: auto; min-width: 116rpx; margin: 0; border-radius: 44rpx; color: var(--sakura-body); background: transparent; }
+.sheet-scroll { flex: 1; min-height: 0; height: 55vh; }
+.detail-mat { width: 100%; padding: 12rpx; border: 1rpx solid var(--sakura-stroke); border-radius: 28rpx; background: #FFF; }
+.detail-photo { display: block; width: 100%; border-radius: 18rpx; background: var(--sakura-wash); }
+.detail-copy { padding: 28rpx 4rpx; }
+.detail-title, .detail-caption, .detail-source, .detail-license { display: block; word-break: break-word; }
+.detail-title { font-size: 32rpx; font-weight: 600; line-height: 1.45; }
+.detail-caption { margin-top: 12rpx; color: var(--sakura-body); font-size: 28rpx; line-height: 1.65; }
+.detail-source { margin-top: 24rpx; color: var(--sakura-body); font-size: 24rpx; line-height: 1.65; }
+.detail-license { margin-top: 12rpx; color: var(--sakura-muted); font-size: 23rpx; line-height: 1.65; }
+.photo-sheet .source-link { width: 100%; margin: 20rpx 0 0; color: var(--sakura-accent); border: 1rpx solid var(--sakura-stroke); background: #FFF; border-radius: 24rpx; }
+.sheet-bottom { position: relative; flex: none; padding: 20rpx 0 calc(24rpx + env(safe-area-inset-bottom)); }
+.photo-sheet .like-button { width: 100%; margin: 0; color: #FFF; background: var(--sakura-accent); border-radius: 44rpx; font-size: 28rpx; font-weight: 600; }
+.photo-sheet .like-button.secondary { color: var(--sakura-accent); border: 1rpx solid var(--sakura-stroke); background: var(--sakura-wash); }
+.like-button.disabled { opacity: .6; }
+.like-notice { display: block; margin-bottom: 12rpx; font-size: 24rpx; color: var(--sakura-body); line-height: 1.65; word-break: break-word; }
+.floating-heart { position: absolute; left: calc(50% - 24rpx); bottom: 100%; color: var(--sakura-accent); font-size: 48rpx; pointer-events: none; animation: heart-rise 400ms ease-out both; }
+@keyframes gentle-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5rpx); } }
+@keyframes heart-rise { from { opacity: 1; transform: translateY(0) scale(.7); } to { opacity: 0; transform: translateY(-44rpx) scale(1.1); } }
+.paused .bubble-frame, .paused .spiral-rotor, .paused .spiral-counter { animation-play-state: paused; }
+.reduced .bubble-frame, .reduced .spiral-rotor, .reduced .spiral-counter { animation: none; }
+.reduced .pollen-burst { display: none; }
+.reduced .garden-control, .reduced .garden-subtitle { transition: none; }
+@media (prefers-reduced-motion: reduce) { .bubble-frame, .floating-heart, .spiral-rotor, .spiral-counter { animation: none; } .pollen-burst { display: none; } .garden-control, .garden-subtitle { transition: none; } }

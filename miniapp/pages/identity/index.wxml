@@ -1,6 +1,6 @@
 <view class="page identity-page">
   <view class="identity-hero">
-    <view class="identity-hero-icon">🐈‍⬛</view>
+    <view class="identity-hero-icon"><icon name="cat" size="{{64}}" color="#D94F75" /></view>
     <view class="identity-hero-copy">
       <text class="identity-eyebrow">同猫核对 · 外观候选</text>
       <text class="identity-title">一起核对是不是熟悉的它</text>
@@ -13,7 +13,7 @@
   <view wx:if="{{feedbackMessage}}" class="feedback success">{{feedbackMessage}}</view>
 
   <view wx:if="{{loading}}" class="card loading-card">
-    <view class="loading-orbit"><text>🐾</text></view>
+    <view class="loading-orbit"><icon name="paw" size="{{52}}" color="#D94F75" /></view>
     <text class="loading-title">正在整理可核对的猫咪</text>
     <text class="muted">会先检查小屋里已有的人工确认模板</text>
   </view>
@@ -31,7 +31,7 @@
     </view>
 
     <view wx:if="{{task.isFinal}}" class="card completed-card">
-      <view class="completed-icon">{{task.needsMoreEvidence ? '…' : '✓'}}</view>
+      <view class="completed-icon"><text wx:if="{{task.needsMoreEvidence}}">…</text><icon wx:else name="check" size="{{40}}" color="#FFFFFF" /></view>
       <text class="completed-title">{{task.needsMoreEvidence ? '已保留为待确认' : '这次确认已经保存'}}</text>
       <text wx:if="{{task.isComplete}}" class="completed-name">{{task.assignment.displayName || task.assignment.catName || '猫咪身份'}}</text>
       <text class="completed-desc">{{task.needsMoreEvidence ? '可以补拍正脸、左右侧身或独特花纹，再重新核对。' : '身份关联有审计记录，可撤销；系统不会因为一次结果自动合并其他猫咪。'}}</text>
@@ -53,7 +53,7 @@
         </view>
       </view>
       <view wx:else class="empty-candidates">
-        <text class="empty-icon">🔎</text>
+        <view class="empty-icon"><icon name="search" size="{{80}}" color="#D94F75" /></view>
         <text class="empty-title">暂时没有可靠候选</text>
         <text class="muted">这不等于一定是新猫，也可能是小屋模板还不够。你可以人工选择或先保留待确认。</text>
       </view>

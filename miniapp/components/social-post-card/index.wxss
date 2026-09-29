@@ -1,0 +1,31 @@
+:host { display: block; }
+view, text, button, image { box-sizing: border-box; }
+.story-card { padding: 28rpx; border: 1rpx solid #F2DFE7; border-radius: 28rpx; background: #FFFFFF; color: #3E2D35; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; }
+.story-author { display: flex; align-items: center; gap: 16rpx; }
+.story-avatar { display: flex; flex: none; align-items: center; justify-content: center; width: 64rpx; height: 64rpx; border-radius: 50%; background: #FFF0F5; color: #B94768; font-size: 28rpx; font-weight: 600; }
+.story-author-copy { flex: 1; min-width: 0; }
+.story-author-name { display: block; font-size: 27rpx; font-weight: 600; line-height: 1.45; word-break: break-word; }
+.story-time { display: block; margin-top: 4rpx; color: #80616F; font-size: 23rpx; line-height: 1.55; }
+.story-status { max-width: 160rpx; color: #80616F; font-size: 23rpx; line-height: 1.55; word-break: break-word; }
+.story-content { display: block; margin: 24rpx 0; font-size: 28rpx; line-height: 1.75; white-space: pre-wrap; word-break: break-word; }
+.story-photo-frame { position: relative; overflow: hidden; width: 100%; padding-top: 75%; border-radius: 20rpx; background: #FFF0F5; }
+.story-photo { position: absolute; inset: 0; width: 100%; height: 100%; }
+.story-photo-count { position: absolute; bottom: 16rpx; right: 16rpx; padding: 6rpx 14rpx; border-radius: 16rpx; background: #FFFBFC; color: #6F5A64; font-size: 23rpx; line-height: 1.5; }
+.story-photo-recovery { margin-top: 16rpx; padding: 16rpx 0 8rpx; }
+.story-photo-message { display: block; min-width: 0; color: #80616F; font-size: 24rpx; line-height: 1.65; word-break: break-word; }
+.story-card .story-photo-retry { display: flex; align-items: center; justify-content: center; width: 100%; max-width: 100%; min-height: 88rpx; height: auto; margin: 12rpx 0 0; padding: 20rpx 24rpx; border: 0; border-radius: 20rpx; background: #FFF0F5; color: #B94768; font-size: 26rpx; font-weight: 500; line-height: 1.55; white-space: normal; word-break: break-word; }
+.story-photo-retry::after { border: 0; }
+.story-card .story-photo-retry[disabled] { color: #80616F; background: #FFF7FA; }
+.story-photo-retry:active { opacity: .7; }
+.story-cat { display: flex; align-items: flex-start; gap: 12rpx; margin-top: 24rpx; padding-bottom: 8rpx; }
+.story-cat icon { flex: none; margin-top: 6rpx; }
+.story-cat-copy { display: flex; flex: 1; min-width: 0; flex-wrap: wrap; align-items: baseline; column-gap: 16rpx; row-gap: 4rpx; }
+.story-cat-name { color: #6F5A64; font-size: 25rpx; font-weight: 600; line-height: 1.55; word-break: break-word; }
+.story-cat-meta { color: #80616F; font-size: 24rpx; line-height: 1.55; word-break: break-word; }
+.story-comments { min-height: 88rpx; margin-top: 20rpx; padding: 16rpx 0 8rpx; border-top: 1rpx solid #F2DFE7; }
+.story-comment { margin-bottom: 8rpx; color: #6F5A64; font-size: 25rpx; line-height: 1.65; word-break: break-word; }
+.story-comment-author { color: #B94768; font-weight: 500; }
+.story-reply { display: flex; align-items: center; gap: 12rpx; min-height: 88rpx; width: 100%; padding: 18rpx 0 0; margin: 8rpx 0 0; background: transparent; color: #B94768; border: 0; border-radius: 0; font-size: 26rpx; font-weight: 500; line-height: 1.5; text-align: left; }
+.story-reply::after { border: 0; }
+.story-reply-count { flex: 1; min-width: 0; color: #80616F; font-size: 23rpx; font-weight: 400; text-align: right; word-break: break-word; }
+.story-reply:active { opacity: .7; }

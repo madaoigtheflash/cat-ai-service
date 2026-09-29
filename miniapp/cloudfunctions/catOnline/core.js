@@ -1,6 +1,7 @@
 'use strict'
 
 const crypto = require('crypto')
+const { createShowcaseHandlers } = require('./showcase')
 
 const SCHEMA_VERSION = 1
 const OWNER_KEY_VERSION = 'v1'
@@ -49,7 +50,9 @@ const ACTIONS = new Set([
   'castRelationshipVote',
   'reviewSighting',
   'submitFeedback',
-  'listFeedbackCenter'
+  'listFeedbackCenter',
+  'listShowcase',
+  'setShowcaseLike'
 ])
 
 class DomainError extends Error {
@@ -1212,7 +1215,13 @@ function createCatOnlineCore(options) {
     }
   }
 
+  const showcaseHandlers = createShowcaseHandlers({
+    repository, media, catalog: settings.showcaseCatalog,
+    likeId: (ownerKey, assetId) => stableId('shl', ownerSecret, `showcase|${ownerKey}|${assetId}`),
+    DomainError
+  })
   const handlers = {
+    ...showcaseHandlers,
     health,
     bootstrap,
     createCommunity,

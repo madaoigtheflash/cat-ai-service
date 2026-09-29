@@ -8,7 +8,7 @@
   <view class="upload-card {{imagePath ? 'has-image' : ''}}" bindtap="chooseImage">
     <image wx:if="{{imagePath}}" class="preview-image" src="{{imagePath}}" mode="aspectFill" />
     <view wx:else class="upload-empty">
-      <view class="camera-icon">📷</view>
+      <view class="camera-icon"><icon name="camera" size="{{52}}" color="#D94F75" /></view>
       <text class="upload-title">拍照或从相册选择</text>
       <text class="muted">支持 JPG、PNG 等常见图片格式</text>
     </view>
@@ -22,8 +22,8 @@
   </view>
   <view wx:if="{{error}}" class="notice error"><text>{{error}}</text></view>
 
-  <button class="primary-button" loading="{{loading}}" disabled="{{loading}}" bindtap="runIdentify">{{loading ? '猫咪观察员正在认真看看…' : '开始发现猫咪特征'}}</button>
-  <button wx:if="{{!configured}}" class="text-button" bindtap="showDemo">只查看结果界面演示</button>
+  <button class="primary-button" loading="{{loading}}" disabled="{{loading || saving}}" bindtap="runIdentify">{{loading ? '猫咪观察员正在认真看看…' : '开始发现猫咪特征'}}</button>
+  <button wx:if="{{!configured}}" class="text-button" disabled="{{loading || saving}}" bindtap="showDemo">只查看结果界面演示</button>
 
   <view wx:if="{{result}}" class="result-card">
     <view class="result-head">
@@ -44,7 +44,12 @@
       <text class="feature-chip" wx:for="{{result.features}}" wx:key="*this">{{item}}</text>
     </view>
     <text class="result-description">{{result.description}}</text>
-    <button class="secondary-button" bindtap="saveToPet">保存到猫咪档案</button>
+    <view wx:if="{{!result.demo}}" class="register-actions">
+      <text class="share-explanation">先登记到本机，再由你决定分享什么。健康、备注和识别原始结果不会带入动态，照片需另行确认。</text>
+      <button class="primary-button" loading="{{saving}}" disabled="{{saving}}" bindtap="registerAndShare">{{savedPetId ? '已登记，继续写动态' : '登记后分享'}}</button>
+      <button class="secondary-button archive-only-button" disabled="{{saving}}" bindtap="saveToPet">{{savedPetId ? '查看本机档案' : '只保存到猫咪档案'}}</button>
+    </view>
+    <text wx:else class="share-explanation">演示结果不能登记或发布。选择自己的照片并完成真实观察后，即可继续。</text>
   </view>
 
   <view class="tips-card">

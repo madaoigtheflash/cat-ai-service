@@ -1,3 +1,7 @@
 {
-  "navigationBarTitleText": "猫咪助手"
+  "navigationBarTitleText": "猫猫小屋",
+  "enablePullDownRefresh": true,
+  "backgroundColor": "#FFF7FA",
+  "backgroundTextStyle": "dark",
+  "usingComponents": { "social-post-card": "/components/social-post-card/index", "icon": "/components/icon/index" }
 }
