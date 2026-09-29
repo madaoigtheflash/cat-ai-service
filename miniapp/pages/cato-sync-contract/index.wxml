@@ -7,10 +7,12 @@
     <text class="lab-copy">① A 新建事项，B 点“发送 / 拉取”。② B 切离线并修改，A 在线修改同一事项。③ B 重新连接，再明确选择保留哪份内容。</text>
     <text class="lab-muted">本地版本含未发送的预测变更；权威版本仅在模拟端接受命令后递增。另一设备不会自动刷新。</text>
   </view>
-  <view wx:if="{{error}}" class="error-panel">
-    <text class="lab-error" aria-live="assertive">{{error}}</text>
-    <button wx:if="{{retryAvailable}}" class="lab-primary" bindtap="retrySave">重试这次保存</button>
+  <view wx:if="{{error || retryAvailable}}" class="error-panel">
+    <text wx:if="{{error}}" class="lab-error" aria-live="assertive">{{error}}</text>
+    <text wx:if="{{retryAvailable}}" class="lab-copy">待重试的是先前提交：{{retrySummary}}。不会改用当前输入。</text>
+    <button wx:if="{{retryAvailable}}" class="lab-primary" bindtap="retrySave">重试先前提交</button>
   </view>
+  <view wx:if="{{saveNotice}}" class="lab-notice" aria-live="polite">{{saveNotice}}</view>
   <block wx:if="{{ready}}">
     <view wx:for="{{clients}}" wx:key="id" wx:for-item="client" class="card device-card">
       <view class="device-header">
