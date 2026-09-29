@@ -1,0 +1,133 @@
+<view class="lab-page relationship-page">
+  <text class="lab-title">先观察，再理解彼此</text>
+  <text class="lab-copy">记录一只猫朝向另一只猫的行为假设。一次互动和几张票，都不是关系的定论。</text>
+  <view class="lab-notice">纯本地模拟 · 三只合成猫、两位模拟观察者。无真实识猫、定位、模型判断或云端投票；不读取健康档案和私信。</view>
+
+  <view wx:if="{{error || pending || !ready}}" class="feedback-panel">
+    <text wx:if="{{error}}" class="lab-error">{{error}}</text>
+    <button wx:if="{{pending}}" class="lab-primary" loading="{{busy}}" disabled="{{busy}}" bindtap="retryPending">重试核对这次保存</button>
+    <button wx:elif="{{!ready}}" class="lab-secondary" bindtap="loadState">重新读取本机记录</button>
+  </view>
+  <text wx:if="{{notice}}" class="save-notice">{{notice}}</text>
+
+  <view class="card lab-section">
+    <text class="lab-heading">一个方向，一份计划</text>
+    <text class="lab-muted">A → B 的发起方与接收方不能互换。反向 B → A 单独建计划，不共享证据和投票。</text>
+    <button wx:if="{{plans.length}}" class="lab-secondary" disabled="{{pending || !ready}}" bindtap="toggleCreate">{{createOpen ? '收起新计划（保留输入）' : '新建一个方向的计划'}}</button>
+    <view wx:if="{{createOpen}}">
+      <text class="field-label">起点猫 · 行为发起／跟随的一方</text>
+      <picker range="{{cats}}" range-key="label" value="{{fromIndex}}" data-field="fromIndex" disabled="{{pending || !ready}}" bindchange="changeCat"><view class="picker-value">{{cats[fromIndex].label}} · 选择</view></picker>
+      <text class="field-label">终点猫 · 被接近／被跟随的一方</text>
+      <picker range="{{cats}}" range-key="label" value="{{toIndex}}" data-field="toIndex" disabled="{{pending || !ready}}" bindchange="changeCat"><view class="picker-value">{{cats[toIndex].label}} · 选择</view></picker>
+      <text class="field-label">待观察的中性假设</text>
+      <picker range="{{kinds}}" range-key="name" value="{{kindIndex}}" disabled="{{pending || !ready}}" bindchange="changeKind"><view class="picker-value">{{kinds[kindIndex].name}} · 选择</view></picker>
+      <view class="direction-panel">
+        <text class="direction-title">{{cats[fromIndex].name}} → {{cats[toIndex].name}}</text>
+        <text class="lab-copy">{{cats[fromIndex].name}}：{{kinds[kindIndex].fromRole}}
+{{cats[toIndex].name}}：{{kinds[kindIndex].toRole}}</text>
+        <text class="lab-muted">角色仅描述这条假设，不代表猫的固定身份、性格或血缘。</text>
+      </view>
+      <text wx:if="{{fromIndex === toIndex}}" class="lab-error">起点与终点不能是同一只猫。</text>
+      <text class="field-label">我设定的观察时间（本机时间）</text>
+      <view class="time-grid">
+        <picker mode="date" start="2000-01-01" end="2099-12-31" value="{{createDate}}" data-field="createDate" disabled="{{pending || !ready}}" bindchange="changeField"><view class="picker-value">{{createDate || '选择日期'}}</view></picker>
+        <picker mode="time" value="{{createTime}}" data-field="createTime" disabled="{{pending || !ready}}" bindchange="changeField"><view class="picker-value">{{createTime || '选择时间'}}</view></picker>
+      </view>
+      <text class="lab-muted">只在本页保存时间，不发送通知；允许记录已经过去的观察安排。</text>
+      <text class="field-label">可编辑的观察清单</text>
+      <textarea class="lab-input note-input" auto-height maxlength="800" value="{{createChecklist}}" data-field="createChecklist" disabled="{{pending || !ready}}" bindinput="changeField" placeholder="记录动作、先后、时长与另一方回应，不诱导互动。" />
+      <button class="lab-primary" disabled="{{pending || !ready || fromIndex === toIndex}}" bindtap="createPlan">保存这份方向计划</button>
+    </view>
+  </view>
+
+  <view wx:if="{{plans.length}}" class="lab-section">
+    <text class="lab-heading">本机方向记录 · {{plans.length}} 份</text>
+    <button wx:for="{{plans}}" wx:key="id" class="plan-switch {{selected.id === item.id ? 'is-selected' : ''}}" data-id="{{item.id}}" disabled="{{pending}}" bindtap="selectPlan">
+      <text class="plan-name">{{item.direction}} · {{item.kindName}}</text>
+      <text class="lab-muted">{{item.roles}}</text>
+      <text class="lab-muted">{{item.statusLabel}} · {{item.timeLabel}}</text>
+    </button>
+  </view>
+  <view wx:else class="empty-record">
+    <text class="lab-heading">还没有关系结论，也没有预置票</text>
+    <text class="lab-copy">先保存一份计划，再分时记录证据。后面的分布只来自你亲自操作的模拟投票。</text>
+  </view>
+
+  <block wx:if="{{selected}}">
+    <view class="card lab-section">
+      <text class="lab-heading">{{selected.direction}} · 当前假设</text>
+      <text class="lab-copy">{{selected.roles}}</text>
+      <text class="status-line">{{selected.statusLabel}} · {{selected.timeLabel}}</text>
+      <text class="lab-copy">{{selected.checklist}}</text>
+      <button class="lab-secondary" disabled="{{pending || !ready}}" bindtap="openReverse">{{reversePlan ? '查看反向独立记录' : '另建反向计划'}}</button>
+      <text class="lab-muted">{{reversePlan ? '反向已建计划；点击查看它自己的角色、证据与票数。' : '反向尚无记录；此处不会自动生成或推断。'}}</text>
+      <button wx:if="{{selected.status === 'active' && !editOpen}}" class="lab-secondary" disabled="{{pending || !ready}}" bindtap="startEdit">编辑时间与清单</button>
+      <view wx:if="{{editOpen && selected.status === 'active'}}" class="edit-panel">
+        <text class="field-label">编辑观察时间</text>
+        <view class="time-grid">
+          <picker mode="date" start="2000-01-01" end="2099-12-31" value="{{editDate}}" data-field="editDate" disabled="{{pending}}" bindchange="changeField"><view class="picker-value">{{editDate}}</view></picker>
+          <picker mode="time" value="{{editTime}}" data-field="editTime" disabled="{{pending}}" bindchange="changeField"><view class="picker-value">{{editTime}}</view></picker>
+        </view>
+        <textarea class="lab-input note-input" auto-height maxlength="800" value="{{editChecklist}}" data-field="editChecklist" disabled="{{pending}}" bindinput="changeField" />
+        <text class="lab-muted">方向与行为假设保存后不改写，避免让已有证据和票变成另一条假设。</text>
+        <button class="lab-primary" disabled="{{pending || !ready}}" bindtap="saveEdit">保存修改</button>
+        <button class="lab-secondary" disabled="{{pending}}" bindtap="cancelEdit">取消编辑</button>
+      </view>
+      <button class="lab-secondary" disabled="{{pending || !ready}}" bindtap="toggleStatus">{{selected.status === 'completed' ? '撤销完成，继续记录' : '完成本次观察记录'}}</button>
+    </view>
+
+    <view class="card lab-section">
+      <text class="lab-heading">分时证据笔记</text>
+      <text class="lab-muted">当前仅为 {{selected.direction}} 记录。证据是待核对的描述，不是事实认证；不要填真实位置、私人信息或给猫贴道德标签。</text>
+      <view wx:if="{{selected.status === 'active'}}">
+        <text class="field-label">这段观察发生的时间</text>
+        <view class="time-grid">
+          <picker mode="date" start="2000-01-01" end="2099-12-31" value="{{evidenceDate}}" data-field="evidenceDate" disabled="{{pending}}" bindchange="changeField"><view class="picker-value">{{evidenceDate || '选择记录日期'}}</view></picker>
+          <picker mode="time" value="{{evidenceTime}}" data-field="evidenceTime" disabled="{{pending}}" bindchange="changeField"><view class="picker-value">{{evidenceTime || '选择记录时间'}}</view></picker>
+        </view>
+        <textarea class="lab-input note-input" auto-height maxlength="800" value="{{evidenceNote}}" data-field="evidenceNote" disabled="{{pending}}" bindinput="changeField" placeholder="例如（虚构）：糯米先向芝麻走近，芝麻停留约十秒后离开；没有继续跟随。" />
+        <button class="lab-primary" disabled="{{pending || !ready}}" bindtap="addEvidence">保存这段证据笔记</button>
+      </view>
+      <text wx:else class="lab-copy">本次记录已完成。可撤销完成后继续补记；仍可撤回不可靠的证据与投票。</text>
+      <text wx:if="{{!allEvidence.length}}" class="lab-copy">此方向还没有证据。缺少有效证据时不能投票或完成。</text>
+      <view wx:for="{{allEvidence}}" wx:key="id" class="evidence-item">
+        <text class="field-label">{{item.timeLabel}} · {{item.active ? '待核对笔记' : '已撤回，不计入投票'}}</text>
+        <text class="lab-copy">{{item.note}}</text>
+        <button wx:if="{{item.active}}" class="lab-danger" data-id="{{item.id}}" disabled="{{pending || !ready}}" bindtap="withdrawEvidence">撤回这条证据</button>
+      </view>
+    </view>
+
+    <view class="card lab-section">
+      <text class="lab-heading">两位模拟观察者的判断</text>
+      <text class="lab-copy">{{selected.direction}} · 每人每个方向仅一票，重复投票会改票。不会发送给任何真实用户。</text>
+      <view wx:for="{{voteCards}}" wx:key="id" class="observer-card">
+        <text class="field-label">{{item.name}}</text>
+        <text class="lab-copy">{{item.choiceName}}</text>
+        <text wx:if="{{item.voted}}" class="lab-muted">引用本方向 {{item.evidenceCount}} 段有效证据</text>
+        <button wx:if="{{item.voted}}" class="lab-danger" data-id="{{item.id}}" disabled="{{pending || !ready}}" bindtap="withdrawVote">撤回这位观察者的票</button>
+      </view>
+      <view wx:if="{{selected.status === 'active' && activeEvidence.length}}">
+        <text class="field-label">我现在操作的模拟身份</text>
+        <picker range="{{observers}}" range-key="name" value="{{observerIndex}}" disabled="{{pending}}" bindchange="changeObserver"><view class="picker-value">{{observers[observerIndex].name}} · 切换</view></picker>
+        <text class="field-label">引用哪些证据（至少一段）</text>
+        <checkbox-group bindchange="selectEvidence">
+          <label wx:for="{{activeEvidence}}" wx:key="id" class="evidence-choice"><checkbox value="{{item.id}}" checked="{{item.checked}}" disabled="{{pending}}" color="#B94768" /><view><text class="field-label">{{item.timeLabel}}</text><text class="lab-copy">{{item.note}}</text></view></label>
+        </checkbox-group>
+        <text class="field-label">对这段记录的判断</text>
+        <picker range="{{choices}}" range-key="name" value="{{voteIndex}}" disabled="{{pending}}" bindchange="changeVote"><view class="picker-value">{{choices[voteIndex].name}} · 选择</view></picker>
+        <button class="lab-primary" disabled="{{pending || !ready || !selectedEvidenceIds.length}}" bindtap="vote">以 {{observers[observerIndex].name}} 投票 / 改票</button>
+      </view>
+      <text wx:elif="{{!activeEvidence.length}}" class="lab-copy">先补充本方向的有效证据，投票入口才会开放。</text>
+    </view>
+
+    <view class="card lab-section">
+      <text class="lab-heading">{{stats.direction}} 的模拟票分布</text>
+      <text class="lab-muted">来自已保存的本方向本地票；非置信度、非热度、非关系认证。</text>
+      <view class="distribution-head"><text>判断类别</text><text>票数</text></view>
+      <view wx:for="{{stats.rows}}" wx:key="id" class="distribution-row"><text>{{item.name}}</text><text class="vote-count">{{item.count}}</text></view>
+      <text class="lab-copy">已投 {{stats.total}} / 2 位 · 未投 {{stats.unvoted}} 位</text>
+      <text class="lab-muted">反向票不混入此表。撤回证据会同步撤回引用它的票；任何票数都不能自动证明同猫身份或亲缘关系。</text>
+    </view>
+  </block>
+  <text class="bottom-note">观察应保持距离，不强迫猫互动。记录不代替兽医判断；本实验不生成诊断、治疗或用药建议。</text>
+</view>

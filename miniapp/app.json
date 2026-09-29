@@ -16,7 +16,8 @@
     "pages/garden/index",
     "pages/feedback/index",
     "pages/settings/index",
-    "pages/mine/index"
+    "pages/mine/index",
+    "pages/cato-relationship-observe/index"
   ],
   "window": {
     "navigationBarBackgroundColor": "#FF6F91",
