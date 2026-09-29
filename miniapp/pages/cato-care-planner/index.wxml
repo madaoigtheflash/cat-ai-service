@@ -1,0 +1,59 @@
+<view class="lab-page planner-page">
+  <text class="lab-title">把照护，放回自己的节奏</text>
+  <text class="lab-copy">私人照护日程 · 本地实验</text>
+  <view class="lab-notice">记录仅保存在本机；不发送微信提醒。这里只在打开页面时展示日程，不发送微信推送，不在后台提醒。日期和时间由你选择；仅记录你或兽医已确定的事项，不提供诊断、药量或自动用药安排。</view>
+  <text wx:if="{{error}}" class="lab-error">{{error}}</text>
+  <text wx:if="{{feedback}}" class="feedback">{{feedback}}</text>
+  <view wx:if="{{loading}}" class="card"><text class="lab-copy">正在读取本机日程…</text></view>
+  <button wx:elif="{{!today}}" class="lab-secondary" bindtap="reload">重新读取本机日程</button>
+  <block wx:else>
+    <button wx:if="{{!showForm}}" class="lab-primary" bindtap="openForm">＋ 记一件照护事项</button>
+    <view wx:if="{{showForm}}" class="card form-card">
+      <text class="lab-heading">新建事项</text>
+      <label class="field-label" for="care-title">事项名称</label>
+      <input id="care-title" class="lab-input" value="{{draft.title}}" maxlength="80" placeholder="例如：整理猫咪用品" bindinput="updateTitle" />
+      <text class="field-label">时间方式</text>
+      <picker mode="selector" range="{{kindLabels}}" value="{{draft.kindIndex}}" bindchange="selectKind"><view class="picker-control">{{kindLabels[draft.kindIndex]}} · 点击选择</view></picker>
+      <text class="field-label">{{draft.kindIndex === 2 ? '发生日期（不设钟点）' : '首次发生日期'}}</text>
+      <picker mode="date" start="1900-01-01" end="9999-12-31" value="{{draft.date}}" bindchange="selectDate"><view class="picker-control">{{draft.date || '请亲自选择日期'}}</view></picker>
+      <block wx:if="{{draft.kindIndex !== 2}}">
+        <text class="field-label">{{draft.kindIndex === 0 ? '开始时间' : '截止时间'}}（设备当地时间）</text>
+        <picker mode="time" value="{{draft.time}}" bindchange="selectTime"><view class="picker-control">{{draft.time || '请亲自选择时间'}}</view></picker>
+      </block>
+      <text class="field-label">重复方式</text>
+      <picker mode="selector" range="{{repeatLabels}}" value="{{draft.repeatIndex}}" bindchange="selectRepeat"><view class="picker-control">{{repeatLabels[draft.repeatIndex]}} · 点击选择</view></picker>
+      <text class="lab-muted">每月保留首次日期：31 日在短月取月末，之后仍回到 31 日。周一至周五不排除法定节假日；周末起始会从下个周一出现。</text>
+      <view class="actions"><button class="lab-primary" bindtap="saveTask">确认保存</button><button class="lab-secondary" bindtap="cancelForm">取消</button></view>
+    </view>
+
+    <view class="lab-section">
+      <text class="lab-heading">{{day === today ? '今天的照护' : '按日查看'}} · {{entries.length}} 件</text>
+      <picker mode="date" start="1900-01-01" end="9999-12-31" value="{{day}}" bindchange="chooseDay"><view class="picker-control">{{day}} · 点击换日期</view></picker>
+      <view class="actions day-actions"><button class="lab-secondary" data-days="-1" bindtap="moveDay">前一天</button><button class="lab-secondary" bindtap="goToday">回到今天</button><button class="lab-secondary" data-days="1" bindtap="moveDay">后一天</button></view>
+      <text class="lab-muted">过去的日期可补记，未来日期仅预览。开始/截止时间是你设定的提示，不限制当天打卡；未完成项不自动挪到次日。</text>
+      <view wx:if="{{!entries.length}}" class="card empty-card"><text class="lab-heading">这一天暂时留白</text><text class="lab-copy">没有符合重复规则的事项。可以换一天看看，或记下新的照护安排。</text></view>
+      <view wx:for="{{entries}}" wx:key="id" class="card occurrence">
+        <text class="task-title">{{item.title}}</text>
+        <text class="lab-copy">{{item.kindLabel}}{{item.time ? ' · ' + item.time : ''}}</text>
+        <text class="lab-muted">{{item.repeatLabel}}</text>
+        <text class="status">{{item.status}}</text>
+        <text wx:if="{{item.checkSummary}}" class="lab-muted">实际记录时间：{{item.checkSummary}}</text>
+        <view class="actions">
+          <button class="lab-primary" disabled="{{!item.canCheck}}" data-action="check" data-id="{{item.id}}" bindtap="act">{{item.count ? '再记一次' : '完成 / 打卡'}}</button>
+          <button class="lab-secondary" disabled="{{!item.canUndo}}" data-action="undo" data-id="{{item.id}}" bindtap="act">{{item.skipped ? '撤销跳过' : '撤销最近一次'}}</button>
+          <button class="lab-secondary" disabled="{{!item.canSkip}}" data-action="skip" data-id="{{item.id}}" bindtap="act">跳过当天</button>
+        </view>
+      </view>
+    </view>
+
+    <view class="lab-section">
+      <text class="lab-heading">全部事项 · {{total}}</text>
+      <text class="lab-muted">暂停只关闭操作，不删除历史；恢复后不会自动补打卡。没有连续打卡要求。</text>
+      <view wx:if="{{!tasks.length}}" class="card"><text class="lab-copy">尚未添加事项。你的原猫咪档案不会被读取或改动。</text></view>
+      <view wx:for="{{tasks}}" wx:key="id" class="card task-row">
+        <view><text class="task-title">{{item.title}}</text><text class="lab-muted">从 {{item.date}} 起 · {{item.kindLabel}} {{item.time}}</text><text class="lab-muted">{{item.repeatLabel}} · {{item.paused ? '已暂停' : '进行中'}}</text></view>
+        <button class="lab-secondary" data-action="{{item.paused ? 'resume' : 'pause'}}" data-id="{{item.id}}" bindtap="act">{{item.paused ? '恢复事项' : '暂停事项'}}</button>
+      </view>
+    </view>
+  </block>
+</view>

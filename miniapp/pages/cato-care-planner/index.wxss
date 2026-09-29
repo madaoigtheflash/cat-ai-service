@@ -1,0 +1,17 @@
+@import "../../styles/cato-lab.wxss";
+
+.planner-page { min-height: 100vh; }
+.planner-page text, .planner-page label { word-break: break-word; }
+.form-card { margin-top: 24rpx; }
+.field-label { display: block; margin: 24rpx 0 12rpx; font-size: 27rpx; font-weight: 600; line-height: 1.55; }
+.picker-control { display: flex; align-items: center; min-height: 88rpx; margin: 12rpx 0 24rpx; padding: 22rpx 24rpx; color: #3E2D35; background: #FFF7FA; border: 1rpx solid #F2DFE7; border-radius: 22rpx; font-size: 27rpx; line-height: 1.65; word-break: break-word; }
+.actions { display: flex; flex-wrap: wrap; gap: 12rpx; margin: 16rpx 0; }
+.actions button { flex: 1 1 210rpx; min-width: 0; margin: 0; }
+.day-actions button { flex-basis: 160rpx; padding-left: 16rpx; padding-right: 16rpx; }
+.task-title { display: block; font-size: 30rpx; font-weight: 600; line-height: 1.45; }
+.task-row > view { min-width: 0; }
+.task-row .lab-muted { margin-top: 12rpx; }
+.occurrence, .empty-card { margin-top: 24rpx; }
+.status { display: block; margin: 20rpx 0 12rpx; color: #B94768; font-size: 27rpx; font-weight: 600; line-height: 1.55; }
+.feedback { display: block; margin: 24rpx 0; padding: 24rpx; color: #3F8E75; background: #FFFFFF; border: 1rpx solid #F2DFE7; border-radius: 24rpx; font-size: 26rpx; line-height: 1.65; }
+.planner-page button:active { transform: scale(.98); }
