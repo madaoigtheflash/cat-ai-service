@@ -55,3 +55,4 @@ node --check miniapp/config/cato-lab.js
 ## 所有权
 
 本分支只改 focus 页面、纯计时/状态工具、focus 测试、本审计文档、实验配置及页面清单。不提交主任务已有的 `miniapp/services/community.js` 更改；不推送、不部署、不合并。
+> 主代理补充验收（2026-09-29）：重新执行本分支 cato 测试 36/36 通过（含 5 项共享隔离测试）；结构检查与原生 WXML 编译通过。已在微信开发者工具实际打开本页并查看截图：390×753、fontSizeSetting 16、基础库 3.17.1，确认 app 为离线实验、cloudReady=false。截图收录在 review 分支 docs/cato-lab/previews/focus.png。仅检查该默认页面状态；320/375/430px、大字号、键盘、真机及真实云同步尚未验证。
