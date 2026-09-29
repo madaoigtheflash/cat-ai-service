@@ -19,7 +19,10 @@ function errorMessage(error) {
   return detail.slice(0, 180) || '暂时连接不上广场，请稍后重试。'
 }
 async function call(action, input = {}) {
-  require('./cato-lab-guard')()
+  const app = typeof getApp === 'function' ? getApp() : null
+  if (app && app.globalData && app.globalData.catoLabOffline) {
+    throw new Error('此分支为离线审计实验，不连接生产云端；没有发送或上传。')
+  }
   if (!wx.cloud) throw new Error('当前微信版本不支持云开发，请升级后重试。')
   try {
     const response = await wx.cloud.callFunction({ name: FUNCTION_NAME, config: { env: CLOUD_ENV }, data: { action, ...input } })
