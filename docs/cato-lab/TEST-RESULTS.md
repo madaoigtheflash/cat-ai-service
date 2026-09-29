@@ -21,7 +21,7 @@
 | 有向关系观察 · `relationship-observe` | 44/44 | 378/378 | [5698676](https://github.com/madaoigtheflash/cat-ai-service/commit/5698676a0ef54454e5c363ada87d81af6bfe1d1c) |
 | 知识与反馈转行动 · `knowledge-action` | 33/33 | 367/367 | [d1bcdcf](https://github.com/madaoigtheflash/cat-ai-service/commit/d1bcdcfd0ee250e8054e6f4be77c05a80e4057e7) |
 
-机器可读记录：[verification.json](verification.json)。该文件保留每个方向完整SHA、全部检查结果和复验时间，远端核对另见交付记录。
+机器可读记录：[verification.json](verification.json)。该文件保留每个方向完整SHA、全部检查结果和复验时间，远端核对另见[交付记录](DELIVERY.md)。
 
 ## 实际界面证据
 
