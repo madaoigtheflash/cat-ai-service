@@ -54,7 +54,7 @@
   <view class="lab-section">
     <text class="lab-heading">3 · 本机收件箱 · {{count}} 条</text>
     <text class="lab-muted">实际保存的私人实验事项，最多 500 条。不会主动提醒；原文与来源一并保留，便于核对。</text>
-    <view wx:if="{{!items.length &amp;&amp; !loadFailed}}" class="card capture-empty">这里还没有事项。整理草稿并明确确认后才会出现。</view>
+    <view wx:if="{{!items.length && !loadFailed}}" class="card capture-empty">这里还没有事项。整理草稿并明确确认后才会出现。</view>
     <view wx:for="{{items}}" wx:key="id" class="card capture-item">
       <text class="capture-status">{{item.done ? '已完成 · 随时可撤销' : '待处理'}}</text>
       <text class="capture-item-title">{{item.title}}</text>
