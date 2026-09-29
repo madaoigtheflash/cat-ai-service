@@ -1,6 +1,5 @@
 <view class="lab-page journal-page">
   <view class="journal-header">
-    <text class="journal-kicker">CAT-AI × CATO · 本地实验 06</text>
     <text class="lab-title">和猫一起的小日子</text>
     <text class="lab-copy">先写给自己，再决定哪些话值得分享。</text>
   </view>
