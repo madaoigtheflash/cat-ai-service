@@ -1,0 +1,25 @@
+@import "../../styles/cato-lab.wxss";
+
+.capture-page { overflow-wrap: break-word; }
+.capture-block, .capture-label { display: block; word-break: break-word; }
+.capture-label { margin: 12rpx 0; font-size: 26rpx; font-weight: 600; line-height: 1.55; }
+.capture-safety { margin: 24rpx 0; padding: 24rpx; color: #A66A20; background: #FFFFFF; border: 1rpx solid #F2DFE7; border-radius: 24rpx; font-size: 25rpx; line-height: 1.65; word-break: break-word; }
+.capture-notice { margin: 24rpx 0; padding: 24rpx; background: #FFFFFF; border: 1rpx solid #F2DFE7; border-radius: 24rpx; font-size: 26rpx; line-height: 1.65; word-break: break-word; }
+.capture-source { display: block; margin-top: 24rpx; font-size: 24rpx; color: #6F5A64; }
+.capture-textarea { min-height: 220rpx; }
+.capture-title-input { min-height: 112rpx; }
+.capture-actions { display: flex; flex-wrap: wrap; gap: 16rpx; }
+.capture-actions > button { flex: 1 1 240rpx; min-width: 0; max-width: 100%; }
+.capture-actions .lab-secondary, .capture-actions .lab-danger { margin: 12rpx 0; }
+.capture-selected { border: 2rpx solid #B94768; }
+.capture-draft, .capture-item { margin-top: 24rpx; }
+.capture-original { display: block; margin: 16rpx 0; color: #6F5A64; font-size: 24rpx; line-height: 1.65; word-break: break-word; }
+.capture-time-warning { margin: 16rpx 0; color: #A66A20; font-size: 25rpx; line-height: 1.65; word-break: break-word; }
+.capture-picker-row { display: flex; flex-wrap: wrap; gap: 16rpx; }
+.capture-picker-row > picker { flex: 1 1 260rpx; min-width: 0; max-width: 100%; }
+.capture-picker-row .lab-input { min-height: 88rpx; white-space: normal; word-break: break-word; }
+.capture-empty { margin-top: 24rpx; color: #6F5A64; font-size: 27rpx; line-height: 1.65; }
+.capture-item-title { display: block; margin: 12rpx 0; font-size: 30rpx; font-weight: 600; line-height: 1.45; word-break: break-word; }
+.capture-status { display: block; color: #6F5A64; font-size: 24rpx; line-height: 1.55; }
+.capture-time { display: block; margin: 16rpx 0; font-size: 26rpx; line-height: 1.6; word-break: break-word; }
+.capture-footer { display: block; margin: 40rpx 0 0; color: #6F5A64; font-size: 24rpx; line-height: 1.65; word-break: break-word; }

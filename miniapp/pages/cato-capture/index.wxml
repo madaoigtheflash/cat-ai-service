@@ -1,0 +1,71 @@
+<view class="lab-page capture-page">
+  <text class="lab-title">照护收件箱</text>
+  <text class="lab-copy">先把想到的事放下来，再一条条确认。</text>
+  <view class="lab-notice">
+    <text class="capture-label">离线实验 · 只存本机</text>
+    <text class="capture-block">不连接云端、不发送提醒、不做真实语音或图片识别。合成样本不代表你的猫咪资料。</text>
+  </view>
+  <view class="capture-safety">只记录你已确定的照护事项，不提供诊断、用药或剂量建议。猫咪不适请咨询兽医，不要等待本地事项提醒。</view>
+
+  <view wx:if="{{error}}" class="lab-error" role="alert">{{error}}</view>
+  <view wx:if="{{notice}}" class="capture-notice">{{notice}}</view>
+  <button wx:if="{{loadFailed}}" class="lab-secondary" bindtap="reloadInbox">重新读取收件箱</button>
+
+  <view wx:if="{{!batch}}" class="lab-section">
+    <text class="lab-heading">1 · 写下照护事项</text>
+    <text class="lab-muted">每行一条，或用分号、句号分隔。最多 20 条／3000 字，每条最多 180 字；不会自动理解逗号和“然后”。</text>
+    <text class="capture-source">当前来源：{{sourceLabel}}</text>
+    <textarea class="lab-input capture-textarea" value="{{input}}" maxlength="3000" auto-height placeholder="例如：明天换水；周末洗食盆；整理猫玩具" bindinput="onInput" />
+    <text class="lab-muted">{{input.length}} / 3000 字。草稿仅在当前页面内保留，退出前请先确认。</text>
+    <view class="capture-actions">
+      <button class="lab-secondary" data-source="voice-sample" bindtap="useSample">载入合成语音文字</button>
+      <button class="lab-secondary" data-source="image-sample" bindtap="useSample">载入合成图片文字</button>
+    </view>
+    <button wx:if="{{source !== 'text'}}" class="lab-secondary" bindtap="startText">清空样本，新写手动文字</button>
+    <button class="lab-primary" bindtap="prepareDrafts">整理为可编辑草稿</button>
+  </view>
+
+  <view wx:if="{{batch}}" class="lab-section">
+    <text class="lab-heading">2 · 核对 {{batch.drafts.length}} 条草稿</text>
+    <text wx:if="{{saveUncertain}}" class="lab-error">上次保存结果未确认，事项可能已保存。草稿暂时只读，请重试核对结果；批次回执会防止重复创建。</text>
+    <text wx:else class="lab-muted">还没有创建事项。原文中的时间仅作提示，必须逐条选择具体时间或明确先不设时间。时间按你手动选择的本地钟表记录，不会发送通知。</text>
+    <view wx:for="{{batch.drafts}}" wx:key="id" class="card capture-draft">
+      <text class="capture-label">草稿 {{index + 1}} · {{sourceLabel}}</text>
+      <text class="capture-original">原文：{{item.originalText}}</text>
+      <text class="form-label">事项内容（可编辑）</text>
+      <textarea class="lab-input capture-title-input" auto-height disabled="{{saving || saveUncertain}}" value="{{item.title}}" maxlength="180" data-id="{{item.id}}" data-field="title" bindinput="editDraft" />
+      <view class="capture-time-warning">{{item.timeHint}}</view>
+      <text class="capture-label">{{item.timeMode === 'review' ? '时间待核对 · 尚不能确认' : item.timeMode === 'unscheduled' ? '已选择：先不设时间' : '已选择：手动日期时间（请补全）'}}</text>
+      <view class="capture-actions">
+        <button class="lab-secondary {{item.timeMode === 'unscheduled' ? 'capture-selected' : ''}}" disabled="{{saving || saveUncertain}}" data-id="{{item.id}}" data-mode="unscheduled" bindtap="chooseTimeMode">先不设时间</button>
+        <button class="lab-secondary {{item.timeMode === 'scheduled' ? 'capture-selected' : ''}}" disabled="{{saving || saveUncertain}}" data-id="{{item.id}}" data-mode="scheduled" bindtap="chooseTimeMode">手动选时间</button>
+      </view>
+      <view wx:if="{{item.timeMode === 'scheduled'}}" class="capture-picker-row">
+        <picker mode="date" disabled="{{saving || saveUncertain}}" value="{{item.date}}" start="2000-01-01" end="2100-12-31" data-id="{{item.id}}" data-field="date" bindchange="editDraft"><view class="lab-input">日期：{{item.date || '请选择'}}</view></picker>
+        <picker mode="time" disabled="{{saving || saveUncertain}}" value="{{item.time}}" data-id="{{item.id}}" data-field="time" bindchange="editDraft"><view class="lab-input">时间：{{item.time || '请选择'}}</view></picker>
+      </view>
+      <button class="lab-danger" disabled="{{saving || saveUncertain}}" data-id="{{item.id}}" bindtap="removeDraft">移除此条草稿</button>
+    </view>
+    <text class="lab-muted">确认会把这一批全部存入本机实验收件箱，不会写入原版档案、创建医疗计划或同步到其他设备。</text>
+    <button class="lab-primary" loading="{{saving}}" disabled="{{saving || loadFailed}}" bindtap="confirmDrafts">{{saveUncertain ? '重试并核对上次保存结果' : '确认并保存 ' + batch.drafts.length + ' 条到本机'}}</button>
+    <button class="lab-secondary" disabled="{{saving}}" bindtap="cancelBatch">取消整批草稿</button>
+  </view>
+
+  <view class="lab-section">
+    <text class="lab-heading">3 · 本机收件箱 · {{count}} 条</text>
+    <text class="lab-muted">实际保存的私人实验事项，最多 500 条。不会主动提醒；原文与来源一并保留，便于核对。</text>
+    <view wx:if="{{!items.length &amp;&amp; !loadFailed}}" class="card capture-empty">这里还没有事项。整理草稿并明确确认后才会出现。</view>
+    <view wx:for="{{items}}" wx:key="id" class="card capture-item">
+      <text class="capture-status">{{item.done ? '已完成 · 随时可撤销' : '待处理'}}</text>
+      <text class="capture-item-title">{{item.title}}</text>
+      <text class="capture-time">{{item.timeLabel}}</text>
+      <text class="lab-muted">来源：{{item.sourceLabel}}</text>
+      <text class="capture-original">录入原文：{{item.originalText}}</text>
+      <view class="capture-actions">
+        <button class="lab-secondary" disabled="{{saving || loadFailed}}" data-id="{{item.id}}" bindtap="toggleItem">{{item.done ? '撤销完成' : '标记完成'}}</button>
+        <button class="lab-danger" disabled="{{saving || loadFailed}}" data-id="{{item.id}}" bindtap="removeItem">删除事项</button>
+      </view>
+    </view>
+  </view>
+  <text class="capture-footer">数据只在本机实验空间，卸载或清理缓存可能丢失。需要全部重来时，可返回「方案审计入口」重置本实验。</text>
+</view>
