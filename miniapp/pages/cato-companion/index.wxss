@@ -1,0 +1,44 @@
+@import "../../styles/cato-lab.wxss";
+
+.companion-page { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; }
+.intro { display: block; margin-top: 16rpx; color: #6F5A64; font-size: 28rpx; line-height: 1.65; word-break: break-word; }
+.scope-notice { margin-bottom: 32rpx; }
+.card { padding: 28rpx; }
+.choice-row, .time-row, .preset-row { display: flex; flex-wrap: wrap; gap: 12rpx; margin: 16rpx 0; }
+.choice { display: flex; flex: 1 1 120rpx; align-items: center; justify-content: center; min-width: 88rpx; min-height: 88rpx; padding: 20rpx 12rpx; margin: 0; color: #705260; background: #FFF7FA; border: 1rpx solid #F2DFE7; border-radius: 20rpx; font-size: 26rpx; font-weight: 600; line-height: 1.45; white-space: normal; word-break: break-word; }
+.choice.selected { color: #B94768; border-color: #B94768; background: #FFF0F5; }
+.choice[disabled] { color: #80616F; opacity: .65; }
+.sample-bubble { padding: 24rpx; margin: 24rpx 0 18rpx; background: #FFF0F5; border-radius: 4rpx 24rpx 24rpx; }
+.sample-label { display: block; color: #80616F; font-size: 23rpx; line-height: 1.55; }
+.sample-text { display: block; margin-top: 12rpx; color: #3E2D35; font-size: 28rpx; line-height: 1.75; word-break: break-word; }
+.field-label { display: block; color: #3E2D35; font-size: 28rpx; font-weight: 600; line-height: 1.5; word-break: break-word; }
+.form-item { margin: 24rpx 0; }
+.lab-input { margin: 12rpx 0 0; }
+.tone-label { margin-top: 28rpx; }
+.toggle-row { display: flex; align-items: center; gap: 20rpx; min-height: 112rpx; padding: 16rpx 0; }
+.toggle-copy { flex: 1; min-width: 0; }
+.toggle-copy .lab-muted { margin-top: 6rpx; }
+.toggle-row switch { display: flex; flex: none; align-items: center; justify-content: center; min-width: 104rpx; min-height: 88rpx; }
+.time-field { flex: 1 1 230rpx; min-width: 0; }
+.time-button { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12rpx; min-height: 88rpx; padding: 20rpx; margin-top: 12rpx; background: #FFF7FA; border: 1rpx solid #F2DFE7; border-radius: 20rpx; color: #3E2D35; font-size: 28rpx; font-weight: 600; line-height: 1.5; word-break: break-word; }
+.time-button text { min-width: 0; }
+.time-button text:last-child { color: #B94768; font-size: 24rpx; }
+.time-button.inactive { color: #80616F; background: #F8F2F5; }
+.equal-note { margin-top: 12rpx; }
+.simulated-time { margin-top: 20rpx; }
+.time-choice { flex-basis: 108rpx; font-size: 24rpx; }
+.prompt-result { margin-top: 20rpx; padding: 24rpx; border: 1rpx solid #F2DFE7; border-radius: 20rpx; background: #FFF7FA; }
+.prompt-shown { background: #F3ECFF; }
+.result-title { display: block; color: #3E2D35; font-size: 28rpx; font-weight: 600; line-height: 1.5; }
+.result-copy { display: block; margin-top: 12rpx; color: #6F5A64; font-size: 26rpx; line-height: 1.65; word-break: break-word; }
+.motion-sample { display: flex; align-items: center; gap: 20rpx; min-height: 100rpx; margin: 16rpx 0; padding: 20rpx; border-radius: 20rpx; background: #FFF0F5; }
+.motion-sample text { flex: 1; min-width: 0; color: #705260; font-size: 26rpx; line-height: 1.6; word-break: break-word; }
+.motion-dot { flex: none; width: 28rpx; height: 28rpx; margin: 10rpx; border-radius: 50%; background: #B94768; }
+.motion-dot.is-moving { animation: companion-breathe 2200ms ease-in-out infinite; }
+.reduced-motion .motion-dot { animation: none; transform: none; }
+.save-area { margin-top: 36rpx; }
+.save-state { display: block; margin-bottom: 12rpx; color: #3E2D35; font-size: 28rpx; font-weight: 600; line-height: 1.5; }
+.reset-button { display: flex; align-items: center; justify-content: center; min-height: 88rpx; padding: 22rpx 20rpx; margin: 12rpx 0; background: transparent; color: #80616F; font-size: 26rpx; font-weight: 500; line-height: 1.5; white-space: normal; }
+.footer-note { margin-top: 24rpx; }
+@keyframes companion-breathe { 0%, 100% { opacity: .65; transform: scale(.85); } 50% { opacity: 1; transform: scale(1.15); } }
+@media (prefers-reduced-motion: reduce) { .motion-dot.is-moving { animation: none; transform: none; } }

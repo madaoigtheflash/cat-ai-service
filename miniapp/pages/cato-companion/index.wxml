@@ -1,0 +1,92 @@
+<view class="lab-page companion-page {{draft.reduceMotion ? 'reduced-motion' : ''}}">
+  <text class="lab-title">可控制的猫咪陪伴</text>
+  <text class="intro">称呼、语气和出现的时机，都由你决定。</text>
+  <view class="lab-notice scope-notice">仅本机实验：这里是 AI 助手的文案与页内提示预览，不是真实猫友。不会发微信通知、改变系统免打扰或同步云端。</view>
+
+  <view class="card">
+    <text class="lab-heading">先听听这个语气</text>
+    <view class="choice-row">
+      <button wx:for="{{scenarios}}" wx:key="id" class="choice {{scenario === item.id ? 'selected' : ''}}" data-value="{{item.id}}" bindtap="chooseScenario" aria-label="{{item.label}}场景预览">{{item.label}}</button>
+    </view>
+    <view class="sample-bubble">
+      <text class="sample-label">AI 助手 · 本地示例文案</text>
+      <text class="sample-text">{{previewText}}</text>
+    </view>
+    <text class="lab-muted">主动查看文案不受安静时段限制。下面的“页内提示试验”才会检查是否应出现。</text>
+  </view>
+
+  <view class="card">
+    <text class="lab-heading">你想怎样被称呼</text>
+    <view class="form-item">
+      <label class="field-label" for="nickname">你的称呼</label>
+      <input id="nickname" class="lab-input" value="{{draft.nickname}}" maxlength="24" data-key="nickname" bindinput="edit" disabled="{{busy}}" placeholder="例如：阿桃" aria-label="你的称呼，1至12个字" />
+      <text wx:if="{{fieldErrors.nickname}}" class="lab-error">{{fieldErrors.nickname}}</text>
+    </view>
+    <view class="form-item">
+      <label class="field-label" for="assistant-name">助手自称</label>
+      <input id="assistant-name" class="lab-input" value="{{draft.assistantName}}" maxlength="24" data-key="assistantName" bindinput="edit" disabled="{{busy}}" placeholder="例如：小猫助手" aria-label="助手自称，1至12个字" />
+      <text wx:if="{{fieldErrors.assistantName}}" class="lab-error">{{fieldErrors.assistantName}}</text>
+    </view>
+    <text class="lab-muted">各 1–12 个字；保存时去掉首尾空格。自称只是 AI 界面标签，不代表真实身份。</text>
+    <text class="field-label tone-label">说话语气</text>
+    <view class="choice-row">
+      <button class="choice {{draft.tone === 'gentle' ? 'selected' : ''}}" data-key="tone" data-value="gentle" bindtap="edit" disabled="{{busy}}">温柔一点</button>
+      <button class="choice {{draft.tone === 'concise' ? 'selected' : ''}}" data-key="tone" data-value="concise" bindtap="edit" disabled="{{busy}}">简洁一点</button>
+    </view>
+  </view>
+
+  <view class="card">
+    <text class="lab-heading">给自己留一点安静</text>
+    <label class="toggle-row">
+      <view class="toggle-copy"><text class="field-label">允许本实验页内提示</text><text class="lab-muted">默认关闭；仅在你点试验按钮时展示</text></view>
+      <switch checked="{{draft.notificationsEnabled}}" color="#B94768" data-key="notificationsEnabled" bindchange="edit" disabled="{{busy}}" aria-label="允许本实验页内提示" />
+    </label>
+    <label class="toggle-row">
+      <view class="toggle-copy"><text class="field-label">启用安静时段</text><text class="lab-muted">只拦住本页示例提示，不控制微信</text></view>
+      <switch checked="{{draft.quietEnabled}}" color="#B94768" data-key="quietEnabled" bindchange="edit" disabled="{{busy}}" aria-label="启用安静时段" />
+    </label>
+    <view class="time-row">
+      <view class="time-field"><text class="field-label">安静开始</text><picker mode="time" value="{{draft.quietStart}}" disabled="{{busy || !draft.quietEnabled}}" data-key="quietStart" bindchange="edit"><view class="time-button {{!draft.quietEnabled ? 'inactive' : ''}}">{{draft.quietStart}}<text>选择</text></view></picker></view>
+      <view class="time-field"><text class="field-label">安静结束</text><picker mode="time" value="{{draft.quietEnd}}" disabled="{{busy || !draft.quietEnabled}}" data-key="quietEnd" bindchange="edit"><view class="time-button {{!draft.quietEnabled ? 'inactive' : ''}}">{{draft.quietEnd}}<text>选择</text></view></picker></view>
+    </view>
+    <text class="lab-muted">{{quietDescription}}</text>
+    <text class="lab-muted equal-note">起止相同时表示全天安静。时间按本机钟点理解，不自动安排后台任务。</text>
+  </view>
+
+  <view class="card simulation-card">
+    <text class="lab-heading">页内提示试验</text>
+    <text class="lab-copy">模拟钟点，不是现在的真实时间。使用当前草稿，即使尚未保存也能试。</text>
+    <picker mode="time" value="{{simulatedTime}}" bindchange="changeClock"><view class="time-button simulated-time"><text>模拟本地时间</text><text>{{simulatedTime}} · 选择</text></view></picker>
+    <view class="preset-row">
+      <button wx:for="{{timePresets}}" wx:key="*this" class="choice time-choice {{simulatedTime === item ? 'selected' : ''}}" data-value="{{item}}" bindtap="changeClock">{{item}}</button>
+    </view>
+    <button class="lab-secondary" bindtap="simulatePrompt">试一次页内提示</button>
+    <view wx:if="{{attempted && prompt}}" class="prompt-result {{prompt.shown ? 'prompt-shown' : ''}}" aria-live="polite">
+      <text class="result-title">{{prompt.shown ? '示例提示已显示' : '本次未显示提示'}}</text>
+      <text class="result-copy">{{prompt.reason}}</text>
+      <text wx:if="{{prompt.shown}}" class="result-copy">{{prompt.text}}</text>
+    </view>
+    <text wx:else class="lab-muted">先试默认关闭；再打开页内提示，对比 23:00 与 08:00。改变钟点后，结果会立即更新。</text>
+  </view>
+
+  <view class="card">
+    <text class="lab-heading">让画面也慢下来</text>
+    <label class="toggle-row">
+      <view class="toggle-copy"><text class="field-label">减少动态</text><text class="lab-muted">开启后，本页指示点停止呼吸动画</text></view>
+      <switch checked="{{draft.reduceMotion}}" color="#B94768" data-key="reduceMotion" bindchange="edit" disabled="{{busy}}" aria-label="减少动态" />
+    </label>
+    <view class="motion-sample"><view class="motion-dot {{draft.reduceMotion ? '' : 'is-moving'}}"></view><text>{{draft.reduceMotion ? '静止预览 · 已减少动态' : '轻呼吸预览 · 可随时关掉'}}</text></view>
+    <text class="lab-muted">默认减少动态，保留你上次保存的选择。若宿主支持系统“减少动态”偏好，也会优先停止动画；本实验不宣称已读取系统设置。</text>
+  </view>
+
+  <view class="save-area">
+    <text class="save-state">{{loadFailed ? '读取未完成，保存暂不可用' : dirty ? '有未保存的修改' : '当前没有未保存的修改'}}</text>
+    <text wx:if="{{error}}" class="lab-error" aria-live="polite">{{error}}</text>
+    <text wx:if="{{status}}" class="lab-muted" aria-live="polite">{{status}}</text>
+    <button wx:if="{{loadFailed}}" class="lab-secondary" bindtap="loadPreferences" disabled="{{busy}}">重试读取本机偏好</button>
+    <button class="lab-primary" bindtap="save" disabled="{{busy || loadFailed || !dirty}}">{{busy ? '等待确认' : '保存本机偏好'}}</button>
+    <button class="lab-secondary" bindtap="discard" disabled="{{busy || !dirty}}">放弃未保存的修改</button>
+    <button class="reset-button" bindtap="reset" disabled="{{busy}}">恢复并保存默认偏好</button>
+    <text class="lab-muted footer-note">没有连续打卡、逾期惩罚或社交催促。离开此页不会自动保存草稿；本页文案不提供医疗判断。</text>
+  </view>
+</view>
