@@ -1,0 +1,98 @@
+<view class="lab-page expense-page">
+  <view class="expense-kicker">CAT-AI × CATO · 05</view>
+  <text class="lab-title">每份照顾，都记得</text>
+  <text class="lab-copy">私人养猫账本 · 把日常花费慢慢理清。</text>
+  <view class="lab-notice">本地实验：记录仅保存在当前设备，不上传、不公开、不接支付或银行卡。清理小程序数据或卸载后可能丢失，不能作为正式财务凭证。</view>
+
+  <view wx:if="{{error}}" class="expense-alert" role="alert">
+    <text class="lab-error">{{error}}</text>
+    <button class="lab-secondary" bindtap="reloadLedger" disabled="{{saving}}">重新加载账本</button>
+  </view>
+  <text wx:if="{{status}}" class="expense-success">{{status}}</text>
+
+  <view class="card expense-editor">
+    <view class="expense-card-header">
+      <text class="lab-heading">{{preview ? '核对这一笔' : (editId ? '修改这笔支出' : '记下这一笔')}}</text>
+      <text class="expense-step">{{preview ? '02 / 确认' : '01 / 草稿'}}</text>
+    </view>
+    <text class="lab-muted">{{preview ? '确认后才会写入本机账本。' : '必填：金额、日期、分类。名字和备注可留空。'}}</text>
+
+    <view wx:if="{{!preview}}" class="expense-form">
+      <label class="expense-label" for="expense-amount">支出金额（元）</label>
+      <input id="expense-amount" class="lab-input expense-amount" type="digit" value="{{draft.amount}}" data-field="amount" bindinput="onField" placeholder="例如 38.50" maxlength="20" disabled="{{saving}}" />
+      <text class="lab-muted">0.01–999,999.99 元，最多两位小数。</text>
+      <view class="expense-fields">
+        <view class="expense-field">
+          <text class="expense-label">支出日期</text>
+          <picker mode="date" value="{{draft.date}}" start="1900-01-01" end="2100-12-31" bindchange="onDate" disabled="{{saving}}">
+            <view class="expense-picker"><text>{{draft.date}}</text><text class="expense-picker-hint">选择</text></view>
+          </picker>
+        </view>
+        <view class="expense-field">
+          <text class="expense-label">支出分类</text>
+          <picker mode="selector" range="{{categories}}" range-key="label" value="{{categoryIndex}}" bindchange="onCategory" disabled="{{saving}}">
+            <view class="expense-picker"><text>{{categories[categoryIndex].label}}</text><text class="expense-picker-hint">选择</text></view>
+          </picker>
+        </view>
+      </view>
+      <label class="expense-label" for="expense-cat">猫咪名字（选填）</label>
+      <input id="expense-cat" class="lab-input" value="{{draft.catName}}" data-field="catName" bindinput="onField" maxlength="60" placeholder="手动填写，不读取原档案" disabled="{{saving}}" />
+      <label class="expense-label" for="expense-note">备注（选填）</label>
+      <textarea id="expense-note" class="lab-input expense-note" value="{{draft.note}}" data-field="note" bindinput="onField" maxlength="200" auto-height placeholder="例如：本月补充猫砂，最多 200 字" disabled="{{saving}}" />
+      <button class="lab-primary" bindtap="previewDraft" disabled="{{!ready || saving}}">{{editId ? '预览修改' : '预览这笔支出'}}</button>
+      <button class="lab-secondary" bindtap="cancelDraft" disabled="{{saving}}">{{editId ? '取消修改' : '清空草稿'}}</button>
+    </view>
+
+    <view wx:else class="expense-preview">
+      <text class="expense-preview-amount">¥ {{preview.amount}}</text>
+      <view class="expense-detail"><text>日期</text><text>{{preview.date}}</text></view>
+      <view class="expense-detail"><text>分类</text><text>{{preview.categoryLabel}}</text></view>
+      <view class="expense-detail"><text>猫咪</text><text>{{preview.catName || '未指定猫咪'}}</text></view>
+      <view class="expense-detail expense-detail-note"><text>备注</text><text>{{preview.note || '无备注'}}</text></view>
+      <button class="lab-primary" bindtap="confirmPreview" loading="{{saving}}" disabled="{{!ready || saving}}">{{editId ? '确认更新记录' : '确认记入本机账本'}}</button>
+      <button class="lab-secondary" bindtap="backToForm" disabled="{{saving}}">返回修改，暂不保存</button>
+    </view>
+  </view>
+
+  <view wx:if="{{ready}}" class="lab-section">
+    <text class="lab-heading">这个月的照顾</text>
+    <picker mode="date" fields="month" value="{{month}}" start="1900-01" end="2100-12" bindchange="onMonth" disabled="{{!ready || saving}}">
+      <view class="expense-month"><text>{{monthLabel || '读取月份中'}}</text><text class="expense-picker-hint">切换月份</text></view>
+    </picker>
+    <view class="card expense-summary">
+      <text class="lab-muted">{{monthLabel}} · 共 {{count}} 笔</text>
+      <text class="expense-total">¥ {{total}}</text>
+      <text class="lab-muted">按支出日期统计，修改或删除后重新计算。</text>
+      <view class="expense-category-list">
+        <view wx:for="{{categoryTotals}}" wx:key="value" class="expense-category-row">
+          <view><text class="expense-category-name">{{item.label}}</text><text class="lab-muted">{{item.count}} 笔</text></view>
+          <text class="expense-category-total">¥ {{item.amount}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{ready}}" class="lab-section">
+    <text class="lab-heading">{{monthLabel}}的明细</text>
+    <view wx:if="{{ready && !rows.length}}" class="card expense-empty">
+      <text class="expense-empty-mark">—</text>
+      <text class="expense-record-title">这个月还没有记账</text>
+      <text class="lab-copy">可以从一袋猫粮开始。以前的记录，可切换月份查看。</text>
+    </view>
+    <view wx:for="{{rows}}" wx:key="id" class="card expense-record">
+      <view class="expense-record-header">
+        <view class="expense-record-description"><text class="expense-record-title">{{item.categoryLabel}}</text><text class="lab-muted">{{item.date}} · {{item.catName || '未指定猫咪'}}</text></view>
+        <text class="expense-record-amount">¥ {{item.amount}}</text>
+      </view>
+      <text wx:if="{{item.note}}" class="expense-record-note">{{item.note}}</text>
+      <view class="expense-actions">
+        <button class="lab-secondary" data-id="{{item.id}}" bindtap="startEdit" disabled="{{saving}}">修改</button>
+        <button class="lab-danger" data-id="{{item.id}}" bindtap="requestDelete" disabled="{{saving}}">删除</button>
+      </view>
+    </view>
+  </view>
+  <view class="expense-footer">
+    <text wx:if="{{ready}}" class="lab-muted">全账本 {{recordCount}} / 1,000 笔 · 独立本机存储</text>
+    <text class="lab-muted">草稿未确认前仅保留在当前页面。医疗分类仅用于记录支出，不提供诊断、用药或治疗建议。</text>
+  </view>
+</view>
