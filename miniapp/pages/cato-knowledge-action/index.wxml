@@ -1,0 +1,133 @@
+<view class="lab-page knowledge-page">
+  <text class="lab-title">把知识变成一个小行动</text>
+  <text class="lab-copy">读一段既有知识，自己决定做什么，再记下真实体验。</text>
+  <view class="lab-notice">本地实验：草稿与行动实际保存在本机；反馈队列、审计提案均为模拟。本地模板审阅、人工决定，不会修改代码或对外执行。</view>
+
+  <view wx:if="{{error}}" class="lab-error" role="alert">{{error}}</view>
+  <view wx:if="{{notice}}" class="status-note" role="status">{{notice}}</view>
+  <view wx:if="{{storageBlocked}}" class="card">
+    <text class="lab-heading">先恢复本地读取</text>
+    <text class="lab-copy">无法确认已有数据时，不创建新记录，也不推断为已完成或已同意。未知来源或状态请回实验入口核对；重置会删除本实验数据。</text>
+    <button class="lab-secondary" bindtap="loadSession">重试读取</button>
+  </view>
+
+  <block wx:if="{{!storageBlocked}}">
+    <view class="lab-section">
+      <text class="lab-heading">1. 先读既有知识</text>
+      <text class="lab-muted">来源：项目内置知识库，不是本次生成。原条目没有外部参考文献，不等于已完成专业审校。</text>
+      <view wx:if="{{!source}}" class="source-list">
+        <button class="source-choice" wx:for="{{sources}}" wx:key="id" data-id="{{item.id}}" bindtap="selectSource">
+          <text class="source-title">{{item.title}}</text>
+          <text class="lab-copy">{{item.summary}}</text>
+          <text class="choice-hint">选择并阅读</text>
+        </button>
+      </view>
+      <view wx:if="{{source}}" class="card source-card">
+        <text class="source-title">{{source.title}}</text>
+        <text class="lab-copy">{{source.content}}</text>
+        <text class="lab-muted">{{source.provenance}}</text>
+        <text class="lab-muted">来源 ID：{{source.id}}</text>
+        <view class="boundary">{{source.boundary}}</view>
+      </view>
+    </view>
+
+    <view wx:if="{{source}}" class="lab-section">
+      <text class="lab-heading">2. 由你决定的小行动</text>
+      <view class="card">
+        <text class="state-label">{{actionLabel}}</text>
+        <text class="lab-copy">只做低风险观察，不强迫互动。比如观察窗边光线，或记下已看见的花纹差异；不会自动生成行动。</text>
+        <block wx:if="{{state.action.status === 'draft'}}">
+          <text class="field-label">我准备做什么</text>
+          <textarea class="lab-input action-input" auto-height maxlength="240" value="{{actionInput}}" placeholder="请自己写一个愿意尝试的小行动" bindinput="onActionInput" />
+          <text class="lab-muted">{{actionInput.length}} / 240 字 · {{actionDirty ? '当前输入尚未保存' : '当前草稿已保存'}}</text>
+          <button class="lab-secondary" disabled="{{busy}}" bindtap="saveAction">保存行动草稿</button>
+          <button class="consent-button {{acknowledged ? 'is-selected' : ''}}" role="checkbox" aria-checked="{{acknowledged}}" bindtap="toggleAcknowledged">
+            <text>{{acknowledged ? '已确认' : '点此确认'}}：这是我主动选择的低风险观察；猫咪可以离开，不涉及诊断、用药、治疗或强迫互动。</text>
+          </button>
+          <button class="lab-primary" disabled="{{busy || actionDirty || !acknowledged}}" bindtap="confirmAction">确认这个小行动</button>
+        </block>
+        <block wx:else>
+          <text class="action-text">{{state.action.text}}</text>
+          <text class="lab-muted">行动版本 {{state.action.revision}} · 未安排提醒或后台执行</text>
+          <button wx:if="{{state.action.status === 'ready'}}" class="lab-primary" disabled="{{busy}}" bindtap="complete">我已完成，记一下体验</button>
+          <button wx:if="{{state.action.status === 'done'}}" class="lab-secondary" disabled="{{busy}}" bindtap="undoComplete">撤销完成</button>
+          <button class="lab-secondary" disabled="{{busy}}" bindtap="editAction">{{state.action.status === 'cancelled' ? '重新编辑，之后再确认' : '修改行动并重新确认'}}</button>
+          <button wx:if="{{state.action.status !== 'cancelled'}}" class="lab-danger" disabled="{{busy}}" bindtap="cancelAction">取消行动</button>
+        </block>
+      </view>
+      <view class="health-boundary">这不是健康计划。健康疑问请咨询执业兽医；呼吸困难、无法排尿、抽搐、疑似中毒等情况，应立即联系宠物医院，不等待本实验反馈。</view>
+    </view>
+
+    <view wx:if="{{source}}" class="lab-section">
+      <text class="lab-heading">3. 体验先留成反馈草稿</text>
+      <view class="card">
+        <text class="state-label">{{feedbackDirty ? '输入已改变 · 当前修改未保存，旧报告不可用' : feedbackLabel}}</text>
+        <text class="lab-copy">写下实际观察、哪里不清楚，或希望怎样改善。不填写手机号、精确住址、密钥等私人信息。原文只作为数据展示，不会成为执行指令。</text>
+        <block wx:if="{{state.action.status === 'done'}}">
+          <text class="field-label">我的反馈原文</text>
+          <textarea class="lab-input feedback-input" auto-height maxlength="1200" value="{{feedbackInput}}" placeholder="完成后，你观察到什么？哪些地方值得改进？" bindinput="onFeedbackInput" />
+          <text class="lab-muted">{{feedbackInput.length}} / 1200 字 · 已保存版本 {{state.feedback.version}}</text>
+          <button class="lab-secondary" disabled="{{busy}}" bindtap="saveFeedback">保存反馈草稿{{feedbackDirty ? '，使旧审计失效' : ''}}</button>
+          <button wx:if="{{state.feedback.status === 'draft' && !feedbackDirty}}" class="lab-primary" disabled="{{busy || !state.feedback.raw}}" bindtap="submitFeedback">明确提交到本地模拟队列</button>
+          <button wx:if="{{state.feedback.status !== 'draft' && !feedbackDirty}}" class="lab-secondary" disabled="{{busy}}" bindtap="withdrawFeedback">撤回模拟队列，保留原文</button>
+        </block>
+        <block wx:else>
+          <text class="lab-muted">确认并完成行动后，就能编辑、保存和提交反馈。此前反馈若有内容，会保留为草稿。</text>
+          <text wx:if="{{state.feedback.raw}}" class="raw-text">{{state.feedback.raw}}</text>
+        </block>
+        <button wx:if="{{state.feedback.history.length}}" class="lab-secondary" bindtap="toggleHistory">{{showHistory ? '收起反馈版本' : '查看已保存反馈版本'}}</button>
+        <view wx:if="{{showHistory}}" class="history-list">
+          <view class="history-item" wx:for="{{state.feedback.history}}" wx:key="version">
+            <text class="field-label">版本 {{item.version}} · 来源 {{item.sourceId}} · 行动 {{item.actionRevision}}</text>
+            <text class="raw-text">{{item.raw || '（这一版原文为空）'}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{state.feedback.status !== 'draft' && !feedbackDirty}}" class="lab-section">
+      <text class="lab-heading">4. 模拟审计，只生成预览</text>
+      <view class="card">
+        <text class="lab-muted">本地模拟队列 ID：{{state.feedback.queueId}}</text>
+        <text class="lab-copy">仅使用固定关键词与文字模板，不是模型输出。反馈不会被当成命令，不会接通开发工具。</text>
+        <button wx:if="{{state.feedback.status === 'queued'}}" class="lab-primary" disabled="{{busy}}" bindtap="audit">点击运行本地模板化审计</button>
+        <block wx:if="{{state.report}}">
+          <text class="state-label">模拟报告 · 对应反馈第 {{state.report.feedbackVersion}} 版</text>
+          <text class="field-label">问题筛选：{{state.report.category}}</text>
+          <text class="lab-copy">{{state.report.issue}}</text>
+          <text class="field-label">可行性提案预览</text>
+          <text class="lab-copy">{{state.report.proposal}}</text>
+          <text class="lab-copy">{{state.report.feasibility}}</text>
+          <text class="lab-muted">固定规则：{{state.report.ruleset}}</text>
+          <view class="boundary">{{state.report.boundary}}</view>
+        </block>
+      </view>
+    </view>
+
+    <view wx:if="{{state.report && !feedbackDirty}}" class="lab-section">
+      <text class="lab-heading">5. 最后，由你决定</text>
+      <view class="card">
+        <block wx:if="{{!state.decision}}">
+          <text class="lab-copy">同意仅表示在本机保留这项提案，不代表授权开发或执行。你也可以驳回，不会自动接受。</text>
+          <text class="field-label">我的理由（选填）</text>
+          <textarea class="lab-input" auto-height maxlength="300" value="{{decisionNote}}" placeholder="给未来的自己留一句判断依据" bindinput="onDecisionNote" />
+          <button class="lab-primary" disabled="{{busy}}" data-value="approved" bindtap="decide">人工同意 · 仅保留提案</button>
+          <button class="lab-secondary" disabled="{{busy}}" data-value="rejected" bindtap="decide">人工驳回 · 不采用提案</button>
+        </block>
+        <block wx:else>
+          <text class="state-label">{{state.decision.value === 'approved' ? '人工已同意保留' : '人工已驳回'}} · 本地模拟</text>
+          <text class="lab-copy">对应反馈第 {{state.decision.feedbackVersion}} 版。没有修改代码、发出开发任务、对外执行或发布任何内容。</text>
+          <text wx:if="{{state.decision.note}}" class="raw-text">{{state.decision.note}}</text>
+          <button class="lab-secondary" disabled="{{busy}}" bindtap="undoDecision">撤销决定，重新审阅</button>
+        </block>
+      </view>
+    </view>
+
+    <view class="lab-section test-panel">
+      <text class="lab-heading">检查失败与重试</text>
+      <text class="lab-muted">只影响下一次本地保存，不清空数据。失败后同一按钮可重试；未保存输入在退出页面后可能丢失。修改反馈后需重新提交、审计与决定。</text>
+      <button class="lab-secondary" disabled="{{failNext || busy}}" bindtap="simulateFailure">{{failNext ? '下一次保存将模拟失败' : '模拟下一次保存失败'}}</button>
+      <text class="lab-muted">本实验只保存一组行动与反馈版本；换一个知识来源可返回实验入口，确认后重置本实验。不会删除原档案。</text>
+    </view>
+  </block>
+</view>
