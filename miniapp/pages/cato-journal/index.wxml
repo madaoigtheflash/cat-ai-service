@@ -1,0 +1,91 @@
+<view class="lab-page journal-page">
+  <view class="journal-header">
+    <text class="journal-kicker">CAT-AI × CATO · 本地实验 06</text>
+    <text class="lab-title">和猫一起的小日子</text>
+    <text class="lab-copy">先写给自己，再决定哪些话值得分享。</text>
+  </view>
+  <view class="lab-notice">私人日记仅保存在本机，不云同步。不自动读取档案或照片。分享仅为本地草稿预览，没有真实发布；模拟小屋没有真实成员。卸载或清理小程序数据会丢失日记。</view>
+  <text wx:if="{{status}}" class="journal-status" role="status">{{status}}</text>
+  <text wx:if="{{error}}" class="lab-error">{{error}}</text>
+  <button wx:if="{{!ready}}" class="lab-secondary" bindtap="loadEntries">重试读取本机日记</button>
+
+  <view wx:if="{{editorOpen && draft}}" class="card journal-editor">
+    <text class="lab-heading">写一篇私人日记</text>
+    <text class="lab-muted">{{dirty ? '有尚未保存的修改' : '保存后可在下方回顾'}} · 不会自动进入分享草稿</text>
+    <view class="journal-field">
+      <text class="form-label">日记日期</text>
+      <picker mode="date" value="{{draft.date}}" start="1900-01-01" end="2199-12-31" data-field="date" bindchange="setDraftField">
+        <view class="lab-input journal-picker">{{draft.date}} · 选择日期</view>
+      </picker>
+    </view>
+    <view class="journal-field">
+      <label class="form-label" for="journal-title">标题（1–60 字）</label>
+      <input id="journal-title" class="lab-input" value="{{draft.title}}" maxlength="60" placeholder="例如：窗边的一小片阳光" data-field="title" bindinput="setDraftField" />
+    </view>
+    <view class="journal-field">
+      <label class="form-label" for="journal-cat">猫咪称呼（选填，最多 60 字）</label>
+      <input id="journal-cat" class="lab-input" value="{{draft.catName}}" maxlength="60" placeholder="手动记下称呼，不关联真实档案" data-field="catName" bindinput="setDraftField" />
+    </view>
+    <view class="journal-field">
+      <label class="form-label" for="journal-story">今天的故事（1–4000 字）</label>
+      <textarea id="journal-story" class="lab-input journal-textarea" auto-height value="{{draft.story}}" maxlength="4000" placeholder="今天发生了什么？这里可以只写给自己。" data-field="story" bindinput="setDraftField" />
+    </view>
+    <text class="lab-muted">健康情况仅作个人记录，不能替代兽医诊断；出现紧急症状请及时就医。</text>
+    <button class="lab-primary" disabled="{{!ready}}" bindtap="saveEntry">保存到本机私人日记</button>
+    <button class="lab-secondary" bindtap="cancelEdit">取消本次编辑</button>
+  </view>
+  <button class="lab-secondary" bindtap="newEntry">另写一篇</button>
+
+  <view class="lab-section">
+    <text class="lab-heading">翻翻自己的日记 · {{entries.length}} 篇</text>
+    <label class="form-label" for="journal-search">搜索标题、正文或猫咪称呼</label>
+    <input id="journal-search" class="lab-input" value="{{query}}" maxlength="100" placeholder="输入想找的那一天的小事" bindinput="changeQuery" />
+    <picker mode="date" value="{{reviewDate}}" start="1900-01-01" end="2199-12-31" bindchange="changeReviewDate">
+      <view class="lab-input journal-picker">{{reviewDate || '按日期回顾（所有日期）'}}</view>
+    </picker>
+    <button wx:if="{{query || reviewDate}}" class="lab-secondary" bindtap="clearReview">清除搜索与日期筛选</button>
+    <view wx:if="{{!visibleEntries.length}}" class="card journal-empty">
+      <text class="lab-heading">{{entries.length ? '还没有找到这篇日记' : '留下一件小事就好'}}</text>
+      <text class="lab-muted">{{entries.length ? '试试别的词，或清除日期筛选。' : '不必每天写，也不必写得完整。第一篇由你开始。'}}</text>
+    </view>
+    <view wx:for="{{visibleEntries}}" wx:key="id" class="card journal-entry">
+      <text class="journal-meta">{{item.date}} · 私人 / 本机</text>
+      <text class="journal-entry-title">{{item.title}}</text>
+      <text wx:if="{{item.catName}}" class="lab-muted">与 {{item.catName}} 的记忆</text>
+      <text class="journal-story" selectable>{{item.story}}</text>
+      <view class="journal-actions">
+        <button class="lab-secondary" data-id="{{item.id}}" bindtap="editEntry">编辑</button>
+        <button class="lab-danger" data-id="{{item.id}}" bindtap="deleteEntry">删除</button>
+      </view>
+      <button class="lab-secondary" data-id="{{item.id}}" bindtap="beginShare">为这篇另建分享预览</button>
+    </view>
+  </view>
+
+  <view wx:if="{{share}}" id="journal-share" class="lab-section card journal-share">
+    <text class="journal-kicker">独立草稿 · 未发布</text>
+    <text class="lab-heading">只分享你主动选中的话</text>
+    <text class="lab-muted">私人来源：{{shareSourceTitle}}。来源标题、日期、猫咪称呼和照片均不自动进入预览。重新选择来源会清空此草稿。</text>
+    <text class="lab-copy">点选一个短片段，或直接在下方手动改写。选片段会替换草稿并清除可见范围，请重新核对。</text>
+    <view wx:for="{{excerpts}}" wx:key="index" class="journal-excerpt">
+      <text class="journal-story">{{item.text}}</text>
+      <button class="lab-secondary" data-index="{{item.index}}" bindtap="chooseExcerpt">只使用片段 {{item.index + 1}}</button>
+    </view>
+    <text wx:if="{{!excerpts.length}}" class="lab-muted">这篇正文很短，请手动改写想分享的内容。</text>
+    <label class="form-label" for="share-text">分享文字（1–500 字，可继续改写）</label>
+    <textarea id="share-text" class="lab-input journal-textarea" auto-height value="{{share.body}}" maxlength="500" placeholder="分享草稿默认为空白，不会自动复制全文" bindinput="changeShareText" />
+    <text class="form-label">这份预览的可见范围（必选）</text>
+    <button class="lab-secondary {{share.visibility === 'public' ? 'journal-selected' : ''}}" data-visibility="public" bindtap="chooseVisibility">{{share.visibility === 'public' ? '已选：' : ''}}公开 · 仅本地预览</button>
+    <button class="lab-secondary {{share.visibility === 'room' ? 'journal-selected' : ''}}" data-visibility="room" bindtap="chooseVisibility">{{share.visibility === 'room' ? '已选：' : ''}}午后猫窝 · 一个模拟小屋</button>
+    <text class="lab-muted">小屋身份与可见范围仅为模拟，没有实际访问权限或真实成员。切换范围后需重新生成预览。</text>
+    <text wx:if="{{shareError}}" class="lab-error">{{shareError}}</text>
+    <button class="lab-primary" bindtap="previewShare">核对并生成本地预览</button>
+    <view wx:if="{{preview}}" class="journal-preview">
+      <text class="lab-heading">分享预览 · 未发布</text>
+      <text class="journal-meta">可见范围：{{preview.audience.label}}</text>
+      <text class="journal-story" selectable>{{preview.text}}</text>
+      <text class="lab-muted">仅展示上述文字与范围。没有云端发布，也没有通知任何人。原日记依旧私密。</text>
+    </view>
+    <button class="lab-secondary" bindtap="cancelShare">取消并清空分享草稿</button>
+    <text class="lab-muted">取消或离开页面会清空分享预览，不删除私人日记。</text>
+  </view>
+</view>

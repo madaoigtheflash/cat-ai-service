@@ -1,0 +1,20 @@
+@import "../../styles/cato-lab.wxss";
+
+.journal-page { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; }
+.journal-header { padding: 16rpx 0 8rpx; }
+.journal-kicker { display: block; margin-bottom: 16rpx; color: #80616F; font-size: 23rpx; font-weight: 600; line-height: 1.55; word-break: break-word; }
+.journal-field { margin-top: 24rpx; }
+.journal-picker { display: flex; align-items: center; white-space: normal; word-break: break-word; }
+.journal-textarea { min-height: 240rpx; width: 100%; }
+.journal-status { display: block; margin: 24rpx 0; color: #3F8E75; font-size: 26rpx; line-height: 1.65; word-break: break-word; }
+.journal-empty { margin-top: 24rpx; }
+.journal-entry { margin-top: 24rpx; }
+.journal-meta { display: block; margin-bottom: 12rpx; color: #80616F; font-size: 24rpx; line-height: 1.55; word-break: break-word; }
+.journal-entry-title { display: block; margin-bottom: 12rpx; color: #3E2D35; font-size: 30rpx; font-weight: 600; line-height: 1.45; word-break: break-word; }
+.journal-story { display: block; margin: 20rpx 0; color: #6F5A64; font-size: 28rpx; line-height: 1.65; white-space: pre-wrap; word-break: break-word; }
+.journal-actions { display: flex; flex-wrap: wrap; gap: 16rpx; }
+.journal-actions > button { flex: 1 1 180rpx; min-width: 0; margin: 8rpx 0; }
+.journal-share { border-color: #EBC6D4; }
+.journal-excerpt { margin: 24rpx 0; padding: 20rpx; border: 1rpx solid #F2DFE7; border-radius: 24rpx; }
+.journal-selected { color: #FFFFFF; background: #B94768; }
+.journal-preview { margin-top: 24rpx; padding: 24rpx; background: #FFF0F5; border: 1rpx solid #EBC6D4; border-radius: 24rpx; }
