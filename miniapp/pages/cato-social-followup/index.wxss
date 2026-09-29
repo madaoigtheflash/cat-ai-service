@@ -1,0 +1,24 @@
+@import "../../styles/cato-lab.wxss";
+
+.followup-page { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; }
+.role-card { margin-top: 24rpx; }
+.button-row, .stage-nav { display: flex; flex-wrap: wrap; gap: 12rpx; }
+.button-row button { flex: 1 1 220rpx; min-width: 0; margin: 0; }
+.stage-nav { margin: 24rpx 0; }
+.stage-nav button { flex: 1 1 170rpx; min-width: 0; padding: 18rpx 12rpx; margin: 0; font-size: 25rpx; }
+.selected { color: #B94768; background: #FFFFFF; box-shadow: inset 0 0 0 3rpx #B94768; }
+.story-picker { margin-bottom: 24rpx; }
+.story-title { display: block; margin-top: 12rpx; font-size: 32rpx; font-weight: 600; line-height: 1.45; word-break: break-word; }
+.comment, .message { margin-top: 20rpx; padding: 24rpx; border: 1rpx solid #F2DFE7; border-radius: 20rpx; background: #FFFBFC; }
+.reply { margin-left: 20rpx; }
+.focus { border: 3rpx solid #B94768; }
+.context-box { margin: 24rpx 0; padding: 24rpx; border-radius: 20rpx; background: #FFF0F5; }
+.draft-input { min-height: 176rpx; }
+.permission-note { margin: 24rpx 0; padding: 24rpx; color: #705260; background: #FFF0F5; border-radius: 20rpx; font-size: 26rpx; line-height: 1.65; word-break: break-word; }
+.feedback { display: block; margin: 20rpx 0; font-size: 26rpx; color: #3F8E75; line-height: 1.65; word-break: break-word; }
+.notice-button { width: 100%; min-height: 88rpx; margin: 20rpx 0; padding: 24rpx; text-align: left; background: #FFF0F5; border-radius: 20rpx; white-space: normal; line-height: 1.65; }
+.notice-title { display: block; margin-bottom: 12rpx; font-size: 27rpx; font-weight: 600; color: #3E2D35; word-break: break-word; }
+.mine { background: #FFF0F5; }
+.boundary-card { margin-top: 40rpx; }
+.form-label { margin-top: 24rpx; }
+.lab-primary:active, .lab-secondary:active { transform: scale(.98); }

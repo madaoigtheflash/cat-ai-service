@@ -1,0 +1,91 @@
+<view class="lab-page followup-page">
+  <text class="lab-title">低压力猫友续聊</text>
+  <text class="lab-copy">从一段猫咪日常开始，给回应留一点空间。</text>
+  <view class="lab-notice">离线 · 本机模拟。两位猫友、猫咪故事、通知与回复全部虚构；不会访问真实用户或发送真实消息。</view>
+  <text wx:if="{{error}}" class="lab-error" role="alert">{{error}}</text>
+  <text wx:if="{{feedback}}" class="feedback">{{feedback}}</text>
+  <button wx:if="{{!ready}}" class="lab-secondary" bindtap="loadState">重试读取本地记录</button>
+  <block wx:if="{{ready}}">
+    <view class="card role-card">
+      <text class="lab-heading">当前模拟身份</text>
+      <view class="button-row">
+        <button wx:for="{{users}}" wx:key="id" class="lab-secondary {{actor === item.id ? 'selected' : ''}}" data-id="{{item.id}}" bindtap="switchRole">{{item.name}}</button>
+      </view>
+      <text class="lab-muted">切换身份亲自演示回复；不会自动替对方回应。</text>
+    </view>
+    <view class="stage-nav">
+      <button class="lab-secondary {{stage === 'story' ? 'selected' : ''}}" data-stage="story" bindtap="switchStage">公开故事</button>
+      <button class="lab-secondary {{stage === 'notices' ? 'selected' : ''}}" data-stage="notices" bindtap="switchStage">本地通知{{unread ? ' · ' + unread : ''}}</button>
+      <button class="lab-secondary {{stage === 'chat' ? 'selected' : ''}}" data-stage="chat" bindtap="switchStage">私信练习</button>
+    </view>
+    <block wx:if="{{stage === 'story'}}">
+      <view class="story-picker">
+        <button wx:for="{{stories}}" wx:key="id" class="lab-secondary {{storyId === item.id ? 'selected' : ''}}" data-id="{{item.id}}" bindtap="selectStory">{{item.title}}</button>
+      </view>
+      <view class="card">
+        <text class="lab-muted">公开示例 · {{post.name}}</text>
+        <text class="story-title">{{post.title}}</text>
+        <text class="lab-copy">{{post.text}}</text>
+      </view>
+      <view class="card">
+        <text class="lab-heading">公开评论 · 本机模拟</text>
+        <text wx:if="{{!comments.length}}" class="lab-muted">还没有本地评论。填入一个开场，改成自己的话，再明确发送。</text>
+        <view wx:for="{{comments}}" wx:key="id" class="comment {{item.parentId ? 'reply' : ''}} {{item.selected ? 'focus' : ''}}">
+          <text class="lab-muted">{{item.name}}{{item.parentId ? ' · 回复' : ''}}{{item.selected ? ' · 当前定位' : ''}}</text>
+          <text class="lab-copy">{{item.text}}</text>
+          <button class="lab-secondary" data-root="{{item.rootId}}" data-id="{{item.id}}" bindtap="selectComment">选择这条{{item.parentId ? '回复的原评论' : '评论'}}</button>
+        </view>
+        <view wx:if="{{context}}" class="context-box">
+          <text class="lab-muted">正在回复的原评论</text>
+          <text class="lab-copy">{{context.text}}</text>
+          <button class="lab-secondary" bindtap="clearSelection">取消选择</button>
+          <button class="lab-secondary" bindtap="openChat">从这条评论进入私信练习</button>
+        </view>
+        <text class="form-label">{{rootId ? '回复草稿（最多 300 字）' : '开场评论草稿（最多 300 字）'}}</text>
+        <text wx:if="{{ownStory && !rootId}}" class="lab-muted">这是当前身份的故事。请选择对方的故事发起评论，或选择已有评论来回复。</text>
+        <textarea class="lab-input draft-input" auto-height maxlength="300" value="{{commentDraft}}" bindinput="inputComment" placeholder="先写草稿，不会自动发送" />
+        <button class="lab-secondary" bindtap="fillOpener">填入可编辑开场</button>
+        <button class="lab-primary" disabled="{{!commentDraft || (ownStory && !rootId)}}" bindtap="sendComment">明确发送{{rootId ? '模拟回复' : '模拟评论'}}</button>
+        <button wx:if="{{commentDraft}}" class="lab-secondary" bindtap="cancelComment">取消草稿</button>
+      </view>
+    </block>
+    <view wx:if="{{stage === 'notices'}}" class="card">
+      <text class="lab-heading">{{me}}的本地通知</text>
+      <text class="lab-muted">只在本机展示，不是微信推送。点开会定位原故事、原评论或对应消息。</text>
+      <text wx:if="{{!notices.length}}" class="lab-copy">暂无通知。另一模拟身份明确发送后，这里才会出现记录。</text>
+      <button wx:for="{{notices}}" wx:key="id" class="notice-button" data-id="{{item.id}}" bindtap="openNotice">
+        <text class="notice-title">{{item.name}}{{item.label}}</text>
+        <text class="lab-muted">{{item.title}} · {{item.read ? '已查看' : '未查看'}}</text>
+      </button>
+    </view>
+    <view wx:if="{{stage === 'chat'}}" class="card">
+      <text class="lab-heading">与{{peerName}}的私信练习</text>
+      <view wx:if="{{context}}" class="context-box">
+        <text class="lab-muted">源自公开示例 · {{context.title}}</text>
+        <text class="lab-copy">{{context.text}}</text>
+        <button class="lab-secondary" bindtap="showSource">查看原故事与评论</button>
+      </view>
+      <text wx:else class="lab-copy">先在公开故事下发送一条模拟评论，再选择它作为招呼的上下文。</text>
+      <view class="permission-note">{{permission.label}}</view>
+      <text wx:if="{{!messages.length}}" class="lab-muted">当前身份没有可见消息。删除记录不会重置一条招呼的限制。</text>
+      <view wx:for="{{messages}}" wx:key="id" class="message {{item.mine ? 'mine' : ''}} {{item.selected ? 'focus' : ''}}">
+        <text class="lab-muted">{{item.name}} · 本地文字{{item.selected ? ' · 当前定位' : ''}}</text>
+        <text class="lab-copy">{{item.text}}</text>
+      </view>
+      <text class="form-label">文字草稿（最多 300 字）</text>
+      <textarea class="lab-input draft-input" auto-height maxlength="300" value="{{messageDraft}}" bindinput="inputMessage" placeholder="可以先写下，不需要立刻发送" />
+      <button class="lab-secondary" bindtap="fillGreeting">填入可编辑文字</button>
+      <button class="lab-primary" disabled="{{!permission.allowed || !messageDraft}}" bindtap="sendMessage">{{!contact ? '明确发送一条模拟招呼' : contact.status === 'pending' && canIgnore ? '明确回复并允许续聊' : '明确发送模拟文字'}}</button>
+      <button wx:if="{{messageDraft}}" class="lab-secondary" bindtap="cancelMessage">取消草稿</button>
+      <button wx:if="{{canIgnore}}" class="lab-secondary" bindtap="ignoreGreeting">忽略这条招呼</button>
+      <button wx:if="{{contact}}" class="lab-danger" bindtap="deleteHistory">删除本身份的本地消息</button>
+    </view>
+    <view class="card boundary-card">
+      <text class="lab-heading">{{me}}的边界</text>
+      <text class="lab-muted">关闭陌生人招呼只阻止新的首次联系；已同意的续聊不受影响。拉黑则阻止双方评论与私信。</text>
+      <button class="lab-secondary" bindtap="toggleStrangers">{{acceptStrangers ? '关闭' : '开启'}}陌生人招呼（当前{{acceptStrangers ? '开启' : '关闭'}}）</button>
+      <button class="lab-secondary" bindtap="toggleBlock">{{ownBlock ? '解除拉黑' : '拉黑'}}{{peerName}}</button>
+      <text class="lab-muted">无需回复，也没有催促、已读压力或倒计时。模拟会话上限 500 次发送；不会导入私人资料。</text>
+    </view>
+  </block>
+</view>
