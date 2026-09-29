@@ -1,7 +1,7 @@
 <view class="lab-page companion-page {{draft.reduceMotion ? 'reduced-motion' : ''}}">
   <text class="lab-title">可控制的猫咪陪伴</text>
   <text class="intro">称呼、语气和出现的时机，都由你决定。</text>
-  <view class="lab-notice scope-notice">仅本机实验：这里是 AI 助手的文案与页内提示预览，不是真实猫友。不会发微信通知、改变系统免打扰或同步云端。</view>
+  <view class="lab-notice scope-notice">仅本机实验：这里是本地助手的预写文案与页内提示，不是真实猫友。不调用生成服务，不会发微信通知、改变系统免打扰或同步云端。</view>
 
   <view class="card">
     <text class="lab-heading">先听听这个语气</text>
@@ -9,7 +9,7 @@
       <button wx:for="{{scenarios}}" wx:key="id" class="choice {{scenario === item.id ? 'selected' : ''}}" data-value="{{item.id}}" bindtap="chooseScenario" aria-label="{{item.label}}场景预览">{{item.label}}</button>
     </view>
     <view class="sample-bubble">
-      <text class="sample-label">AI 助手 · 本地示例文案</text>
+      <text class="sample-label">本地助手 · 预写示例文案</text>
       <text class="sample-text">{{previewText}}</text>
     </view>
     <text class="lab-muted">主动查看文案不受安静时段限制。下面的“页内提示试验”才会检查是否应出现。</text>
@@ -27,7 +27,7 @@
       <input id="assistant-name" class="lab-input" value="{{draft.assistantName}}" maxlength="24" data-key="assistantName" bindinput="edit" disabled="{{busy}}" placeholder="例如：小猫助手" aria-label="助手自称，1至12个字" />
       <text wx:if="{{fieldErrors.assistantName}}" class="lab-error">{{fieldErrors.assistantName}}</text>
     </view>
-    <text class="lab-muted">各 1–12 个字；保存时去掉首尾空格。自称只是 AI 界面标签，不代表真实身份。</text>
+    <text class="lab-muted">各 1–12 个字；保存时去掉首尾空格。自称只是本地界面标签，不代表真实身份。</text>
     <text class="field-label tone-label">说话语气</text>
     <view class="choice-row">
       <button class="choice {{draft.tone === 'gentle' ? 'selected' : ''}}" data-key="tone" data-value="gentle" bindtap="edit" disabled="{{busy}}">温柔一点</button>

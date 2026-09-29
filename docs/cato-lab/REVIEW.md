@@ -58,3 +58,4 @@ node -e "for (const f of ['miniapp/app.json','miniapp/pages/cato-companion/index
 - 没有真实通知、云免打扰、后台唤醒、跨端同步、其他页面联动或账号绑定；生产接入必须另行明确授权与验收。
 - 未安装依赖、未联网、未调用云端、未推送。本工作树原有的 `miniapp/services/community.js` 修改保持未暂存，不属于本分支功能提交。
 > 主代理补充验收（2026-09-29）：重新执行 cato 测试 33/33 通过（含 5 项共享隔离测试）；结构检查与原生 WXML 编译通过。已实际打开页面并查看截图：390×753、fontSizeSetting 16、基础库 3.17.1，offline=true、cloudReady=false；证据在 review 分支 docs/cato-lab/previews/companion.png。320/375/430px、大字号、键盘、真机和真实云权限尚未验收。
+> 全量旧功能回归补充：复用本机已有依赖（忽略的 node_modules 联接，未安装新依赖），运行 miniapp/tests/*.test.cjs 为 367/367 通过、0 跳过。修正实验页文案以遵守个人版既有契约，未放宽原测试；当前页面仅是本地规则／预写文案，不调用生成服务。
