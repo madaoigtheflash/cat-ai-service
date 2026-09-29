@@ -1,5 +1,4 @@
 <view class="lab-page expense-page">
-  <view class="expense-kicker">CAT-AI × CATO · 05</view>
   <text class="lab-title">每份照顾，都记得</text>
   <text class="lab-copy">私人养猫账本 · 把日常花费慢慢理清。</text>
   <view class="lab-notice">本地实验：记录仅保存在当前设备，不上传、不公开、不接支付或银行卡。清理小程序数据或卸载后可能丢失，不能作为正式财务凭证。</view>
