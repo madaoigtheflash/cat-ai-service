@@ -1,0 +1,65 @@
+<view class="page data-page">
+  <view class="card data-hero">
+    <view class="hero-heading"><view class="hero-icon"><icon name="archive" size="40" color="#D94F75" /></view><text class="data-title">我的数据</text></view>
+    <text class="data-copy">和猫咪聊过的话、你确认的猫档案，都留在这里。</text>
+    <text class="data-note">只读本机微信存储，不代表云端全量数据；不会自动同步或公开。</text>
+  </view>
+  <view wx:if="{{loading}}" class="card state-card" aria-live="polite"><text>正在读取本机记录…</text></view>
+  <view wx:if="{{error}}" class="card error-card" aria-live="polite"><text>{{error}}</text><button class="secondary-button" bindtap="loadData">重新读取</button></view>
+  <block wx:if="{{!loading && !error}}">
+    <view class="summary-grid">
+      <button class="summary-item" data-section="cats" bindtap="selectSection"><text class="summary-count">{{counts.pets}}</text><text>本机猫档案</text></button>
+      <button class="summary-item" data-section="relationships" bindtap="selectSection"><text class="summary-count">{{counts.relationships}}</text><text>双方关系</text></button>
+      <button class="summary-item" bindtap="goMap"><text class="summary-count">{{counts.locations}}</text><text>粗位置记录</text></button>
+      <button class="summary-item" data-section="history" bindtap="selectSection"><text class="summary-count">{{counts.messages}}</text><text>对话消息</text></button>
+    </view>
+    <view class="data-tabs" aria-role="tablist" aria-label="本机数据分类">
+      <button class="data-tab {{activeSection === 'cats' ? 'selected' : ''}}" data-section="cats" bindtap="selectSection" aria-role="tab" aria-selected="{{activeSection === 'cats'}}">猫档案</button>
+      <button class="data-tab {{activeSection === 'relationships' ? 'selected' : ''}}" data-section="relationships" bindtap="selectSection" aria-role="tab" aria-selected="{{activeSection === 'relationships'}}">双方关系</button>
+      <button class="data-tab {{activeSection === 'history' ? 'selected' : ''}}" data-section="history" bindtap="selectSection" aria-role="tab" aria-selected="{{activeSection === 'history'}}">对话历史</button>
+    </view>
+    <view wx:if="{{activeSection === 'cats'}}">
+      <view class="section-heading"><view><text class="section-title">我记录的猫咪</text><text class="section-note">打开档案查看健康子记录等私人资料</text></view></view>
+      <button wx:for="{{pets}}" wx:key="id" class="card pet-row" data-id="{{item.id}}" bindtap="openPet">
+        <image wx:if="{{item.imagePath}}" class="pet-avatar" src="{{item.imagePath}}" mode="aspectFill" />
+        <view wx:else class="pet-avatar pet-placeholder"><icon name="cat" size="40" color="#D94F75" /></view>
+        <view class="row-copy"><text class="row-title">{{item.name}}</text><text class="row-detail">{{item.breed || '品种未填写'}}{{item.coatColor ? ' · ' + item.coatColor : ''}}</text><text class="data-note">更新于 {{item.timeLabel}}</text></view>
+        <icon name="chevron" size="28" color="#9D8490" />
+      </button>
+      <view wx:if="{{!pets.length}}" class="card empty-card"><icon name="cat" size="64" color="#D94F75" /><text class="empty-title">还没有本机猫档案</text><text class="data-copy">回到聊聊，拍张照片或告诉我猫咪的名字；确认后再保存。</text><button class="primary-button" bindtap="goChat">回到聊聊</button></view>
+      <button wx:else class="secondary-button section-action" bindtap="goPets">管理本机猫档案</button>
+    </view>
+    <view wx:elif="{{activeSection === 'relationships'}}">
+      <view class="section-heading"><view><text class="section-title">从双方看同一条关系</text><text class="section-note">本机主人确认的身份，不是社区投票或自动推断</text></view></view>
+      <view wx:for="{{relationships}}" wx:key="id" class="card relation-row">
+        <text class="row-title">{{item.forward}}</text><text class="relation-reverse">换个视角：{{item.reverse}}</text>
+        <text wx:if="{{item.note}}" class="row-detail">{{item.note}}</text><text wx:if="{{item.missing}}" class="record-warning">有猫档案已不存在，请到关系页核对。</text>
+        <text class="data-note">{{item.pending ? '身份待确认' : '主人确认'}} · {{item.timeLabel}}</text>
+      </view>
+      <view wx:if="{{!relationships.length}}" class="card empty-card"><icon name="heart" size="64" color="#D94F75" /><text class="empty-title">还没有关系记录</text><text class="data-copy">先登记两只猫，再明确双方身份和方向。单张照片不能证明亲缘。</text></view>
+      <button class="secondary-button section-action" bindtap="goRelationships">查看与编辑关系网</button>
+    </view>
+    <view wx:else>
+      <view class="section-heading"><view><text class="section-title">已确认记录</text><text class="section-note">本机历史确认回执；不代表记录现在仍存在</text></view></view>
+      <button wx:for="{{actionReceipts}}" wx:key="id" class="card receipt-row" data-id="{{item.id}}" bindtap="openReceipt">
+        <text class="row-title">{{item.kindLabel}}</text><text class="row-detail">{{item.statusLabel}}</text><text class="data-note">确认于 {{item.timeLabel}}</text><text class="receipt-action">查看此类当前数据</text>
+      </button>
+      <view wx:if="{{!receiptCount}}" class="card"><text class="data-copy">还没有可展示的历史确认回执。下方旧消息仅记录当时的对话，不代表当前档案状态。</text></view>
+      <button wx:if="{{receiptCount > 3}}" class="secondary-button section-action" aria-expanded="{{receiptsExpanded}}" bindtap="toggleReceipts">{{receiptsExpanded ? '收起为最近 3 条' : '展开全部 ' + receiptCount + ' 条确认记录'}}</button>
+      <view class="section-heading"><view><text class="section-title">本机对话历史</text><text class="section-note">最近消息在上；时间按本机时区显示</text></view></view>
+      <view wx:for="{{messages}}" wx:key="id" class="card message-row {{item.mine ? 'mine' : ''}}"><text class="message-source">{{item.sourceLabel}}</text><text class="message-time">{{item.timeLabel}}</text><text class="message-text" selectable="{{true}}">{{item.text}}</text></view>
+      <view wx:if="{{!messages.length}}" class="card empty-card"><icon name="message" size="64" color="#D94F75" /><text class="empty-title">还没有保存的对话</text><text class="data-copy">这里不会用示例填充你的历史。</text><button class="primary-button" bindtap="goChat">去聊一句</button></view>
+      <button wx:if="{{hasEarlier}}" class="secondary-button section-action" bindtap="showEarlier">展开更早的消息</button>
+      <button class="secondary-button section-action" disabled="{{exporting || loading}}" loading="{{exporting}}" bindtap="exportHistory">复制本机历史与草稿</button>
+      <text class="data-note export-note">含私人文字。仅在你再次确认后复制，不会自动发布。</text>
+    </view>
+  </block>
+  <view class="section-heading"><view><text class="section-title">其他记录入口</text><text class="section-note">这些数据范围与本机记录分开</text></view></view>
+  <view class="card link-card">
+    <button class="data-link" bindtap="goMap"><view class="row-copy"><text class="row-title">本机猫咪地图</text><text class="row-detail">你主动确认的约 2 公里粗位置</text></view><icon name="chevron" size="28" color="#9D8490" /></button>
+    <button class="data-link" bindtap="goSocial"><view class="row-copy"><text class="row-title">我的社区动态与回应</text><text class="row-detail">你主动分享的内容与审核状态</text></view><icon name="chevron" size="28" color="#9D8490" /></button>
+    <button class="data-link" bindtap="goOnline"><view class="row-copy"><text class="row-title">小屋协作资料与热区</text><text class="row-detail">先选择小屋；这里不是自己的全部数据</text></view><icon name="chevron" size="28" color="#9D8490" /></button>
+    <button class="data-link" bindtap="goSettings"><view class="row-copy"><text class="row-title">个人与服务设置</text><text class="row-detail">查看云服务配置与功能状态</text></view><icon name="chevron" size="28" color="#9D8490" /></button>
+  </view>
+  <text class="data-note footer-note">本机存储不是跨设备备份。识别与对话不构成医疗判断；健康异常请咨询执业兽医。</text>
+</view>

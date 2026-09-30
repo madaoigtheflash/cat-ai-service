@@ -1,4 +1,9 @@
 <view class="page mine-page">
+  <view class="card">
+    <text class="section-title">自己的数据与历史</text>
+    <text class="mine-subtitle">查看本机对话、已确认的猫咪与关系、粗位置。这里不是管理员后台。</text>
+    <button class="secondary-button mine-manage" bindtap="goOwnData">查看我的数据</button>
+  </view>
   <view class="mine-hero card">
     <view class="mine-hero-main">
       <view class="avatar-collage">

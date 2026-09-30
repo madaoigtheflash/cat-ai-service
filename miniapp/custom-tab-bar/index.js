@@ -7,9 +7,9 @@ const COLOR_NORMAL = '#6F5A64'
 const COLOR_ACTIVE = '#FF6F91'
 
 const TABS = [
-  { key: 'home', text: '首页', icon: 'home', path: '/pages/home/index' },
-  { key: 'pets', text: '档案', icon: 'archive', path: '/pages/pets/index' },
-  { key: 'social', text: '社交', icon: 'message', path: '/pages/social/index' },
+  { key: 'home', text: '聊聊', icon: 'message', path: '/pages/home/index' },
+  { key: 'pets', text: '猫咪', icon: 'archive', path: '/pages/pets/index' },
+  { key: 'social', text: '社区', icon: 'users', path: '/pages/social/index' },
   { key: 'mine', text: '我的', icon: 'user', path: '/pages/mine/index' }
 ]
 

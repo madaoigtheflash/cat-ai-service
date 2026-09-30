@@ -54,7 +54,7 @@ test('every tab page syncs the custom tab bar selection on show', () => {
       `${file} must select tab index ${selected}`
     )
   }
-  assert.match(read('pages/home/index.js'), /goIdentify\(\)\s*\{\s*wx\.navigateTo/, 'home must open identify via navigateTo now that it is not a tab')
+  assert.match(read('pages/home/index.js'), /api\.identify\(/, 'conversation home reuses the actual photo observation service')
 })
 
 test('mine page aggregates personal assets with honest empty states', () => {

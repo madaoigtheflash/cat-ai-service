@@ -1,7 +1,9 @@
 {
   "pages": [
-    "pages/cato-lab/index",
     "pages/home/index",
+    "pages/home-classic/index",
+    "pages/companion-data/index",
+    "pages/companion-map/index",
     "pages/identify/index",
     "pages/pets/index",
     "pages/pet-detail/index",
@@ -48,19 +50,19 @@
     "list": [
       {
         "pagePath": "pages/home/index",
-        "text": "首页",
+        "text": "聊聊",
         "iconPath": "assets/tabbar/home.png",
         "selectedIconPath": "assets/tabbar/home-selected.png"
       },
       {
         "pagePath": "pages/pets/index",
-        "text": "档案",
+        "text": "猫咪",
         "iconPath": "assets/tabbar/archive.png",
         "selectedIconPath": "assets/tabbar/archive-selected.png"
       },
       {
         "pagePath": "pages/social/index",
-        "text": "社交"
+        "text": "社区"
       },
       {
         "pagePath": "pages/mine/index",

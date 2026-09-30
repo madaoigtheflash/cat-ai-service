@@ -19,10 +19,12 @@ test('档案导入只投影ID和名字，不导入健康资料或照片', () => 
   assert.deepEqual(readLocalCatCards(), [{ id: 'a', name: '长名字' }]); delete global.wx
 })
 test('实验启动不调用云初始化、不写原有设置', () => {
+  const config = require('../config/cato-lab'); const oldEnabled = config.enabled; config.enabled = true
   let app; global.App = value => { app = value }
   global.wx = { cloud: { init() { throw Error('cloud called') } }, setStorageSync() { throw Error('original settings changed') } }
   require('../app'); app.onLaunch()
   assert.equal(app.globalData.catoLabOffline, true); assert.equal(app.globalData.cloudReady, false)
+  config.enabled = oldEnabled
   delete global.wx; delete global.App
 })
 test('生产云传输在实验中被拒绝', () => {
@@ -30,11 +32,13 @@ test('生产云传输在实验中被拒绝', () => {
   assert.throws(() => require('../services/cato-lab-guard')(), /不连接生产云端/)
   delete global.getApp
 })
-test('入口存在、默认游客项目和触控安全区', () => {
+test('收敛版回到原首页入口与真实项目，实验样式保留安全区', () => {
   const root = path.resolve(__dirname, '..')
   const app = JSON.parse(fs.readFileSync(path.join(root, 'app.json'), 'utf8'))
-  assert.equal(app.pages[0], 'pages/cato-lab/index')
-  assert.equal(JSON.parse(fs.readFileSync(path.join(root, 'project.config.json'), 'utf8')).appid, 'touristappid')
+  assert.equal(app.pages[0], 'pages/home/index')
+  assert.ok(app.pages.includes('pages/home-classic/index'))
+  assert.equal(require('../config/cato-lab').enabled, false)
+  assert.equal(JSON.parse(fs.readFileSync(path.join(root, 'project.config.json'), 'utf8')).appid, 'wx1112379224ace9f9')
   const css = fs.readFileSync(path.join(root, 'styles/cato-lab.wxss'), 'utf8')
   assert.match(css, /min-height: 88rpx/); assert.match(css, /safe-area-inset-bottom/)
 })

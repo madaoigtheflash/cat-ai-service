@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "width": 390,
+  "height": 753,
+  "fontSizeSetting": 16,
+  "checks": [
+    "two confirmed cats",
+    "mother-to-child relationship",
+    "coarse synthetic location",
+    "own history and map"
+  ],
+  "cloudCalls": 0,
+  "synthetic": true,
+  "limitations": [
+    "no physical keyboard or large-font/other-width verification",
+    "no production upload or model request"
+  ]
+}

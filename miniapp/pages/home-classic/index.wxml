@@ -1,0 +1,24 @@
+<view class="community-page">
+  <view class="home-intro">
+    <text class="community-heading">猫咪的新故事</text>
+    <text class="community-description">看看大家主动分享的猫片和日常，也留下你的相遇。</text>
+    <view class="community-actions">
+      <button class="community-action primary" bindtap="goIdentify"><icon name="camera" size="{{32}}" color="#FFFFFF" /><text>拍照识猫</text></button>
+      <button class="community-action quiet" bindtap="goCompose"><icon name="edit" size="{{30}}" color="#B94768" /><text>分享照片 / 故事</text></button>
+    </view>
+  </view>
+  <view class="community-feed">
+    <view wx:if="{{loading && !posts.length}}" class="community-state" aria-live="polite"><text class="community-state-title">正在寻找新故事…</text><text class="community-state-copy">正在加载大家公开分享的内容。</text></view>
+    <view wx:if="{{error}}" class="community-error" aria-live="polite"><text>{{error}}</text><button class="community-action" bindtap="retry" disabled="{{loading}}">重新加载</button></view>
+    <text wx:if="{{refreshing}}" class="community-end">正在更新故事…</text>
+    <social-post-card wx:for="{{posts}}" wx:key="id" post="{{item}}" bind:open="openPost" bind:reply="replyPost" />
+    <view wx:if="{{loaded && !loading && !error && !posts.length}}" class="community-state">
+      <text class="community-state-title">这里还没有公开故事</text>
+      <text class="community-state-copy">可以直接选照片分享，也可以识猫、建档后再发布。档案不会自动公开。</text>
+      <button class="community-action" bindtap="goCompose">分享第一张猫片</button>
+    </view>
+    <button wx:if="{{posts.length && nextCursor}}" class="community-action quiet" bindtap="loadMore" loading="{{loading && !refreshing}}" disabled="{{loading}}">{{loading ? '正在加载…' : '看看更多故事'}}</button>
+    <text wx:if="{{posts.length && !nextCursor && !loading && !error}}" class="community-end">暂时看到这里，有新故事再来看看。</text>
+  </view>
+  <text class="community-note">这里仅展示主动公开的故事，不包含私密档案、健康记录或精确位置。健康异常请及时咨询执业兽医。</text>
+</view>

@@ -2,6 +2,7 @@ const community = require('../../services/community')
 const { postOf, uniquePosts, text, timeLabel } = require('../../components/social-post-card/view-model')
 
 Page({
+  goPublic() { wx.navigateTo({ url: '/pages/home-classic/index' }) },
   data: { activeSection: 'mine', posts: [], nextCursor: null, notifications: [], notificationCursor: null, loadingPosts: false, loadingNotifications: false, mineLoaded: false, notificationsLoaded: false, error: '', notificationError: '' },
   onShow() {
     if (typeof this.getTabBar === 'function' && this.getTabBar()) this.getTabBar().setData({ selected: 2 })

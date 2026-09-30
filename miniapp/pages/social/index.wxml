@@ -1,6 +1,7 @@
 <view class="community-page">
   <text class="community-heading">和猫友接上话</text>
   <text class="community-description">分享的猫片与故事、收到的回应，都在这里。</text>
+  <button class="house-entry" bindtap="goPublic"><icon name="users" size="{{36}}" color="#B94768" /><text>逛猫友广场 · 看照片和评论</text><icon name="chevron" size="{{28}}" color="#80616F" /></button>
   <button class="community-action primary social-compose" bindtap="goCompose"><icon name="edit" size="{{32}}" color="#FFFFFF" /><text>分享照片 / 故事</text></button>
   <button class="house-entry" bindtap="goHouse">
     <icon name="home" size="{{36}}" color="#B94768" />
@@ -23,7 +24,7 @@
     </view>
     <button wx:if="{{posts.length && nextCursor}}" class="community-action quiet" bindtap="loadMore" loading="{{loadingPosts}}" disabled="{{loadingPosts}}">{{loadingPosts ? '正在加载…' : '查看更早的故事'}}</button>
     <text wx:if="{{posts.length && !nextCursor && !loadingPosts && !error}}" class="community-end">你的故事都在这里了。</text>
-    <text class="community-note">只有你主动提交的故事才会进入审核；通过后在首页公开。原有档案仍保留在“档案”中。</text>
+    <text class="community-note">只有你主动提交的故事才会进入审核；通过后在广场公开。对话、地点和健康记录不会自动公开。</text>
   </view>
   <view wx:else class="social-list">
     <view wx:if="{{loadingNotifications && !notifications.length}}" class="community-state" aria-live="polite"><text class="community-state-title">正在加载收到的回应…</text></view>

@@ -1,10 +1,10 @@
 {
-  "appid": "touristappid",
+  "appid": "wx1112379224ace9f9",
   "compileType": "miniprogram",
   "cloudfunctionRoot": "cloudfunctions/",
   "libVersion": "3.17.1",
   "miniprogramRoot": "./",
-  "projectname": "猫猫小屋-CATO离线审计",
+  "projectname": "猫猫小屋-对话收敛开发版",
   "description": "拍照观察猫咪、登记本地档案、主动分享故事与猫友交流",
   "setting": {
     "urlCheck": false,

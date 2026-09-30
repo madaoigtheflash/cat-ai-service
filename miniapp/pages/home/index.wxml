@@ -1,24 +1,62 @@
-<view class="community-page">
-  <view class="home-intro">
-    <text class="community-heading">猫咪的新故事</text>
-    <text class="community-description">看看大家主动分享的猫片和日常，也留下你的相遇。</text>
-    <view class="community-actions">
-      <button class="community-action primary" bindtap="goIdentify"><icon name="camera" size="{{32}}" color="#FFFFFF" /><text>拍照识猫</text></button>
-      <button class="community-action quiet" bindtap="goCompose"><icon name="edit" size="{{30}}" color="#B94768" /><text>分享照片 / 故事</text></button>
-    </view>
+<view class="companion-page {{keyboardHeight ? 'keyboard-open' : ''}}" style="height: calc(100vh - 120rpx - env(safe-area-inset-bottom) - {{keyboardHeight}}px)">
+  <view class="companion-top">
+    <view class="companion-avatar"><icon name="cat" size="{{48}}" color="#B94768" /></view>
+    <view class="companion-title"><text class="companion-name">小桃 · 虚拟猫</text><text class="companion-subtitle">{{cloudMode ? '云端文字对话 · 记录仍由你确认' : '本地引导 · 固定规则，不是自由对话'}}</text></view>
+    <button class="plain-action" bindtap="goData" aria-label="查看自己的数据和历史"><icon name="book" size="{{38}}" color="#B94768" /><text>历史</text></button>
   </view>
-  <view class="community-feed">
-    <view wx:if="{{loading && !posts.length}}" class="community-state" aria-live="polite"><text class="community-state-title">正在寻找新故事…</text><text class="community-state-copy">正在加载大家公开分享的内容。</text></view>
-    <view wx:if="{{error}}" class="community-error" aria-live="polite"><text>{{error}}</text><button class="community-action" bindtap="retry" disabled="{{loading}}">重新加载</button></view>
-    <text wx:if="{{refreshing}}" class="community-end">正在更新故事…</text>
-    <social-post-card wx:for="{{posts}}" wx:key="id" post="{{item}}" bind:open="openPost" bind:reply="replyPost" />
-    <view wx:if="{{loaded && !loading && !error && !posts.length}}" class="community-state">
-      <text class="community-state-title">这里还没有公开故事</text>
-      <text class="community-state-copy">可以直接选照片分享，也可以识猫、建档后再发布。档案不会自动公开。</text>
-      <button class="community-action" bindtap="goCompose">分享第一张猫片</button>
+  <scroll-view class="conversation" scroll-y scroll-into-view="{{scrollTarget}}" scroll-with-animation="{{false}}">
+    <view class="conversation-inner">
+      <view class="intro"><text class="intro-title">今天，想聊聊哪只猫？</text><text class="intro-copy">我可以陪你整理遇见的猫。登记、关系和地点，都等你确认后再记下。</text></view>
+      <view wx:if="{{!messages.length}}" class="suggestions">
+        <button data-text="登记猫咪叫奶糖" bindtap="usePrompt">试试：登记猫咪叫奶糖</button>
+        <button data-text="今天想放松一会儿" bindtap="usePrompt">今天想放松一会儿</button>
+        <text class="quiet-copy">点选只填入输入框，不会自动发送。</text>
+      </view>
+      <button wx:if="{{truncated}}" class="history-more" bindtap="goData">更早的对话在私人历史中</button>
+      <view wx:for="{{messages}}" wx:key="id" class="message message-{{item.role}}">
+        <text class="message-source">{{item.role === 'user' ? '你' : '小桃 · ' + item.label}}</text><text class="message-text" user-select>{{item.text}}</text>
+      </view>
+      <view wx:if="{{pendingPhoto}}" class="photo-draft">
+        <image class="chosen-photo" src="{{pendingPhoto}}" mode="aspectFit" />
+        <text class="quiet-copy">仅在本机预览。观察时主动上传，不公开到社区。</text>
+        <view class="paired-actions"><button class="solid-action" bindtap="identifyPhoto" loading="{{busy}}" disabled="{{busy}}">上传并观察</button><button bindtap="removePhoto" disabled="{{busy}}">移除照片</button></view>
+      </view>
+      <view wx:if="{{draft}}" id="draft-card" class="confirmation">
+        <text class="confirm-title">请你确认 · {{draft.kind === 'pet' ? '登记猫咪' : draft.kind === 'relationship' ? '猫咪关系' : '见过的地方'}}</text>
+        <text class="quiet-copy">保存在本机 · 不自动上传或分享</text>
+        <block wx:if="{{draft.kind === 'pet'}}">
+          <image wx:if="{{draft.fields.imagePath}}" class="draft-photo" src="{{draft.fields.imagePath}}" mode="aspectFit" />
+          <label class="field-label">猫咪名字<input value="{{draft.fields.name}}" data-field="name" bindinput="onDraftInput" maxlength="40" placeholder="给它一个称呼" /></label>
+          <label class="field-label">品种／外观备注<input value="{{draft.fields.breed}}" data-field="breed" bindinput="onDraftInput" maxlength="60" placeholder="不确定可以留空" /></label>
+          <label class="field-label">毛色<input value="{{draft.fields.coatColor}}" data-field="coatColor" bindinput="onDraftInput" maxlength="60" placeholder="例如橘白，不确定可留空" /></label>
+          <button class="text-action" bindtap="goPets">可能是已有的猫？先查看档案</button>
+        </block>
+        <block wx:elif="{{draft.kind === 'relationship'}}">
+          <text class="field-label">从这只猫</text><picker range="{{pets}}" range-key="name" value="{{fromIndex}}" data-field="fromPetId" bindchange="onCatChange"><view class="picker-field">{{pets[fromIndex].name || '选择猫咪'}}</view></picker>
+          <text class="field-label">到这只猫</text><picker range="{{pets}}" range-key="name" value="{{toIndex}}" data-field="toPetId" bindchange="onCatChange"><view class="picker-field">{{pets[toIndex].name || '选择另一只猫'}}</view></picker>
+          <text class="field-label">双方身份</text><picker range="{{roleLabels}}" value="{{roleIndex}}" bindchange="onRoleChange"><view class="picker-field">{{roleLabels[roleIndex]}}</view></picker>
+          <text class="quiet-copy">方向按“从 → 到”保存。亲缘由你核实，照片和亲近行为不能证明亲缘；不会自动成为小屋投票。</text>
+        </block>
+        <block wx:elif="{{draft.kind === 'location'}}">
+          <text class="field-label">这次遇见的是</text><picker range="{{pets}}" range-key="name" value="{{petIndex}}" data-field="petId" bindchange="onCatChange"><view class="picker-field">{{pets[petIndex].name || '选择猫咪'}}</view></picker>
+          <label class="field-label">粗略区域名称<input value="{{draft.fields.areaText}}" data-field="areaText" bindinput="onDraftInput" maxlength="60" placeholder="例如公园东侧，不写门牌或联系方式" /></label>
+          <button class="soft-action" bindtap="choosePlace">主动在地图选点</button>
+          <text wx:if="{{draft.fields.latitude !== null && draft.fields.latitude !== undefined}}" class="quiet-copy">已有约 2 公里粗位置，原始选点不存入本机日志。</text>
+        </block>
+        <view class="paired-actions"><button class="solid-action" bindtap="confirmDraft" loading="{{busy}}" disabled="{{busy}}">确认保存</button><button bindtap="cancelDraft" disabled="{{busy}}">暂不登记</button></view>
+      </view>
+      <view wx:if="{{notice}}" class="state-note">{{notice}}</view>
+      <view wx:if="{{error}}" class="state-error" role="alert">{{error}}</view>
+      <view wx:if="{{retryText}}" class="retry-panel"><text>待重试：{{retryText}}</text><text class="quiet-copy">只重试这条，新输入不会被覆盖。</text><view class="paired-actions"><button bindtap="retryRemote" disabled="{{busy}}">重试上一条</button><button bindtap="abandonRemote" disabled="{{busy}}">放弃等待</button></view></view>
+      <button wx:if="{{savedPetId}}" class="soft-action" bindtap="shareSaved">挑选内容，再分享给猫友</button>
+      <view class="secondary-links"><button bindtap="goRelationships">看猫咪关系</button><button bindtap="goMap">看分布地图</button><button bindtap="goOnline">小屋与邀请</button></view>
+      <text class="safety-note">虚拟角色不代表真实猫咪想法；外观观察不确认身份，也不作医疗判断。健康异常请咨询执业兽医。</text>
+      <view id="conversation-end"></view>
     </view>
-    <button wx:if="{{posts.length && nextCursor}}" class="community-action quiet" bindtap="loadMore" loading="{{loading && !refreshing}}" disabled="{{loading}}">{{loading ? '正在加载…' : '看看更多故事'}}</button>
-    <text wx:if="{{posts.length && !nextCursor && !loading && !error}}" class="community-end">暂时看到这里，有新故事再来看看。</text>
+  </scroll-view>
+  <view class="composer">
+    <view class="quick-actions"><button bindtap="choosePhoto" disabled="{{busy}}"><icon name="camera" size="{{28}}" color="#B94768" /><text>照片</text></button><button data-kind="pet" bindtap="makeDraft" disabled="{{busy}}">登记猫咪</button><button data-kind="relationship" bindtap="makeDraft" disabled="{{busy}}">记关系</button><button data-kind="location" bindtap="makeDraft" disabled="{{busy}}">记地点</button></view>
+    <view class="input-row"><textarea value="{{input}}" bindinput="onInput" bindkeyboardheightchange="onKeyboard" adjust-position="{{false}}" auto-height maxlength="500" placeholder="说说今天和猫咪的小事…" aria-label="给虚拟猫的消息" cursor-spacing="20" /><button class="send-action" bindtap="send" loading="{{busy}}" disabled="{{busy || !input}}">发送</button></view>
+    <button class="mode-action" bindtap="changeMode" disabled="{{busy || retryText}}">{{cloudMode ? '云端对话已选择 · 点此返回本地引导' : '本地引导 · 可选启用云端文字对话'}}</button>
   </view>
-  <text class="community-note">这里仅展示主动公开的故事，不包含私密档案、健康记录或精确位置。健康异常请及时咨询执业兽医。</text>
 </view>

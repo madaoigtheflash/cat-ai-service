@@ -33,7 +33,7 @@ test('location permission declaration matches the only production location API',
   ]
   const productionSource = productionFiles.map(file => fs.readFileSync(file, 'utf8')).join('\n')
   const chooseCalls = productionSource.match(/wx\.chooseLocation\s*\(/g) || []
-  assert.equal(chooseCalls.length, 1)
+  assert.equal(chooseCalls.length, 2, '小屋上传和本机对话登记均只接受主动选点')
   ;[
     'getLocation',
     'getFuzzyLocation',

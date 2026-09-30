@@ -112,6 +112,7 @@ Page({
   },
 
   goPets() { wx.switchTab({ url: '/pages/pets/index' }) },
+  goOwnData() { wx.navigateTo({ url: '/pages/companion-data/index' }) },
   goGarden() { wx.navigateTo({ url: '/pages/garden/index' }) },
   goSocial() { wx.switchTab({ url: '/pages/social/index' }) },
   goOnline() { wx.navigateTo({ url: '/pages/online/index' }) },

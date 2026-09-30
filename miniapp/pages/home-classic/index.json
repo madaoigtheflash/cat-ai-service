@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "猫友广场",
+  "enablePullDownRefresh": true,
+  "backgroundColor": "#FFF7FA",
+  "backgroundTextStyle": "dark",
+  "usingComponents": { "social-post-card": "/components/social-post-card/index", "icon": "/components/icon/index" }
+}

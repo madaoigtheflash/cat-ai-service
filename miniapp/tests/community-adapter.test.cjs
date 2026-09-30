@@ -355,5 +355,5 @@ test('routes replace knowledge with social without removing native cat features'
   const config = JSON.parse(fs.readFileSync(path.join(__dirname, '../app.json'), 'utf8'))
   assert.ok(!config.pages.includes('pages/knowledge/index'))
   for (const page of ['home', 'social', 'social-compose', 'social-post', 'identify', 'pets', 'pet-detail', 'pet-edit', 'online', 'relationships', 'garden']) assert.ok(config.pages.includes(`pages/${page}/index`), page)
-  assert.deepEqual(config.tabBar.list.map(tab => tab.text), ['首页', '档案', '社交', '我的'])
+  assert.deepEqual(config.tabBar.list.map(tab => tab.text), ['聊聊', '猫咪', '社区', '我的'])
 })

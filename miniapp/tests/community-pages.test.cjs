@@ -71,7 +71,7 @@ function detail(overrides = {}, options = {}) {
 }
 
 for (const [name, filter, busy, loaded] of [
-  ['home', 'public', 'loading', 'loaded'],
+  ['home-classic', 'public', 'loading', 'loaded'],
   ['social', 'mine', 'loadingPosts', 'mineLoaded']
 ]) {
   check(`${name}: real ${filter} request distinguishes empty success from error and stops spinners`, async () => {
@@ -92,7 +92,7 @@ for (const [name, filter, busy, loaded] of [
     assert.equal(f.page.data.error, '网络不可用')
     assert.equal(f.page.data[busy], false)
     assert.equal(f.stopped(), 1)
-    if (name === 'home') assert.equal(f.page.data.refreshing, false)
+    if (name === 'home-classic') assert.equal(f.page.data.refreshing, false)
 
     const failed = fixture(name, { listPosts: async () => { throw new Error('首次加载失败') } })
     await failed.page.loadPosts(true)
@@ -114,7 +114,7 @@ for (const [name, filter, busy, loaded] of [
     assert.deepEqual(f.page.data.posts.map(item => item.id), ['one'])
     assert.equal(f.page.data.nextCursor, 'cursor-1')
     assert.equal(f.page.data[busy], false)
-    await (name === 'home' ? f.page.retry() : f.page.retryPosts())
+    await (name === 'home-classic' ? f.page.retry() : f.page.retryPosts())
     assert.deepEqual(f.calls.slice(1).map(call => call.args[0]), [
       { filter, cursor: 'cursor-1' }, { filter, cursor: 'cursor-1' }
     ])

@@ -295,5 +295,5 @@ test('photo controls remain outside the picture with flexible 88rpx targets and 
   assert.match(css, /\.compose-primary, \.compose-secondary, \.photo-remove, \.photo-cover\s*\{[^}]*min-height: 88rpx;[^}]*height: auto;/)
   assert.match(css, /\.compose-photo-preview\s*\{[^}]*padding-top: 75%/)
   assert.match(css, /\.compose-page button\.compose-primary[^}]*width: 100%;[^}]*min-width: 0;/)
-  for (const page of ['home', 'social']) assert.match(source(`pages/${page}/index.wxml`), /分享照片 \/ 故事/)
+  for (const page of ['home-classic', 'social']) assert.match(source(`pages/${page}/index.wxml`), /分享照片 \/ 故事/)
 })
