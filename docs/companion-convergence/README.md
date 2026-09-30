@@ -2,7 +2,7 @@
 
 独立开发分支：`codex/cat-companion-convergence-20260930`。不覆盖原工作目录，不部署线上。
 
-建议先读 [三轮体验报告](EXPERIENCE-REPORT.md)，再看 [验证记录](VALIDATION.md) 与 [产品/交互边界](BRIEF.md)。
+建议先读 [三轮体验报告](EXPERIENCE-REPORT.md)，再看 [验证记录](VALIDATION.md)、[界面设计检查](DESIGN-CHECK.md) 与 [产品/交互边界](BRIEF.md)。
 
 ## 这版怎么体验
 
