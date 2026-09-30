@@ -1,0 +1,11 @@
+Use case: stylized-concept
+Asset type: original virtual-cat companion character illustration for a pink, cozy Chinese WeChat mini-program; a single isolated character asset, not a UI mockup.
+Primary request: Create Xiaotao, an original friendly and slightly playful rounded cat, sitting naturally with one front paw lifted in a gentle hello. A warm clever gaze and a small relaxed smile, approachable without exaggerated baby proportions.
+Scene/backdrop: genuinely transparent background with native PNG alpha, not a white background or a checkerboard painted into the image.
+Subject: one whole cat, creamy milk-white fur with a few soft pale-peach patches, subtle rosy inner ears, a thin peach-pink collar without a tag, soft rounded paws, two ears and a fully visible curved tail. One front paw lifted, the other resting naturally; anatomically coherent body and legs.
+Style/medium: polished hand-painted 2.5D editorial character illustration with delicate visible brushwork and softly dimensional fur. Clean silhouette, fine painterly details that still read on a small phone screen. Not photorealistic, not shiny plastic, not a clay toy.
+Composition/framing: square 1024 x 1024 canvas; centered complete seated body; the figure occupies approximately 80% of the canvas with comfortable clear space around every ear, paw and the tail; no cropping.
+Lighting/mood: gentle diffuse light, warm and reassuring with quiet liveliness, no dramatic shadows.
+Color palette: milk-white, very pale peach, soft rose-pink accents, warm dark-brown eyes and small nose; designed to sit on pale pink or cream UI backgrounds.
+Text: none.
+Constraints: completely original, no imitation of any existing character or intellectual property, no logos or watermarks. Cat only, no scenery, no extra objects, no particles, no sparkles, no typography, no floor or pedestal, no cast shadow on an opaque background. Preserve genuinely transparent gaps and painted white fur.

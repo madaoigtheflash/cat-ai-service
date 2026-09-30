@@ -6,8 +6,9 @@ const vm = require('node:vm')
 const { createService } = require('../services/companion')
 const clone = value => value === undefined ? undefined : JSON.parse(JSON.stringify(value))
 const event = dataset => ({ currentTarget: { dataset } })
-function fixture() {
+function fixture(options = {}) {
   const values = {}, calls = [], app = { globalData: { cloudReady: true } }
+  const timers = new Map()
   const wx = {
     getStorageSync: key => clone(values[key]),
     setStorageSync: (key,value) => { values[key] = clone(value) },
@@ -28,17 +29,19 @@ function fixture() {
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../pages/home/index.js'),'utf8'),{
     wx, getApp:()=>app, Page:value=>{definition=value},
     require(name) {
+      if(name==='../../utils/companion-presence') return require('../utils/companion-presence')
+      if(name==='../../config/companion-release') return { cloudDialogueEnabled: options.cloudDialogueEnabled === true }
       if(name==='../../services/companion') return service
       if(name==='../../utils/storage') return storage
       if(name==='../../services/companion-remote') return {reply:(...args)=>{calls.push(['remote',...args]);return remoteCall(...args)}}
       if(name==='../../services/api') return {identify:(...args)=>{calls.push(['identify',...args]);return identifyCall(...args)},normalizeIdentifyResult:value=>value}
       if(name==='../../utils/social-handoff') return require('../utils/social-handoff')
       throw Error(name)
-    }, console
+    }, console, setTimeout(fn) { const id = {}; timers.set(id,fn); return id }, clearTimeout(id) { timers.delete(id) }
   })
   const page = {...definition,data:clone(definition.data),setData(patch){Object.assign(this.data,clone(patch))}}
   page.onLoad()
-  return {page,service,storage,wx,calls,app,values,remote:fn=>{remoteCall=fn},identify:fn=>{identifyCall=fn}}
+  return {page,service,storage,wx,calls,app,values,timers,remote:fn=>{remoteCall=fn},identify:fn=>{identifyCall=fn}}
 }
 test('prompt only fills input; local conversation prepares a draft before confirmed storage',async()=>{
   const f=fixture()
@@ -66,7 +69,7 @@ test('cancel leaves conversation but no pet and existing pending draft is not re
   assert.equal(f.service.listMessages().length,2)
 })
 test('cloud mode needs affirmative consent and does not auto-request',()=>{
-  const f=fixture()
+  const f=fixture({cloudDialogueEnabled:true})
   f.page.changeMode(); f.wx.modal.success({confirm:false})
   assert.equal(f.page.data.cloudMode,false)
   f.page.changeMode(); f.wx.modal.success({confirm:true})
@@ -74,7 +77,7 @@ test('cloud mode needs affirmative consent and does not auto-request',()=>{
   assert.equal(f.calls.length,0)
 })
 test('failed remote retry keeps original snapshot and preserves a newer unsent message',async()=>{
-  const f=fixture(); let attempt=0
+  const f=fixture({cloudDialogueEnabled:true}); let attempt=0
   f.remote(async()=>{if(++attempt===1)throw Error('失败');return {text:'云端已回复',source:'cloud'}})
   f.page.data.cloudMode=true
   f.page.onInput({detail:{value:'旧消息'}});await f.page.send()
@@ -88,7 +91,7 @@ test('failed remote retry keeps original snapshot and preserves a newer unsent m
   assert.equal(f.storage.listPets().length,0)
 })
 test('busy send is coalesced and model instructions never become entity writes',async()=>{
-  const f=fixture();let finish
+  const f=fixture({cloudDialogueEnabled:true});let finish
   f.remote(()=>new Promise(resolve=>{finish=resolve}))
   f.page.data.cloudMode=true
   f.page.onInput({detail:{value:'登记猫咪叫奶糖'}})
@@ -142,7 +145,7 @@ test('templates bind existing handlers and safe keyboard container is explicit',
   f.page.onHide(); assert.equal(f.page.data.keyboardHeight,0)
 })
 test('long local history is bounded before optional remote call, not a permanent send blocker',async()=>{
-  const f=fixture()
+  const f=fixture({cloudDialogueEnabled:true})
   f.service.send('长'.repeat(1001))
   f.page.data.cloudMode=true
   f.page.onInput({detail:{value:'你好'}}); await f.page.send()
@@ -203,4 +206,59 @@ test('photo draft invalidates old share; newly confirmed cat becomes the sole sh
   f.page.confirmDraft();f.page.shareSaved()
   assert.equal(f.calls.filter(row=>row[0]==='navigate').length,1)
   assert.ok(f.calls.find(row=>row[0]==='navigate')[1].includes(encodeURIComponent(f.page.data.savedPetId)))
+})
+
+test('release disables unavailable cloud dialogue even when local page state is forged',async()=>{
+  assert.equal(require('../config/companion-release').cloudDialogueEnabled,false)
+  const f=fixture()
+  assert.equal(f.page.data.cloudAvailable,false)
+  f.page.changeMode()
+  assert.equal(f.wx.modal.showCancel,false)
+  assert.match(f.wx.modal.content,/本地固定规则/)
+  assert.equal(f.page.data.cloudMode,false)
+  f.page.data.cloudMode=true
+  f.page.onInput({detail:{value:'保留我的文字'}})
+  await f.page.send()
+  assert.equal(f.page.data.input,'保留我的文字')
+  assert.equal(f.calls.length,0)
+  assert.match(f.page.data.error,/尚未开放/)
+  f.page._pendingRemote={text:'旧请求'}
+  await f.page.retryRemote()
+  assert.equal(f.calls.length,0)
+})
+test('empty welcome stays at top and touching the virtual cat never sends or saves a message',()=>{
+  const f=fixture()
+  assert.equal(f.page.data.scrollTarget,'')
+  f.page.touchCat()
+  assert.match(f.page.data.catReply,/喵/)
+  assert.equal(f.page.data.catReacting,true)
+  assert.equal(f.timers.size,1)
+  f.page.touchCat()
+  assert.equal(f.timers.size,1)
+  assert.equal(f.service.listMessages().length,0)
+  assert.equal(f.storage.listPets().length,0)
+  assert.equal(f.calls.length,0)
+  f.page.onHide()
+  assert.equal(f.timers.size,0)
+  assert.equal(f.page.data.catReacting,false)
+})
+test('reduced motion persists without losing text response and failed preference write stays honest',()=>{
+  const f=fixture()
+  f.page.toggleMotion()
+  assert.equal(f.values.catai_showcase_reduce_motion_v1,true)
+  f.page.touchCat()
+  assert.equal(f.page.data.catReacting,false)
+  assert.equal(f.timers.size,0)
+  assert.ok(f.page.data.catReply)
+  f.wx.setStorageSync=()=>{throw Error('偏好保存失败')}
+  f.page.toggleMotion()
+  assert.equal(f.page.data.reduceMotion,true)
+  assert.match(f.page.data.error,/偏好保存失败/)
+})
+test('missing cat artwork falls back without blocking conversation or registration',()=>{
+  const f=fixture()
+  f.page.onCatImageError()
+  assert.equal(f.page.data.assetFailed,true)
+  f.page.makeDraft(event({kind:'pet'}))
+  assert.ok(f.page.data.draft)
 })

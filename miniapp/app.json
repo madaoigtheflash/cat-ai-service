@@ -35,7 +35,7 @@
   },
   "permission": {
     "scope.userLocation": {
-      "desc": "用于主动选择猫咪目击地点，审核后仅展示约2公里模糊热区"
+      "desc": "用于主动选择猫咪地点：本机登记仅保存约2公里粗位置；小屋目击由你提交，审核后仅成员可见模糊热区"
     }
   },
   "requiredPrivateInfos": [

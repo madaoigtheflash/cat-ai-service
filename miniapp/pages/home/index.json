@@ -1,5 +1,7 @@
 {
-  "navigationBarTitleText": "和小桃聊聊",
+  "navigationBarTitleText": "猫猫小屋",
+  "navigationBarBackgroundColor": "#FFF7FA",
+  "navigationBarTextStyle": "black",
   "enablePullDownRefresh": true,
   "backgroundColor": "#FFF7FA",
   "backgroundTextStyle": "dark",

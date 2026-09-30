@@ -1,5 +1,7 @@
 # 对话收敛版审阅入口
 
+后续已进入 [小桃陪伴版 2.1.0](../companion-living/README.md) 的正式项目整合与 UI 优化。本目录保留三轮开发时的历史证据；最新界面、能力开关及上传/发布状态请看新交付记录。
+
 独立开发分支：`codex/cat-companion-convergence-20260930`。不覆盖原工作目录，不部署线上。
 
 建议先读 [三轮体验报告](EXPERIENCE-REPORT.md)，再看 [验证记录](VALIDATION.md)、[界面设计检查](DESIGN-CHECK.md) 与 [产品/交互边界](BRIEF.md)。

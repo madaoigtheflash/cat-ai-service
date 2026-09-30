@@ -1,0 +1,23 @@
+{
+  "passed": true,
+  "width": 390,
+  "height": 753,
+  "fontSizeSetting": 16,
+  "checks": [
+    "character artwork loads",
+    "local tap response without cloud or message",
+    "reduced motion preserves text feedback",
+    "two confirmed cats",
+    "mother-to-child relationship",
+    "coarse synthetic location",
+    "own history and map",
+    "keyboard height 290px state (not physical keyboard)",
+    "message write failure recovers pending draft; no entity created"
+  ],
+  "cloudCalls": 0,
+  "synthetic": true,
+  "limitations": [
+    "no physical keyboard or large-font/other-width verification",
+    "no production upload or model request"
+  ]
+}

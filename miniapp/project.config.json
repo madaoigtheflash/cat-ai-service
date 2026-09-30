@@ -4,10 +4,10 @@
   "cloudfunctionRoot": "cloudfunctions/",
   "libVersion": "3.17.1",
   "miniprogramRoot": "./",
-  "projectname": "猫猫小屋-对话收敛开发版",
-  "description": "拍照观察猫咪、登记本地档案、主动分享故事与猫友交流",
+  "projectname": "猫猫小屋",
+  "description": "与虚拟猫咪轻互动，拍照观察、确认登记猫咪关系和粗位置，主动分享故事与猫友交流",
   "setting": {
-    "urlCheck": false,
+    "urlCheck": true,
     "es6": true,
     "enhance": true,
     "postcss": true,

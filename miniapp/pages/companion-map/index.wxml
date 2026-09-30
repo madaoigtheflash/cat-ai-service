@@ -1,30 +1,30 @@
 <view class="page local-map-page">
-  <view class="card map-intro">
-    <view class="map-heading"><view class="map-icon"><icon name="pin" size="40" color="#D94F75" /></view><text class="map-title">本机猫咪地图</text></view>
-    <text class="map-copy">回顾你主动确认过的大致区域。</text>
+  <view class="map-intro">
+    <view class="map-heading"><text class="map-title">猫咪相遇地图</text><view class="map-icon"><icon name="pin" size="44" color="#B94768" /></view></view>
+    <text class="map-copy">把相遇记在这里，回看你确认过的大致区域。</text>
     <text class="map-note">约 2 公里粗区域，不是猫咪当前所在的精确点。本页不请求你的位置，不上传这些记录。</text>
   </view>
   <view wx:if="{{loading}}" class="card map-state" aria-live="polite">正在读取本机粗位置…</view>
   <view wx:if="{{error}}" class="card map-error" aria-live="polite"><text>{{error}}</text><button class="secondary-button" bindtap="loadLocations">重新读取</button></view>
   <block wx:if="{{!loading && !error}}">
     <block wx:if="{{locations.length}}">
-      <view class="card native-map-card">
+      <view class="native-map-card">
         <map class="local-cat-map" latitude="{{latitude}}" longitude="{{longitude}}" scale="12" max-scale="15" markers="{{markers}}" circles="{{circles}}" include-points="{{mapPoints}}" show-location="{{false}}" enable-zoom="{{true}}" enable-scroll="{{true}}" enable-poi="{{false}}" bindmarkertap="selectMarker" bindcallouttap="selectMarker"></map>
-        <text class="map-note">标记放在粗区域中心，圆圈仅帮助理解模糊范围；不提供精确地点导航。</text>
+        <view class="map-caption"><icon name="pin" size="28" color="#B94768" /><text class="map-note">标记放在粗区域中心，圆圈仅帮助理解模糊范围；不提供精确地点导航。</text></view>
       </view>
-      <view wx:if="{{selected}}" class="card selected-location" aria-live="polite">
-        <text class="selection-label">选中的记录</text><text class="record-name">{{selected.catName}}</text><text class="record-area">{{selected.areaText}}</text><text class="map-note">记录于 {{selected.timeLabel}} · 本机时区</text>
+      <view wx:if="{{selected}}" class="selected-location" aria-live="polite">
+        <view class="selected-heading"><text class="record-name">{{selected.catName}}</text><text class="selection-label">选中的记录</text></view><text class="record-area">{{selected.areaText}}</text><text class="map-note">记录于 {{selected.timeLabel}} · 本机时区</text>
         <text wx:if="{{selected.missing}}" class="record-warning">关联猫档案已删除，这条位置记录仍需核对，不会为它创建新猫。</text>
       </view>
       <view class="section-heading"><view><text class="section-title">粗位置文字列表</text><text class="section-note">与地图信息等价，点击可查看记录</text></view></view>
-      <button wx:for="{{locations}}" wx:key="markerId" class="card location-row {{selected.markerId === item.markerId ? 'selected' : ''}}" data-id="{{item.markerId}}" bindtap="selectRow" aria-label="{{item.catName}}，{{item.areaText}}，{{item.timeLabel}}">
-        <view class="location-symbol"><icon name="pin" size="32" color="#D94F75" /></view><view class="location-copy"><text class="record-name">{{item.catName}}</text><text class="record-area">{{item.areaText}}</text><text class="map-note">约 2 公里粗区域 · {{item.timeLabel}}</text></view>
+      <button wx:for="{{locations}}" wx:key="markerId" class="location-row {{selected.markerId === item.markerId ? 'selected' : ''}}" data-id="{{item.markerId}}" bindtap="selectRow" aria-label="{{item.catName}}，{{item.areaText}}，{{item.timeLabel}}{{selected.markerId === item.markerId ? '，已选中' : ''}}">
+        <view class="location-symbol"><icon name="pin" size="32" color="#B94768" /></view><view class="location-copy"><text class="record-name">{{item.catName}}</text><text class="record-area">{{item.areaText}}</text><text class="map-note">约 2 公里粗区域 · {{item.timeLabel}}</text></view><icon name="chevron" size="24" color="#80616F" />
       </button>
     </block>
     <view wx:else class="card empty-card map-empty"><icon name="pin" size="72" color="#D94F75" /><text class="empty-title">还没有可展示的粗位置</text><text class="map-copy">回到聊聊，先登记猫咪，再主动选一个大致区域。没有位置也能继续聊天和记录猫咪。</text><button class="primary-button" bindtap="goChat">回到聊聊登记</button></view>
     <text wx:if="{{omittedCount}}" class="map-note omitted-note">有 {{omittedCount}} 条位置格式不完整，未绘制到地图；原记录未被修改。</text>
   </block>
-  <view class="card map-other"><text class="record-name">想查看小屋的共同记录？</text><text class="map-copy">小屋热区来自审核通过的协作目击，与这份本机地图分开。请先选择你加入的小屋。</text><button class="secondary-button" bindtap="goOnline">选择小屋查看热区</button></view>
+  <view class="map-other"><text class="record-name">也看看小屋里的相遇</text><text class="map-copy">小屋热区来自审核通过的协作目击，与这份本机地图分开。请先选择你加入的小屋。</text><button class="secondary-button" bindtap="goOnline">选择小屋查看热区</button></view>
   <button class="secondary-button" bindtap="goData">查看我的其他本机数据</button>
   <text class="map-note map-footer">请勿用位置记录追踪私人住址、救助点或猫咪实时路线。发现健康异常请咨询执业兽医或专业救助人员。</text>
 </view>

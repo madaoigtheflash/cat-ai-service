@@ -3,6 +3,8 @@ const remote = require('../../services/companion-remote')
 const storage = require('../../utils/storage')
 const api = require('../../services/api')
 const handoff = require('../../utils/social-handoff')
+const presence = require('../../utils/companion-presence')
+const release = require('../../config/companion-release')
 const roles = [
   { label: '母亲 → 孩子（需要你确认）', from: 'mother', to: 'child' },
   { label: '父亲 → 孩子（需要你确认）', from: 'father', to: 'child' },
@@ -16,19 +18,23 @@ Page({
     busy: false, cloudMode: false, keyboardHeight: 0, scrollTarget: '',
     roleLabels: roles.map(item => item.label), roleIndex: 0,
     fromIndex: 0, toIndex: 0, petIndex: 0, pendingPhoto: '',
-    savedPetId: '', retryText: '', truncated: false
+    savedPetId: '', retryText: '', truncated: false,
+    greeting: '', catReply: '碰一下我的爪爪，打个招呼。', catReacting: false,
+    reduceMotion: false, assetFailed: false, cloudAvailable: release.cloudDialogueEnabled === true
   },
   onLoad() {
     this._revision = 0
+    this._touchCount = 0
+    this.setData({ greeting: presence.greeting(new Date().getHours()) })
     try { this.setData({ input: companion.getComposerDraft() || '' }); this.refresh() }
     catch (error) { this.showError(error) }
   },
   onShow() {
     if (this.getTabBar && this.getTabBar()) this.getTabBar().setData({ selected: 0 })
-    try { this.refresh() } catch (error) { this.showError(error) }
+    try { this.setData({ reduceMotion: wx.getStorageSync(presence.MOTION_KEY) === true }); this.refresh() } catch (error) { this.showError(error) }
   },
-  onHide() { this.saveInput(); this.setData({ keyboardHeight: 0 }) },
-  onUnload() { this.saveInput() },
+  onHide() { this.saveInput(); this.stopReaction(); this.setData({ keyboardHeight: 0 }) },
+  onUnload() { this.saveInput(); this.stopReaction() },
   onPullDownRefresh() { try { this.refresh() } finally { wx.stopPullDownRefresh() } },
   showError(error) { this.setData({ error: error.message || '暂时未能完成，请保留当前内容后重试。' }) },
   saveInput() { try { companion.saveComposerDraft(this.data.input) } catch (error) { this.showError(error) } },
@@ -44,8 +50,33 @@ Page({
       fromIndex: Math.max(0, pets.findIndex(item => item.id === fields.fromPetId)),
       toIndex: Math.max(0, pets.findIndex(item => item.id === fields.toPetId)),
       petIndex: Math.max(0, pets.findIndex(item => item.id === fields.petId)),
-      scrollTarget: draft ? 'draft-card' : 'conversation-end'
+      scrollTarget: draft ? 'draft-card' : state.messages.length ? 'conversation-end' : ''
     })
+  },
+  stopReaction() {
+    if (this._reactionTimer) clearTimeout(this._reactionTimer)
+    this._reactionTimer = null
+    this.setData({ catReacting: false })
+  },
+  touchCat() {
+    if (this.data.busy || this.data.catReacting) return
+    this.setData({ catReply: presence.reaction(this._touchCount++), catReacting: !this.data.reduceMotion })
+    if (!this.data.reduceMotion) this._reactionTimer = setTimeout(() => {
+      this._reactionTimer = null
+      this.setData({ catReacting: false })
+    }, 360)
+  },
+  toggleMotion() {
+    const next = !this.data.reduceMotion
+    try {
+      wx.setStorageSync(presence.MOTION_KEY, next)
+      this.stopReaction()
+      this.setData({ reduceMotion: next })
+    } catch (error) { this.showError(error) }
+  },
+  onCatImageError() { this.setData({ assetFailed: true }) },
+  showInteractionInfo() {
+    wx.showModal({ title: '关于小桃的回应', content: '小桃是虚拟角色。当前使用本地固定规则和预设回应，不是自由生成对话，也不代表真实猫咪的想法。聊天留在本机；照片仅在你点击“上传并观察”后提交既有观察服务。档案、关系和地点都要由你确认保存。', showCancel: false, confirmText: '知道了', confirmColor: '#B94768' })
   },
   onInput(event) { this._revision += 1; this.setData({ input: event.detail.value }); this.saveInput() },
   onKeyboard(event) { this.setData({ keyboardHeight: Math.max(0, Number(event.detail.height) || 0) }) },
@@ -60,6 +91,9 @@ Page({
     const text = this.data.input.trim()
     if (!text) return
     if (this._pendingRemote) { this.setData({ error: '请重试或放弃上一条云端请求；新输入会保留。' }); return }
+    if (this.data.cloudMode && release.cloudDialogueEnabled !== true) {
+      this.setData({ cloudMode: false, error: '云端文字对话尚未开放。当前输入已保留，可使用本地引导。' }); return
+    }
     if (this.data.cloudMode) {
       this._pendingRemote = {
         text, history: companion.listMessages().slice(-10).map(item => ({ role: item.role, content: item.text.slice(0, 1000) })),
@@ -82,6 +116,7 @@ Page({
   async retryRemote() {
     const request = this._pendingRemote
     if (!request || this.data.busy) return
+    if (release.cloudDialogueEnabled !== true) { this.setData({ error: '云端文字对话尚未开放，输入与待处理内容已保留。' }); return }
     this.setData({ busy: true, error: '', retryText: request.text })
     try {
       if (!request.result) request.result = await remote.reply(request.text, request.history)
@@ -100,6 +135,7 @@ Page({
   },
   changeMode() {
     if (this.data.busy || this._pendingRemote) return
+    if (release.cloudDialogueEnabled !== true) { this.showInteractionInfo(); return }
     if (this.data.cloudMode) { this.setData({ cloudMode: false }); return }
     wx.showModal({
       title: '启用云端文字对话？',
