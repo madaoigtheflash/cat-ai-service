@@ -43,4 +43,4 @@
 
 优化前提交：`c647fb6e0cfdeaa4155bd177e60ae144d558affe`，回退分支 `codex/backup-companion-before-living-20260930`。回退应选择旧代码重新构建，不清空用户数据或重写原 dirty 工作树。上传脚本默认只预检，显式 `-Upload` 才上传开发版本；详见 [发布检查](RELEASE-CHECK.md)。
 
-设计依据：[方向与动效边界](BRIEF.md)、[副页层级调整](PERSONAL-UI.md)、[角色原画及完整提示词](ASSET-PROVENANCE.md)。插画由内置 image_gen 生成，最终项目素材在 `miniapp/assets/companion/xiaotao-welcome-v1.png`，不引用工具临时目录。
+设计依据：[方向与动效边界](BRIEF.md)、[副页层级调整](PERSONAL-UI.md)、[最终设计检查](DESIGN-CHECK.md)、[角色原画及完整提示词](ASSET-PROVENANCE.md)。插画由内置 image_gen 生成，最终项目素材在 `miniapp/assets/companion/xiaotao-welcome-v1.png`，不引用工具临时目录。

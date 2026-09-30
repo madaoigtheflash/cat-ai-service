@@ -41,6 +41,8 @@ powershell -ExecutionPolicy Bypass -File tools/upload_companion.ps1 -Version 2.1
 
 结果文件在被 Git 忽略的 `artifacts/companion-release/` 下，每次使用独立文件名，不覆盖既有回执。成功须同时核对 CLI 结果与公众平台中 AppID、版本号及说明；CLI 超时或缺失结果时先查后台，不盲目重复提交。
 
+2026-10-01 补充：本机 CLI 可能在内部失败后仍退出 0。脚本现会先写独立 `.status.json` 脱敏摘要（版本、源码提交、固定状态、布尔错误类别及限定数值错误码），不保留原始日志、URL、身份或令牌；无回执仍然停止。这不能找回本次已丢失的诊断，也不是自动重试授权。
+
 ## 三个不同状态
 
 | 状态 | 完成证据 | 不代表什么 |
@@ -67,4 +69,4 @@ powershell -ExecutionPolicy Bypass -File tools/upload_companion.ps1 -Version 2.1
 - `node --check miniapp/pages/mine/index.js` 通过。
 - 个人版文案契约、位置权限契约、底部导航与“我的”契约三组测试共 9 项通过，无失败或跳过。
 - 上传脚本语法检查通过，并分别在 Windows PowerShell 5 与当前 PowerShell 执行默认本地预检成功。使用 UTF-8 BOM 保证 Windows PowerShell 能正确读取中文路径与更新说明；配置文件显式按 UTF-8 读取。
-- **没有执行 `-Upload`，没有调用预览/上传/提审/发布。** 以上只验证局部文案、配置和预检分支，不验证真实上传分支、真机体验或云端状态。
+- 以上是准备阶段的局部检查。随后主线程已执行一次 `-Upload`，但 CLI 未生成上传结果文件，**尚不能确认成功，未重复上传**；具体进展见 [交付记录](DELIVERY.md)。没有提审或发布，准备阶段的检查不能验证真机体验或云端状态。

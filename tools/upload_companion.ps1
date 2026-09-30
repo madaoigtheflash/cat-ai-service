@@ -7,6 +7,30 @@ param(
   [switch]$Upload
 )
 
+function Get-SafeUploadDiagnostic {
+  param([object[]]$Diagnostics, [int]$ExitCode, [bool]$ReceiptPresent)
+  # Keep only fixed categories and bounded numeric error codes. Never persist
+  # arbitrary CLI lines, URLs, headers, account IDs, paths, tokens or messages.
+  $diagnosticText = (@($Diagnostics | ForEach-Object { [string]$_ }) -join "`n") -replace '\x1B\[[0-?]*[ -/]*[@-~]', ''
+  $errorCodes = @([regex]::Matches($diagnosticText, '(?i)\b(?:errcode|errorcode|error_code)\s*["'':= ]+(-?\d{1,7})\b') | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique | Select-Object -First 12)
+  return [ordered]@{
+    cliExitCode = $ExitCode
+    receiptPresent = $ReceiptPresent
+    diagnosticLineCount = @($Diagnostics).Count
+    signals = [ordered]@{
+      errorMarker = [bool]($diagnosticText -match '(?i)\[error\]|\bfailed\b|\bfailure\b|失败')
+      uploadSuccessMarker = [bool]($diagnosticText -match '(?i)upload success|[√✔]\s*upload\b|上传成功')
+      loginMentioned = [bool]($diagnosticText -match '(?i)\blogin\b|登录')
+      permissionMentioned = [bool]($diagnosticText -match '(?i)permission|forbidden|unauthori[sz]ed|权限')
+      timeoutMentioned = [bool]($diagnosticText -match '(?i)timeout|timed out|超时')
+      connectionMentioned = [bool]($diagnosticText -match '(?i)ECONN|connection|连接')
+      argumentMentioned = [bool]($diagnosticText -match '(?i)invalid argument|unknown argument|missing required|参数')
+      compileMentioned = [bool]($diagnosticText -match '(?i)compile|编译')
+    }
+    numericErrorCodes = $errorCodes
+  }
+}
+
 $ErrorActionPreference = 'Stop'
 $releaseRoot = Split-Path -Parent $PSScriptRoot
 $releaseProject = Join-Path $releaseRoot 'miniapp'
@@ -64,9 +88,26 @@ try {
   $cliDiagnostics = @(& $wechatCli upload --project $releaseProject --version $Version --desc $Description --info-output $uploadInfo 2>&1)
   $uploadExit = $LASTEXITCODE
 } finally { $ErrorActionPreference = $savedErrorAction }
+$receiptPresent = Test-Path -LiteralPath $uploadInfo -PathType Leaf
+$diagnosticSummary = [ordered]@{
+  schemaVersion = 1
+  recordedAtUtc = [DateTime]::UtcNow.ToString('o')
+  version = $Version
+  sourceCommit = [string]$revision
+  outcome = 'not_confirmed_check_platform'
+  diagnostics = Get-SafeUploadDiagnostic -Diagnostics $cliDiagnostics -ExitCode $uploadExit -ReceiptPresent $receiptPresent
+}
+$diagnosticPath = [IO.Path]::ChangeExtension($uploadInfo, '.status.json')
+[IO.File]::WriteAllText($diagnosticPath, ($diagnosticSummary | ConvertTo-Json -Depth 5), (New-Object Text.UTF8Encoding($false)))
+$cliDiagnostics = $null
+Write-Host "已保存脱敏诊断：$diagnosticPath（仅固定状态与数值错误码，无原始日志）。"
+# This CLI catches upload errors without setting a nonzero exit status. Zero
+# alone is not evidence of success; preserve the receipt + platform checks.
 if ($uploadExit -ne 0) { throw "微信 CLI 上传失败（退出码 $uploadExit）。请在开发者工具检查登录、开发者权限和错误提示。" }
-if (-not (Test-Path -LiteralPath $uploadInfo -PathType Leaf)) { throw 'CLI 未返回上传结果文件，不能确认上传成功；请在公众平台核对，勿直接重复上传。' }
+if (-not $receiptPresent) { throw 'CLI 未返回上传结果文件，不能确认上传成功；请在公众平台核对，勿直接重复上传。' }
 $uploadResult = Get-Content -LiteralPath $uploadInfo -Raw -Encoding UTF8 | ConvertFrom-Json
 if (-not $uploadResult.size -or $uploadResult.size.total -le 0) { throw '上传结果缺少有效包大小，请在公众平台核对；不能据此确认成功。' }
+$diagnosticSummary.outcome = 'cli_receipt_valid_platform_check_required'
+[IO.File]::WriteAllText($diagnosticPath, ($diagnosticSummary | ConvertTo-Json -Depth 5), (New-Object Text.UTF8Encoding($false)))
 Write-Host "CLI 已返回开发版本上传成功，包大小 $($uploadResult.size.total) 字节。结果：$uploadInfo"
 Write-Host '请在公众平台核对版本号和更新说明。尚未提交审核、尚未正式发布。'
