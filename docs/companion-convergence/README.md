@@ -39,6 +39,7 @@ powershell -ExecutionPolicy Bypass -File tools/open_companion.ps1
 | 对话与真实回执分开 | [私人历史](previews/04-history.png) |
 | 粗区域而非精确点 | [本机地图](previews/05-map.png) |
 | 模拟高度，不代表真实键盘 | [键盘高度状态](previews/06-keyboard-height-simulated.png) |
+| 消息失败后草稿仍能继续处理 | [故障恢复](previews/07-message-failure-recovery.png) |
 
 ## 回退与数据边界
 

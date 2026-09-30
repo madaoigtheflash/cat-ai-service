@@ -8,7 +8,8 @@
     "mother-to-child relationship",
     "coarse synthetic location",
     "own history and map",
-    "keyboard height 290px state (not physical keyboard)"
+    "keyboard height 290px state (not physical keyboard)",
+    "message write failure recovers pending draft; no entity created"
   ],
   "cloudCalls": 0,
   "synthetic": true,

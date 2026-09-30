@@ -151,3 +151,56 @@ test('long local history is bounded before optional remote call, not a permanent
   assert.ok(remote[2].every(message=>message.content.length<=1000))
   assert.equal(f.page.data.error,'')
 })
+test('failed message write immediately recovers persisted draft while preserving input',async()=>{
+  const f=fixture(), write=f.wx.setStorageSync
+  let failed=false
+  f.wx.setStorageSync=(key,value)=>{
+    if(key==='catai_companion_messages_v1'&&!failed){failed=true;throw Error('消息保存失败')}
+    write(key,value)
+  }
+  f.page.onInput({detail:{value:'登记猫咪叫奶糖'}});await f.page.send()
+  assert.equal(f.page.data.draft.fields.name,'奶糖')
+  assert.equal(f.page.data.input,'登记猫咪叫奶糖')
+  assert.match(f.page.data.error,/消息保存失败/)
+  assert.equal(f.storage.listPets().length,0)
+  f.page.cancelDraft()
+  assert.equal(f.page.data.draft,null)
+  assert.equal(f.storage.listPets().length,0)
+})
+test('full message history still exposes pending draft for explicit confirmation without resend',async()=>{
+  const f=fixture()
+  f.wx.setStorageSync('catai_companion_messages_v1',{schema:1,messages:Array.from({length:2000},(_,i)=>({
+    id:'old_'+i,role:'user',text:'原有消息',time:1,label:'你',localOnly:true
+  }))})
+  f.page.onInput({detail:{value:'登记猫咪叫奶糖'}});await f.page.send()
+  assert.equal(f.page.data.draft.fields.name,'奶糖')
+  assert.equal(f.page.data.input,'登记猫咪叫奶糖')
+  assert.match(f.page.data.error,/2000/)
+  assert.equal(f.storage.listPets().length,0)
+  f.page.confirmDraft();f.page.confirmDraft()
+  assert.equal(f.storage.listPets().length,1)
+  assert.equal(f.service.listMessages().length,2000)
+})
+test('new text relationship draft invalidates previous cat share shortcut',async()=>{
+  const f=fixture()
+  for(const name of ['奶糖','团子']){
+    f.page.onInput({detail:{value:'登记猫咪叫'+name}});await f.page.send();f.page.confirmDraft()
+  }
+  assert.ok(f.page.data.savedPetId)
+  f.page.onInput({detail:{value:'奶糖是团子的妈妈'}});await f.page.send()
+  assert.equal(f.page.data.savedPetId,'')
+  f.page.shareSaved()
+  assert.equal(f.calls.length,0)
+})
+test('photo draft invalidates old share; newly confirmed cat becomes the sole share target',async()=>{
+  const f=fixture()
+  f.page.onInput({detail:{value:'登记猫咪叫奶糖'}});await f.page.send();f.page.confirmDraft()
+  f.page.data.pendingPhoto='http://tmp/cat.jpg';await f.page.identifyPhoto()
+  assert.equal(f.page.data.savedPetId,'')
+  f.page.shareSaved()
+  assert.equal(f.calls.filter(row=>row[0]==='navigate').length,0)
+  f.page.onDraftInput({currentTarget:{dataset:{field:'name'}},detail:{value:'团子'}})
+  f.page.confirmDraft();f.page.shareSaved()
+  assert.equal(f.calls.filter(row=>row[0]==='navigate').length,1)
+  assert.ok(f.calls.find(row=>row[0]==='navigate')[1].includes(encodeURIComponent(f.page.data.savedPetId)))
+})

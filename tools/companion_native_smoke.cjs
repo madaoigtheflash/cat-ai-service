@@ -58,19 +58,47 @@ async function main() {
     page = await mini.navigateTo('/pages/companion-map/index')
     await new Promise(resolve => setTimeout(resolve,800))
     await mini.screenshot({path:path.join(out,'05-map.png')})
+    page = await mini.reLaunch('/pages/home/index')
+    await mini.evaluate(() => {
+      const app = getApp()
+      app.__smokeOriginalSet = wx.setStorageSync
+      app.__smokeFailedOnce = false
+      wx.setStorageSync = function(key, value) {
+        if (key === 'catai_companion_messages_v1' && !app.__smokeFailedOnce) {
+          app.__smokeFailedOnce = true
+          throw new Error('模拟消息保存失败：草稿仍保留，请确认或取消。')
+        }
+        return app.__smokeOriginalSet(key, value)
+      }
+    })
+    await page.callMethod('onInput',{detail:{value:'登记猫咪叫小雨'}})
+    await page.callMethod('send')
+    await mini.evaluate(() => {
+      const app = getApp()
+      wx.setStorageSync = app.__smokeOriginalSet
+      delete app.__smokeOriginalSet; delete app.__smokeFailedOnce
+    })
+    assert.equal((await page.data()).draft.fields.name,'小雨')
+    assert.equal((await page.data()).input,'登记猫咪叫小雨')
+    await page.setData({scrollTarget:'conversation-end'})
+    await mini.screenshot({path:path.join(out,'07-message-failure-recovery.png')})
+    await page.callMethod('cancelDraft')
     const system = await mini.systemInfo()
     const report = {passed:true, width:system.windowWidth,height:system.windowHeight,fontSizeSetting:system.fontSizeSetting,
-      checks:['two confirmed cats','mother-to-child relationship','coarse synthetic location','own history and map','keyboard height 290px state (not physical keyboard)'],
+      checks:['two confirmed cats','mother-to-child relationship','coarse synthetic location','own history and map','keyboard height 290px state (not physical keyboard)','message write failure recovers pending draft; no entity created'],
       cloudCalls:0, synthetic:true, limitations:['no physical keyboard or large-font/other-width verification','no production upload or model request']}
     fs.writeFileSync(path.join(out,'native-report.json'),JSON.stringify(report,null,2))
     console.log(JSON.stringify(report))
   } finally {
     if (backed) await mini.evaluate(() => {
       const app = getApp()
+      if (app.__smokeOriginalSet) wx.setStorageSync = app.__smokeOriginalSet
+      delete app.__smokeOriginalSet; delete app.__smokeFailedOnce
       app.__convergenceSmokeBackup.forEach(item => item.exists ? wx.setStorageSync(item.key,item.value) : wx.removeStorageSync(item.key))
       app.globalData.cloudReady = app.__convergenceCloudReady
       delete app.__convergenceSmokeBackup; delete app.__convergenceCloudReady
     })
+    if (backed) await mini.reLaunch('/pages/home/index')
     mini.disconnect()
   }
 }

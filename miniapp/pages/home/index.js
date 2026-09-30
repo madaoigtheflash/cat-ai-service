@@ -40,7 +40,7 @@ Page({
     const foundRole = roles.findIndex(item => item.from === fields.fromRole && item.to === fields.toRole)
     this.setData({
       messages: state.messages.slice(-24), truncated: state.messages.length > 24,
-      draft, pets, roleIndex: Math.max(0, foundRole),
+      draft, pets, savedPetId: draft ? '' : this.data.savedPetId, roleIndex: Math.max(0, foundRole),
       fromIndex: Math.max(0, pets.findIndex(item => item.id === fields.fromPetId)),
       toIndex: Math.max(0, pets.findIndex(item => item.id === fields.toPetId)),
       petIndex: Math.max(0, pets.findIndex(item => item.id === fields.petId)),
@@ -72,7 +72,12 @@ Page({
       this.setData({ input: '', error: '', notice: '' })
       companion.saveComposerDraft('')
       this.refresh()
-    } catch (error) { this.showError(error) }
+    } catch (error) {
+      // The draft can have persisted before appending the message failed.
+      // Recover the actual state without resending or confirming anything.
+      try { this.refresh() } catch (_) { /* Preserve the original failure and input. */ }
+      this.showError(error)
+    }
   },
   async retryRemote() {
     const request = this._pendingRemote
@@ -194,7 +199,13 @@ Page({
     } catch (error) { this.showError(error) }
     finally { this.setData({ busy: false }) }
   },
-  shareSaved() { if (this.data.savedPetId) wx.navigateTo({ url: handoff.composeUrl(this.data.savedPetId) }) },
+  shareSaved() {
+    if (this.data.busy || this.data.draft || !this.data.savedPetId) return
+    try {
+      if (companion.getDraft()) { this.refresh(); return }
+      wx.navigateTo({ url: handoff.composeUrl(this.data.savedPetId) })
+    } catch (error) { this.showError(error) }
+  },
   goData() { wx.navigateTo({ url: '/pages/companion-data/index?section=history' }) },
   goMap() { wx.navigateTo({ url: '/pages/companion-map/index' }) },
   goRelationships() { wx.navigateTo({ url: '/pages/relationships/index' }) },

@@ -48,7 +48,7 @@
       <view wx:if="{{notice}}" class="state-note">{{notice}}</view>
       <view wx:if="{{error}}" class="state-error" role="alert">{{error}}</view>
       <view wx:if="{{retryText}}" class="retry-panel"><text>待重试：{{retryText}}</text><text class="quiet-copy">只重试这条，新输入不会被覆盖。</text><view class="paired-actions"><button bindtap="retryRemote" disabled="{{busy}}">重试上一条</button><button bindtap="abandonRemote" disabled="{{busy}}">放弃等待</button></view></view>
-      <button wx:if="{{savedPetId}}" class="soft-action" bindtap="shareSaved">挑选内容，再分享给猫友</button>
+      <button wx:if="{{savedPetId && !draft}}" class="soft-action" bindtap="shareSaved">挑选内容，再分享给猫友</button>
       <view class="secondary-links"><button bindtap="goRelationships">看猫咪关系</button><button bindtap="goMap">看分布地图</button><button bindtap="goOnline">小屋与邀请</button></view>
       <text class="safety-note">虚拟角色不代表真实猫咪想法；外观观察不确认身份，也不作医疗判断。健康异常请咨询执业兽医。</text>
       <view id="conversation-end"></view>
